@@ -1,0 +1,25 @@
+type: com.google.api.codegen.ConfigProto
+config_schema_version: 2.0.0
+language_settings:
+  java:
+    package_name: com.google.cloud.bigtable.data.v2
+    interface_names:
+      google.bigtable.v2.Bigtable: BaseBigtableData
+  python:
+    package_name: google.cloud.bigtable_v2.gapic
+  go:
+    package_name: cloud.google.com/go/bigtable/apiv2
+  csharp:
+    package_name: Google.Cloud.Bigtable.V2
+    interface_names:
+      google.bigtable.v2.Bigtable: BigtableServiceApi
+  ruby:
+    package_name: Google::Cloud::Bigtable::V2
+    release_level: GA
+  php:
+    package_name: Google\Cloud\Bigtable\V2
+  nodejs:
+    package_name: bigtable.v2
+    domain_layer_location: google-cloud
+interfaces:
+- name: google.bigtable.v2.Bigtable

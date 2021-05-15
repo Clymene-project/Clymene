@@ -18,6 +18,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bourbonkk/Clymene/pkg/healthcheck"
+	"github.com/bourbonkk/Clymene/ports"
 	"os"
 	"os/signal"
 	"syscall"
@@ -53,7 +54,7 @@ func NewService(adminPort int) *Service {
 	signal.Notify(signalsChannel, os.Interrupt, syscall.SIGTERM)
 
 	return &Service{
-		//Admin:           NewAdminServer(ports.PortToHostPort(adminPort)),
+		Admin:           NewAdminServer(ports.PortToHostPort(adminPort)),
 		signalsChannel:  signalsChannel,
 		hcStatusChannel: hcStatusChannel,
 	}
