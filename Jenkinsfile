@@ -1,7 +1,7 @@
 pipeline {
     environment {
         registry = "bourbonkk/clymene/agent"
-        registryCredential = 'docker-hub'
+        registryCredential = 'bourbonkk'
         BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
     }
     agent any
@@ -13,7 +13,7 @@ pipeline {
         }
         stage('docker deploy') {
             steps {
-                 docker.withRegistry('https://registry.hub.docker.com', 'docker-hub'){
+                 docker.withRegistry('', registryCredential){
                     bat 'docker push '+ registry+':'+BRANCH_NAME
                  }
             }
