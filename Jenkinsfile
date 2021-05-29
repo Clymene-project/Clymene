@@ -13,9 +13,9 @@ pipeline {
         }
         stage('docker deploy') {
             steps {
-                withDockerRegistry([ credentialsId: registryCredential, url: "https://registry.hub.docker.com" ]) {
-                    bat 'docker push '+ registry+':'+BRANCH_NAME
-                }
+
+                bat 'docker push '+ registry+':'+BRANCH_NAME
+
             }
         }
         stage('Clean docker image') {
