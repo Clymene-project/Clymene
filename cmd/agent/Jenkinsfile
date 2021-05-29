@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('docker build') {
             steps {
-                bat 'docker build -t $registry:'+env.GIT_BRANCH
+                bat 'docker build -t $registry:'+env.GIT_BRANCH+' .'
             }
         }
         stage('docker deploy') {
