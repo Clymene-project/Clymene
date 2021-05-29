@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        registry = "clymene/agent"
+        registry = "registry.localhub:5000/clymene/agent"
         registryCredential = 'docker-hub'
         BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
     }
