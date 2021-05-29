@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Clean docker image') {
             steps{
-                bat "docker rmi "+ registry
+                bat "docker rmi "+ registry+':'+BRANCH_NAME
             }
         }
     }
