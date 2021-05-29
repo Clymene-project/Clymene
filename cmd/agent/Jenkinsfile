@@ -2,19 +2,18 @@ pipeline {
     environment {
         registry = "clymene/agent"
         registryCredential = 'dockerhub'
-        branch = env.GIT_BRANCH
     }
     agent any
     stages {
         stage('docker build') {
             steps {
-                sh 'docker build -t $registry:$branch'
+                sh 'docker build -t $registry:'+env.GIT_BRANCH
             }
         }
         stage('docker deploy') {
             steps {
                 withDockerRegistry([ credentialsId: registryCredential, url: "" ]) {
-                    sh 'docker push $registry:$branch'
+                    sh 'docker push $registry:'+env.GIT_BRANCH
                 }
             }
         }
