@@ -1,7 +1,7 @@
 pipeline {
     environment {
         registry = "clymene/agent"
-        registryCredential = 'docker.io'
+        registryCredential = 'docker-hub'
         BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
     }
     agent any
@@ -13,7 +13,9 @@ pipeline {
         }
         stage('docker deploy') {
             steps {
-                bat 'docker push '+ registry+':'+BRANCH_NAME
+                withDockerRegistry([ credentialsId: registryCredential, url: "https://registry.hub.docker.com" ]) {
+                    bat 'docker push '+ registry+':'+BRANCH_NAME
+                }
             }
         }
         stage('Clean docker image') {
