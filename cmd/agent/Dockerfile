@@ -1,6 +1,6 @@
 FROM golang:1.16.2 AS build-env
 
-ADD / /Clymene
+ADD ../../. /Clymene
 
 WORKDIR /Clymene
 
