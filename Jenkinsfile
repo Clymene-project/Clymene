@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('docker build') {
             steps {
-                bat 'docker build -t '+ registry+':'+BRANCH_NAME+' cmd/agent/.'
+                bat 'docker build -t '+ registry+':'+BRANCH_NAME+' -f=agent.Dockerfile'
             }
         }
         stage('docker deploy') {
