@@ -3,6 +3,7 @@ pipeline {
         registry = "bourbonkk/clymene/agent"
         registryCredential = 'bourbonkk'
         BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
+        DOCKER_SCAN_SUGGEST = false
     }
     agent any
     stages {
