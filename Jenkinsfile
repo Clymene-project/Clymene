@@ -13,14 +13,12 @@ pipeline {
         }
         stage('docker deploy') {
             steps {
-
                 bat 'docker push '+ registry+':'+BRANCH_NAME
-
             }
         }
         stage('Clean docker image') {
             steps{
-                bat "docker rmi $registry"
+                bat "docker rmi "+ registry
             }
         }
     }
