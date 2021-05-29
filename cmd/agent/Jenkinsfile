@@ -1,9 +1,26 @@
 pipeline {
+    environment {
+        registry = "clymene/agent"
+        registryCredential = 'dockerhub'
+        branch = env.GIT_BRANCH
+    }
     agent any
     stages {
-        stage('Stage 1') {
+        stage('docker build') {
             steps {
-                echo 'Hello world!'
+                sh 'docker build -t $registry:$branch'
+            }
+        }
+        stage('docker deploy') {
+            steps {
+                withDockerRegistry([ credentialsId: registryCredential, url: "" ]) {
+                    sh 'docker push $registry:$branch'
+                }
+            }
+        }
+        stage('Clean docker image') {
+            steps{
+                sh "docker rmi $registry"
             }
         }
     }
