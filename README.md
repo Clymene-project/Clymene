@@ -16,9 +16,9 @@ Clymene is the mother of Prometheus in Greek and Roman mythology. The Clymene pr
 The Clymene-agent is service that collects time series data  
 1. Service Discovery   
 2. scrape time series data  
-3. Time-series data transfer to gateway (gRPC)  
-4. Time-series data produce to kafka  
-5. Time-series data insert to Database  
+3. Time-series data transfer to gateway(gRPC) (Optional)  
+4. Time-series data produce to kafka (Optional)  
+5. Time-series data insert to Database (Optional)  
 
 ### Gateway(Optional)  
 The gateway is an optional service responsible for produce Time series data message to kafka from clymene agent.  
