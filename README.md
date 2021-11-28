@@ -5,7 +5,7 @@ Clymene is the mother of Prometheus in Greek and Roman mythology. The Clymene pr
 
 # Architecture  
 ### Release 0.0.1   
-![Release 0.0.1.png](docs/images/architecture_v0.0.1.png)
+![Release 0.0.1.png](docs/images/architecture_v0.0.2.png)
 
 # Code Style
 #### 1. https://github.com/golang/go/wiki/CodeReviewComments  
