@@ -18,20 +18,28 @@ package main
 
 import (
 	"fmt"
-	"github.com/bourbonkk/Clymene/cmd/agent/app/reporter/grpc"
-	"github.com/bourbonkk/Clymene/cmd/docs"
-	"github.com/bourbonkk/Clymene/cmd/flags"
-	"github.com/bourbonkk/Clymene/pkg/config"
-	"github.com/bourbonkk/Clymene/pkg/version"
-	"github.com/bourbonkk/Clymene/ports"
+	"github.com/Clymene-project/Clymene/cmd/docs"
+	"github.com/Clymene-project/Clymene/cmd/flags"
+	"github.com/Clymene-project/Clymene/cmd/status"
+	"github.com/Clymene-project/Clymene/pkg/config"
+	"github.com/Clymene-project/Clymene/pkg/version"
+	"github.com/Clymene-project/Clymene/plugin/storage"
+	"github.com/Clymene-project/Clymene/ports"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/uber/jaeger-lib/metrics"
+	"go.uber.org/zap"
+	"log"
 	"os"
 )
 
 func main() {
 	svc := flags.NewService(ports.AgentAdminHTTP)
-	svc.NoStorage = true
+
+	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Args, os.Stderr))
+	if err != nil {
+		log.Fatalf("Cannot initialize storage factory: %v", err)
+	}
 
 	v := viper.New()
 	var command = &cobra.Command{
@@ -42,34 +50,15 @@ func main() {
 			if err := svc.Start(v); err != nil {
 				return err
 			}
-			logger := svc.Logger // shortcut
-			logger.Info("starting")
+			logger := svc.Logger
 
-			//grpcBuilder := grpc.NewConnBuilder().InitFromViper(v)
-			//builders := map[reporter.Type]app.CollectorProxyBuilder{
-			//	reporter.GRPC: app.GRPCCollectorProxyBuilder(grpcBuilder),
-			//}
-			//cp, err := app.CreateCollectorProxy(app.ProxyBuilderOptions{
-			//	Options: *rOpts,
-			//	Logger:  logger,
-			//	Metrics: mFactory,
-			//}, builders)
-			//if err != nil {
-			//	logger.Fatal("Could not create collector proxy", zap.Error(err))
-			//}
-			//
-			//// TODO illustrate discovery service wiring
-			//
-			//builder := new(app.Builder).InitFromViper(v)
-			//agent, err := builder.CreateAgent(cp, logger, mFactory)
-			//if err != nil {
-			//	return fmt.Errorf("unable to initialize Jaeger Agent: %w", err)
-			//}
-			//
-			//logger.Info("Starting agent")
-			//if err := agent.Run(); err != nil {
-			//	return fmt.Errorf("failed to run the agent: %w", err)
-			//}
+			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
+			//metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "collector"})
+
+			storageFactory.InitFromViper(v)
+			if err := storageFactory.Initialize(baseFactory, logger); err != nil {
+				logger.Fatal("Failed to init storage factory", zap.Error(err))
+			}
 
 			svc.RunAndThen(func() {
 				//agent.Stop()
@@ -81,12 +70,13 @@ func main() {
 
 	command.AddCommand(version.Command())
 	command.AddCommand(docs.Command(v))
+	command.AddCommand(status.Command(v, ports.AgentAdminHTTP))
 
 	config.AddFlags(
 		v,
 		command,
 		svc.AddFlags,
-		grpc.AddFlags,
+		storageFactory.AddPipelineFlags,
 	)
 
 	if err := command.Execute(); err != nil {

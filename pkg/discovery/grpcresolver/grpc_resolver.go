@@ -17,7 +17,7 @@
 package grpcresolver
 
 import (
-	"github.com/bourbonkk/Clymene/pkg/discovery"
+	"github.com/Clymene-project/Clymene/pkg/discovery"
 	"hash"
 	"hash/fnv"
 	"math/rand"

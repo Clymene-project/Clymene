@@ -15,18 +15,18 @@ package config
 
 import (
 	"errors"
-	"github.com/bourbonkk/Clymene/discovery/azure"
-	"github.com/bourbonkk/Clymene/discovery/consul"
-	"github.com/bourbonkk/Clymene/discovery/dns"
-	"github.com/bourbonkk/Clymene/discovery/ec2"
-	"github.com/bourbonkk/Clymene/discovery/file"
-	"github.com/bourbonkk/Clymene/discovery/gce"
-	"github.com/bourbonkk/Clymene/discovery/kubernetes"
-	"github.com/bourbonkk/Clymene/discovery/marathon"
-	"github.com/bourbonkk/Clymene/discovery/openstack"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
-	"github.com/bourbonkk/Clymene/discovery/triton"
-	"github.com/bourbonkk/Clymene/discovery/zookeeper"
+	"github.com/Clymene-project/Clymene/discovery/azure"
+	"github.com/Clymene-project/Clymene/discovery/consul"
+	"github.com/Clymene-project/Clymene/discovery/dns"
+	"github.com/Clymene-project/Clymene/discovery/ec2"
+	"github.com/Clymene-project/Clymene/discovery/file"
+	"github.com/Clymene-project/Clymene/discovery/gce"
+	"github.com/Clymene-project/Clymene/discovery/kubernetes"
+	"github.com/Clymene-project/Clymene/discovery/marathon"
+	"github.com/Clymene-project/Clymene/discovery/openstack"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/discovery/triton"
+	"github.com/Clymene-project/Clymene/discovery/zookeeper"
 )
 
 // ServiceDiscoveryConfig configures lists of different service discovery mechanisms.

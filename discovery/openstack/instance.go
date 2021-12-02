@@ -16,8 +16,8 @@ package openstack
 import (
 	"context"
 	"fmt"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
-	"github.com/bourbonkk/Clymene/util/strutil"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/util/strutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net"

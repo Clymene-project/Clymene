@@ -15,7 +15,7 @@ package kubernetes
 
 import (
 	"context"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
 	"go.uber.org/zap"
 	"net"
 	"strconv"

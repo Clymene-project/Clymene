@@ -16,8 +16,8 @@ package consul
 import (
 	"context"
 	"fmt"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
-	"github.com/bourbonkk/Clymene/util/strutil"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/util/strutil"
 	"go.uber.org/zap"
 	"net"
 	"net/http"

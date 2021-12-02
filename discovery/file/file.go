@@ -17,7 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"io/ioutil"

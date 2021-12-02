@@ -18,7 +18,7 @@ package grpc
 
 import (
 	"flag"
-	"github.com/bourbonkk/Clymene/pkg/config/tlscfg"
+	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
 	"strings"
 
 	"github.com/spf13/viper"

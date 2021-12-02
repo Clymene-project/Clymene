@@ -15,8 +15,8 @@ package openstack
 
 import (
 	"context"
-	"github.com/bourbonkk/Clymene/discovery/refresh"
-	"github.com/bourbonkk/Clymene/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/discovery/refresh"
+	"github.com/Clymene-project/Clymene/discovery/targetgroup"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"

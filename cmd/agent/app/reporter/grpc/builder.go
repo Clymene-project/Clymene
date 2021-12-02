@@ -19,9 +19,9 @@ package grpc
 import (
 	"errors"
 	"fmt"
-	"github.com/bourbonkk/Clymene/pkg/config/tlscfg"
-	"github.com/bourbonkk/Clymene/pkg/discovery"
-	"github.com/bourbonkk/Clymene/pkg/discovery/grpcresolver"
+	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
+	"github.com/Clymene-project/Clymene/pkg/discovery"
+	"github.com/Clymene-project/Clymene/pkg/discovery/grpcresolver"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

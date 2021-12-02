@@ -15,17 +15,19 @@
 package flags
 
 import (
+	"expvar"
 	"flag"
 	"fmt"
-	"github.com/bourbonkk/Clymene/pkg/healthcheck"
-	"github.com/bourbonkk/Clymene/ports"
+	"github.com/Clymene-project/Clymene/pkg/healthcheck"
+	"github.com/Clymene-project/Clymene/ports"
+	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	pMetrics "github.com/jaegertracing/jaeger/pkg/metrics"
+	"github.com/spf13/viper"
+	"github.com/uber/jaeger-lib/metrics"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
-
-	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 // Service represents an abstract Jaeger backend component with some basic shared functionality.
@@ -41,6 +43,9 @@ type Service struct {
 
 	// Logger is initialized after parsing Viper flags like --log-level.
 	Logger *zap.Logger
+
+	// MetricsFactory is the root factory without a namespace.
+	MetricsFactory metrics.Factory
 
 	signalsChannel chan os.Signal
 
@@ -92,6 +97,26 @@ func (s *Service) Start(v *viper.Viper) error {
 		))
 	} else {
 		return fmt.Errorf("cannot create logger: %w", err)
+	}
+
+	metricsBuilder := new(pMetrics.Builder).InitFromViper(v)
+	metricsFactory, err := metricsBuilder.CreateMetricsFactory("")
+	if err != nil {
+		return fmt.Errorf("cannot create metrics factory: %w", err)
+	}
+	s.MetricsFactory = metricsFactory
+
+	s.Admin.initFromViper(v, s.Logger)
+	if h := metricsBuilder.Handler(); h != nil {
+		route := metricsBuilder.HTTPRoute
+		s.Logger.Info("Mounting metrics handler on admin server", zap.String("route", route))
+		s.Admin.Handle(route, h)
+	}
+
+	// Mount expvar routes on different backends
+	if metricsBuilder.Backend != "expvar" {
+		s.Logger.Info("Mounting expvar handler on admin server", zap.String("route", "/debug/vars"))
+		s.Admin.Handle("/debug/vars", expvar.Handler())
 	}
 
 	if err := s.Admin.Serve(); err != nil {
