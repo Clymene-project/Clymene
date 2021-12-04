@@ -22,6 +22,7 @@ import (
 	"github.com/Clymene-project/Clymene/plugin"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/storage"
+	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"io"
 
 	"github.com/spf13/viper"
@@ -148,7 +149,28 @@ func (f *Factory) Close() error {
 
 func (f *Factory) publishOpts() {
 	internalFactory := f.metricsFactory.Namespace(metrics.NSOptions{Name: "internal"})
-
 	internalFactory.Gauge(metrics.Options{Name: tsStorageType + "-" + f.ReaderType}).
 		Update(1)
+}
+
+func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+	var writers []metricstore.Writer
+	for _, storageType := range f.WriterTypes {
+		factory, ok := f.factories[storageType]
+		if !ok {
+			return nil, fmt.Errorf("no %s backend registered for span store", storageType)
+		}
+		writer, err := factory.CreateWriter()
+		if err != nil {
+			return nil, err
+		}
+		writers = append(writers, writer)
+	}
+	var Writer metricstore.Writer
+	if len(f.WriterTypes) == 1 {
+		Writer = writers[0]
+	} else {
+		Writer = metricstore.NewCompositeWriter(writers...)
+	}
+	return Writer, nil
 }

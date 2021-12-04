@@ -18,6 +18,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/Clymene-project/Clymene/cmd/agent/app"
+	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
 	"github.com/Clymene-project/Clymene/cmd/status"
@@ -35,11 +37,14 @@ import (
 
 func main() {
 	svc := flags.NewService(ports.AgentAdminHTTP)
+	svc.NoStorage = true
 
-	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Args, os.Stderr))
+	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Stderr))
 	if err != nil {
 		log.Fatalf("Cannot initialize storage factory: %v", err)
 	}
+	// prometheus scrape role config
+	scrapeConfig := agent_config.NewConfigBuilder()
 
 	v := viper.New()
 	var command = &cobra.Command{
@@ -53,16 +58,39 @@ func main() {
 			logger := svc.Logger
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
-			//metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "collector"})
+			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "agent"})
 
 			storageFactory.InitFromViper(v)
 			if err := storageFactory.Initialize(baseFactory, logger); err != nil {
 				logger.Fatal("Failed to init storage factory", zap.Error(err))
 			}
 
+			metricWriter, err := storageFactory.CreateWriter()
+			if err != nil {
+				logger.Fatal("Failed to create metric writer", zap.Error(err))
+			}
+
+			scrapeConfig.InitFromViper(v)
+
+			agent := app.New(&app.AgentConfig{
+				ConfigFile:    scrapeConfig.ConfigFile,
+				HttpPort:      scrapeConfig.HostPort,
+				MetricFactory: metricsFactory,
+				Logger:        logger,
+				MetricWriter:  metricWriter,
+			})
+
+			if err := agent.Run(); err != nil {
+				logger.Panic("Failed to Run agent", zap.Error(err))
+			}
+
 			svc.RunAndThen(func() {
-				//agent.Stop()
-				//cp.Close()
+				if err := storageFactory.Close(); err != nil {
+					logger.Error("Failed to close storageFactory", zap.Error(err))
+				}
+				if err := agent.Stop(); err != nil {
+					logger.Error("Failed to close agent", zap.Error(err))
+				}
 			})
 			return nil
 		},
@@ -77,6 +105,7 @@ func main() {
 		command,
 		svc.AddFlags,
 		storageFactory.AddPipelineFlags,
+		scrapeConfig.AddFlags,
 	)
 
 	if err := command.Execute(); err != nil {

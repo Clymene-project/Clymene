@@ -29,7 +29,7 @@ const (
 	suffixKerberosServiceName = ".service-name"
 	suffixKerberosRealm       = ".realm"
 	suffixKerberosUseKeyTab   = ".use-keytab"
-	suffixKerberosUserName    = ".username"
+	suffixKerberosUsername    = ".username"
 	suffixKerberosPassword    = ".password"
 	suffixKerberosConfig      = ".config-file"
 	suffixKerberosKeyTab      = ".keytab-file"
@@ -42,12 +42,14 @@ const (
 	defaultKerberosUsername    = ""
 	defaultKerberosKeyTab      = "/etc/security/kafka.keytab"
 
-	plainTextPrefix         = ".plaintext"
-	suffixPlainTextUserName = ".username"
-	suffixPlainTextPassword = ".password"
+	plainTextPrefix          = ".plaintext"
+	suffixPlainTextUsername  = ".username"
+	suffixPlainTextPassword  = ".password"
+	suffixPlainTextMechanism = ".mechanism"
 
-	defaultPlainTextUserName = ""
-	defaultPlainTextPassword = ""
+	defaultPlainTextUsername  = ""
+	defaultPlainTextPassword  = ""
+	defaultPlainTextMechanism = "PLAIN"
 )
 
 func addKerberosFlags(configPrefix string, flagSet *flag.FlagSet) {
@@ -64,7 +66,7 @@ func addKerberosFlags(configPrefix string, flagSet *flag.FlagSet) {
 		defaultKerberosPassword,
 		"The Kerberos password used for authenticate with KDC")
 	flagSet.String(
-		configPrefix+kerberosPrefix+suffixKerberosUserName,
+		configPrefix+kerberosPrefix+suffixKerberosUsername,
 		defaultKerberosUsername,
 		"The Kerberos username used for authenticate with KDC")
 	flagSet.String(
@@ -83,13 +85,17 @@ func addKerberosFlags(configPrefix string, flagSet *flag.FlagSet) {
 
 func addPlainTextFlags(configPrefix string, flagSet *flag.FlagSet) {
 	flagSet.String(
-		configPrefix+plainTextPrefix+suffixPlainTextUserName,
-		defaultPlainTextUserName,
+		configPrefix+plainTextPrefix+suffixPlainTextUsername,
+		defaultPlainTextUsername,
 		"The plaintext Username for SASL/PLAIN authentication")
 	flagSet.String(
 		configPrefix+plainTextPrefix+suffixPlainTextPassword,
 		defaultPlainTextPassword,
 		"The plaintext Password for SASL/PLAIN authentication")
+	flagSet.String(
+		configPrefix+plainTextPrefix+suffixPlainTextMechanism,
+		defaultPlainTextMechanism,
+		"The plaintext Mechanism for SASL/PLAIN authentication, e.g. 'SCRAM-SHA-256' or 'SCRAM-SHA-512' or 'PLAIN'")
 }
 
 // AddFlags add configuration flags to a flagSet.

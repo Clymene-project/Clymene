@@ -18,33 +18,14 @@ package flags
 
 import (
 	"flag"
-	"fmt"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 const (
-	logLevel   = "log-level"
-	configFile = "config-file"
+	logLevel = "log-level"
 )
-
-// AddConfigFileFlag adds flags for ExternalConfFlags
-func AddConfigFileFlag(flagSet *flag.FlagSet) {
-	flagSet.String(configFile, "", "Configuration file in JSON, TOML, YAML, HCL, or Java properties formats (default none). See spf13/viper for precedence.")
-}
-
-// TryLoadConfigFile initializes viper with config file specified as flag
-func TryLoadConfigFile(v *viper.Viper) error {
-	if file := v.GetString(configFile); file != "" {
-		v.SetConfigFile(file)
-		err := v.ReadInConfig()
-		if err != nil {
-			return fmt.Errorf("cannot load config file %s: %w", file, err)
-		}
-	}
-	return nil
-}
 
 // SharedFlags holds flags configuration
 type SharedFlags struct {

@@ -13,30 +13,14 @@ import (
 )
 
 const (
-	// EncodingJSON is used for spans encoded as Protobuf-based JSON.
+	// EncodingJSON is used for timeseries encoded as Protobuf-based JSON.
 	EncodingJSON = "json"
-	// EncodingProto is used for spans encoded as Protobuf.
+	// EncodingProto is used for timeseries encoded as Protobuf.
 	EncodingProto = "protobuf"
-	// EncodingZipkinThrift is used for spans encoded as Zipkin Thrift.
-	EncodingZipkinThrift = "zipkin-thrift"
 
-	configPrefix  = "kafka.producer"
-	suffixBrokers = ".brokers"
-	//suffixTopic   = ".topic"
-
-	suffixMetricTopic = "metric.topic"
-	suffixTraceTopic  = "trace.topic"
-
-	suffixK8sInfoTopic        = "k8s.info.topic"
-	suffixK8sJobInfoTopic     = "k8s.job.topic"
-	suffixK8sPodInfoTopic     = "k8s.pod.topic"
-	suffixSparseLogTopic      = "k8s.sparse.topic"
-	suffixSparseLogModelTopic = "k8s.sparse.model.topic"
-
-	suffixNetstatInfoTopic    = "k8s.netstat.topic"
-	suffixPodHistoryInfoTopic = "k8s.pod.history.topic"
-	suffixJspdLiteTopic       = "jspd.topic"
-
+	configPrefix           = "kafka.producer"
+	suffixBrokers          = ".brokers"
+	suffixTopic            = ".topic"
 	suffixEncoding         = ".encoding"
 	suffixRequiredAcks     = ".required-acks"
 	suffixCompression      = ".compression"
@@ -44,34 +28,24 @@ const (
 	suffixProtocolVersion  = ".protocol-version"
 	suffixBatchLinger      = ".batch-linger"
 	suffixBatchSize        = ".batch-size"
+	suffixBatchMinMessages = ".batch-min-messages"
 	suffixBatchMaxMessages = ".batch-max-messages"
 
 	defaultBroker           = "127.0.0.1:9092"
-	traceTopic              = "jaeger-spans"
-	metricTopic             = "remote_prom"
-	producerMaxMessageBytes = 204857600
-
-	k8sInfoTopic        = "kubernetes_info"
-	k8sJobInfoTopic     = "kubernetes_job_info"
-	k8sPodInfoTopic     = "kubernetes_pod_info"
-	sparseLogTopic      = "sparse_log"
-	sparseModelTopic    = "sparse_model"
-	netstatInfoTopic    = "netstat_info"
-	podHistoryInfoTopic = "pod_history_info" // TODO: to be deleted
-	jspdLiteTopic       = "jspd_lite"
-
+	defaultTopic            = "clymene"
 	defaultEncoding         = EncodingProto
 	defaultRequiredAcks     = "local"
 	defaultCompression      = "none"
 	defaultCompressionLevel = 0
 	defaultBatchLinger      = 0
 	defaultBatchSize        = 0
+	defaultBatchMinMessages = 0
 	defaultBatchMaxMessages = 0
 )
 
 var (
 	// AllEncodings is a list of all supported encodings.
-	AllEncodings = []string{EncodingJSON, EncodingProto, EncodingZipkinThrift}
+	AllEncodings = []string{EncodingJSON, EncodingProto}
 
 	//requiredAcks is mapping of sarama supported requiredAcks
 	requiredAcks = map[string]sarama.RequiredAcks{
@@ -119,42 +93,13 @@ var (
 
 // Options stores the configuration options for Kafka
 type Options struct {
-	Config      producer.Configuration `mapstructure:",squash"`
-	TraceTopic  string                 `mapstructure:"topic"`
-	MetricTopic string                 `mapstructure:"metrictopic"`
-
-	K8sInfoTopic        string
-	K8sJobInfoTopic     string
-	K8sPodInfoTopic     string
-	SparseLogTopic      string
-	SparseModelTopic    string
-	NetstatInfoTopic    string
-	PodHistoryInfoTopic string // TODO: to be deleted
-
-	JspdTopic string
-
-	Encoding string `mapstructure:"encoding"`
+	Config   producer.Configuration `mapstructure:",squash"`
+	Topic    string                 `mapstructure:"topic"`
+	Encoding string                 `mapstructure:"encoding"`
 }
 
 // AddFlags adds flags for Options
 func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
-	flagSet.String(
-		configPrefix+suffixBrokers,
-		defaultBroker,
-		"The comma-separated list of kafka brokers. i.e. '127.0.0.1:9092,0.0.0:1234'")
-	//flagSet.String(
-	//	configPrefix+suffixTopic,
-	//	traceTopic,
-	//	"The name of the kafka topic")
-	flagSet.String(
-		configPrefix+suffixProtocolVersion,
-		"",
-		"Kafka protocol version - must be supported by kafka server")
-	flagSet.String(
-		configPrefix+suffixEncoding,
-		defaultEncoding,
-		fmt.Sprintf(`Encoding of spans ("%s" or "%s") sent to kafka.`, EncodingJSON, EncodingProto),
-	)
 	flagSet.String(
 		configPrefix+suffixRequiredAcks,
 		defaultRequiredAcks,
@@ -165,60 +110,6 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultCompression,
 		"(experimental) Type of compression (none, gzip, snappy, lz4, zstd) to use on messages",
 	)
-	flagSet.String(
-		configPrefix+suffixMetricTopic,
-		metricTopic,
-		"metric topic change option(default = "+metricTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixK8sInfoTopic,
-		k8sInfoTopic,
-		"kubernetes_info topic change option(default = "+k8sInfoTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixK8sJobInfoTopic,
-		k8sJobInfoTopic,
-		"kubernetes_job_info topic change option(default = "+k8sJobInfoTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixK8sPodInfoTopic,
-		k8sPodInfoTopic,
-		"kubernetes_pod_info topic change option(default = "+k8sPodInfoTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixSparseLogTopic,
-		sparseLogTopic,
-		"sparse_log topic change option(default = "+sparseLogTopic+")",
-	)
-
-	flagSet.String(
-		configPrefix+suffixSparseLogModelTopic,
-		sparseModelTopic,
-		"sparse_model topic change option(default = "+sparseModelTopic+")",
-	)
-
-	flagSet.String(
-		configPrefix+suffixNetstatInfoTopic,
-		netstatInfoTopic,
-		"netstat_info topic change option(default = "+netstatInfoTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixPodHistoryInfoTopic,
-		podHistoryInfoTopic,
-		"pod_history_info topic change option(default = "+podHistoryInfoTopic+")",
-	)
-	flagSet.String(
-		configPrefix+suffixJspdLiteTopic,
-		jspdLiteTopic,
-		"jspd_lite topic change option(default = "+jspdLiteTopic+")",
-	)
-
-	flagSet.String(
-		configPrefix+suffixTraceTopic,
-		traceTopic,
-		"trace topic change option(default = "+traceTopic+")",
-	)
-
 	flagSet.Int(
 		configPrefix+suffixCompressionLevel,
 		defaultCompressionLevel,
@@ -235,10 +126,33 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		"(experimental) Number of bytes to batch before sending records to Kafka. Higher value reduce request to Kafka but increase latency and the possibility of data loss in case of process restart. See https://kafka.apache.org/documentation/",
 	)
 	flagSet.Int(
+		configPrefix+suffixBatchMinMessages,
+		defaultBatchMinMessages,
+		"(experimental) The best-effort minimum number of messages needed to send a batch of records to Kafka. Higher value reduce request to Kafka but increase latency and the possibility of data loss in case of process restart. See https://kafka.apache.org/documentation/",
+	)
+	flagSet.Int(
 		configPrefix+suffixBatchMaxMessages,
 		defaultBatchMaxMessages,
-		"(experimental) Number of message to batch before sending records to Kafka. Higher value reduce request to Kafka but increase latency and the possibility of data loss in case of process restart. See https://kafka.apache.org/documentation/",
+		"(experimental) Maximum number of message to batch before sending records to Kafka",
 	)
+	flagSet.String(
+		configPrefix+suffixBrokers,
+		defaultBroker,
+		"The comma-separated list of kafka brokers. i.e. '127.0.0.1:9092,0.0.0:1234'")
+	flagSet.String(
+		configPrefix+suffixTopic,
+		defaultTopic,
+		"The name of the kafka topic")
+	flagSet.String(
+		configPrefix+suffixProtocolVersion,
+		"",
+		"Kafka protocol version - must be supported by kafka server")
+	flagSet.String(
+		configPrefix+suffixEncoding,
+		defaultEncoding,
+		fmt.Sprintf(`Encoding of spans ("%s" or "%s") sent to kafka.`, EncodingJSON, EncodingProto),
+	)
+
 	auth.AddFlags(configPrefix, flagSet)
 }
 
@@ -272,23 +186,10 @@ func (opt *Options) InitFromViper(v *viper.Viper) {
 		AuthenticationConfig: authenticationOptions,
 		BatchLinger:          v.GetDuration(configPrefix + suffixBatchLinger),
 		BatchSize:            v.GetInt(configPrefix + suffixBatchSize),
+		BatchMinMessages:     v.GetInt(configPrefix + suffixBatchMinMessages),
 		BatchMaxMessages:     v.GetInt(configPrefix + suffixBatchMaxMessages),
-		MaxMessageBytes:      producerMaxMessageBytes,
 	}
-
-	opt.TraceTopic = v.GetString(configPrefix + suffixTraceTopic)
-	opt.MetricTopic = v.GetString(configPrefix + suffixMetricTopic)
-
-	opt.K8sInfoTopic = v.GetString(configPrefix + suffixK8sInfoTopic)
-	opt.K8sJobInfoTopic = v.GetString(configPrefix + suffixK8sJobInfoTopic)
-	opt.K8sPodInfoTopic = v.GetString(configPrefix + suffixK8sPodInfoTopic)
-	opt.SparseLogTopic = v.GetString(configPrefix + suffixSparseLogTopic)
-	opt.SparseModelTopic = v.GetString(configPrefix + suffixSparseLogModelTopic)
-	opt.NetstatInfoTopic = v.GetString(configPrefix + suffixNetstatInfoTopic)
-	opt.PodHistoryInfoTopic = v.GetString(configPrefix + suffixPodHistoryInfoTopic)
-
-	opt.JspdTopic = v.GetString(configPrefix + suffixJspdLiteTopic)
-
+	opt.Topic = v.GetString(configPrefix + suffixTopic)
 	opt.Encoding = v.GetString(configPrefix + suffixEncoding)
 }
 

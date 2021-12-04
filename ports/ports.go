@@ -22,11 +22,11 @@ import (
 )
 
 const (
-	GateGRPC = 15610
-
-	AgentAdminHTTP = 15690
-
-	GateAdminHTTP = 15690
+	GatewayGRPC      = 15610
+	GatewayAdminHTTP = 15690
+	AgentAdminHTTP   = 15691
+	AgentReloadHTTP  = 15692
+	Ingester         = 15694
 )
 
 // PortToHostPort converts the port into a host:port address string

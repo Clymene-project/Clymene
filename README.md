@@ -7,10 +7,6 @@ Clymene is the mother of Prometheus in Greek and Roman mythology. The Clymene pr
 ### Release 0.0.1   
 ![Release 0.0.1.png](docs/images/architecture_v0.0.2.png)
 
-# Code Style
-#### 1. https://github.com/golang/go/wiki/CodeReviewComments  
-#### 2. https://peter.bourgon.org/go-in-production/#formatting-and-style  
-
 # components  
 ### Clymene Agent  
 The Clymene-agent is service that collects time series data  
@@ -25,3 +21,7 @@ The gateway is an optional service responsible for produce Time series data mess
 
 ### Ingester(Optional)
 The ingester is an optional service responsible for  insert time series data loaded on kafka into the database.  
+
+# Code Style
+#### 1. https://github.com/golang/go/wiki/CodeReviewComments  
+#### 2. https://peter.bourgon.org/go-in-production/#formatting-and-style    

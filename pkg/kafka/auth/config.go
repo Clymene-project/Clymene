@@ -17,11 +17,11 @@ package auth
 import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
-	"go.uber.org/zap"
 	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 const (
@@ -35,6 +35,7 @@ var authTypes = []string{
 	none,
 	kerberos,
 	tls,
+	plaintext,
 }
 
 // AuthenticationConfig describes the configuration properties needed authenticate with kafka cluster
@@ -66,7 +67,10 @@ func (config *AuthenticationConfig) SetConfiguration(saramaConfig *sarama.Config
 		setKerberosConfiguration(&config.Kerberos, saramaConfig)
 		return nil
 	case plaintext:
-		setPlainTextConfiguration(&config.PlainText, saramaConfig)
+		err := setPlainTextConfiguration(&config.PlainText, saramaConfig)
+		if err != nil {
+			return err
+		}
 		return nil
 	default:
 		return fmt.Errorf("Unknown/Unsupported authentication method %s to kafka cluster", config.Authentication)
@@ -79,7 +83,7 @@ func (config *AuthenticationConfig) InitFromViper(configPrefix string, v *viper.
 	config.Kerberos.ServiceName = v.GetString(configPrefix + kerberosPrefix + suffixKerberosServiceName)
 	config.Kerberos.Realm = v.GetString(configPrefix + kerberosPrefix + suffixKerberosRealm)
 	config.Kerberos.UseKeyTab = v.GetBool(configPrefix + kerberosPrefix + suffixKerberosUseKeyTab)
-	config.Kerberos.Username = v.GetString(configPrefix + kerberosPrefix + suffixKerberosUserName)
+	config.Kerberos.Username = v.GetString(configPrefix + kerberosPrefix + suffixKerberosUsername)
 	config.Kerberos.Password = v.GetString(configPrefix + kerberosPrefix + suffixKerberosPassword)
 	config.Kerberos.ConfigPath = v.GetString(configPrefix + kerberosPrefix + suffixKerberosConfig)
 	config.Kerberos.KeyTabPath = v.GetString(configPrefix + kerberosPrefix + suffixKerberosKeyTab)
@@ -95,6 +99,7 @@ func (config *AuthenticationConfig) InitFromViper(configPrefix string, v *viper.
 		config.TLS.Enabled = true
 	}
 
-	config.PlainText.UserName = v.GetString(configPrefix + plainTextPrefix + suffixPlainTextUserName)
+	config.PlainText.Username = v.GetString(configPrefix + plainTextPrefix + suffixPlainTextUsername)
 	config.PlainText.Password = v.GetString(configPrefix + plainTextPrefix + suffixPlainTextPassword)
+	config.PlainText.Mechanism = v.GetString(configPrefix + plainTextPrefix + suffixPlainTextMechanism)
 }

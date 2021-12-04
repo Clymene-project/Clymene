@@ -17,9 +17,9 @@ package auth
 import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
-	"go.uber.org/zap"
 
 	"github.com/Shopify/sarama"
+	"go.uber.org/zap"
 )
 
 func setTLSConfiguration(config *tlscfg.Options, saramaConfig *sarama.Config, logger *zap.Logger) error {

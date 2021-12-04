@@ -16,7 +16,7 @@
 package storage
 
 import (
-	"errors"
+	"github.com/Clymene-project/Clymene/storage/metricstore"
 
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -33,29 +33,5 @@ type Factory interface {
 	// It is called after all configuration of the factory itself has been done.
 	Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error
 
-	//// CreateSpanReader creates a spanstore.Reader.
-	//CreateSpanReader() (spanstore.Reader, error)
-	//
-	//// CreateSpanWriter creates a spanstore.Writer.
-	//CreateSpanWriter() (spanstore.Writer, error)
-	//
-	//// CreateDependencyReader creates a dependencystore.Reader.
-	//CreateDependencyReader() (dependencystore.Reader, error)
-}
-
-var (
-	// ErrArchiveStorageNotConfigured can be returned by the ArchiveFactory when the archive storage is not configured.
-	ErrArchiveStorageNotConfigured = errors.New("archive storage not configured")
-
-	// ErrArchiveStorageNotSupported can be returned by the ArchiveFactory when the archive storage is not supported by the backend.
-	ErrArchiveStorageNotSupported = errors.New("archive storage not supported")
-)
-
-// ArchiveFactory is an additional interface that can be implemented by a factory to support trace archiving.
-type ArchiveFactory interface {
-	// CreateArchiveSpanReader creates a spanstore.Reader.
-	//CreateArchiveSpanReader() (spanstore.Reader, error)
-	//
-	//// CreateArchiveSpanWriter creates a spanstore.Writer.
-	//CreateArchiveSpanWriter() (spanstore.Writer, error)
+	CreateWriter() (metricstore.Writer, error)
 }

@@ -15,11 +15,3 @@ type JSONUnmarshaller struct{}
 func NewJSONUnmarshaller() *JSONUnmarshaller {
 	return &JSONUnmarshaller{}
 }
-
-// ZipkinThriftUnmarshaller implements Unmarshaller
-type ZipkinThriftUnmarshaller struct{}
-
-// NewZipkinThriftUnmarshaller constructs a zipkinThriftUnmarshaller
-func NewZipkinThriftUnmarshaller() *ZipkinThriftUnmarshaller {
-	return &ZipkinThriftUnmarshaller{}
-}

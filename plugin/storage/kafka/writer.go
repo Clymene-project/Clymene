@@ -12,43 +12,12 @@ type WriterMetrics struct {
 	WrittenFailure metrics.Counter
 }
 
-// Writer writes spans to kafka. Implements spanstore.Writer
+// Writer writes metric to kafka. Implements spanstore.Writer
 type Writer struct {
-	//failMetrics *app.CountsMetrics
+	metrics    WriterMetrics
 	producer   sarama.AsyncProducer
 	marshaller Marshaller
 	topic      string
-}
-
-// NewSpanWriter initiates and returns a new kafka spanwriter
-func NewSpanWriter(
-	producer sarama.AsyncProducer,
-	marshaller Marshaller,
-	topic string,
-	logger *zap.Logger,
-	//success *app.CountsMetrics,
-	//fail *app.CountsMetrics,
-	//marshalFail *app.CountsMetrics,
-) *Writer {
-	go func() {
-		for _ = range producer.Successes() {
-			//logger.Debug("kafka writer", zap.String("Topic", msg.Topic))
-			//success.CountTopic(msg.Topic, string(msg.Headers[0].Value))
-		}
-	}()
-	go func() {
-		for e := range producer.Errors() {
-			logger.Error("kafka writer", zap.String("Topic", e.Msg.Topic), zap.Error(e))
-			//fail.CountTopic(e.Msg.Topic, string(e.Msg.Headers[0].Value))
-		}
-	}()
-
-	return &Writer{
-		producer:   producer,
-		marshaller: marshaller,
-		topic:      topic,
-		//failMetrics: marshalFail,
-	}
 }
 
 // Close closes SpanWriter by closing producer
@@ -60,13 +29,31 @@ func NewMetricWriter(
 	producer sarama.AsyncProducer,
 	marshaller Marshaller,
 	topic string,
-	//fail *app.CountsMetrics,
+	factory metrics.Factory,
+	logger *zap.Logger,
 ) *Writer {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "kafka_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "kafka_metrics_written", Tags: map[string]string{"status": "failure"}}),
+	}
+	go func() {
+		for range producer.Successes() {
+			writeMetrics.WrittenSuccess.Inc(1)
+		}
+	}()
+	go func() {
+		for e := range producer.Errors() {
+			if e != nil && e.Err != nil {
+				logger.Error(e.Err.Error())
+			}
+			writeMetrics.WrittenFailure.Inc(1)
+		}
+	}()
+
 	return &Writer{
 		producer:   producer,
 		marshaller: marshaller,
 		topic:      topic,
-		//failMetrics: fail,
 	}
 }
 
@@ -74,12 +61,13 @@ func NewMetricWriter(
 func (w *Writer) WriteMetric(ts []prompb.TimeSeries) error {
 	metricsBytes, err := w.marshaller.MarshalMetric(ts)
 	if err != nil {
-		//w.failMetrics.CountTopic(w.topic, clusterID)
+		w.metrics.WrittenFailure.Inc(1)
 		return err
 	}
 
 	// The AsyncProducer accepts messages on a channel and produces them asynchronously
 	// in the background as efficiently as possible
+	// If there is no key provided, then Kafka will partition the data in a round-robin fashion. -- allen
 	w.producer.Input() <- &sarama.ProducerMessage{
 		Topic: w.topic,
 		Value: sarama.ByteEncoder(metricsBytes),

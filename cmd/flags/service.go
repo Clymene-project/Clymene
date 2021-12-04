@@ -67,7 +67,6 @@ func NewService(adminPort int) *Service {
 
 // AddFlags registers CLI flags.
 func (s *Service) AddFlags(flagSet *flag.FlagSet) {
-	AddConfigFileFlag(flagSet)
 	if s.NoStorage {
 		AddLoggingFlag(flagSet)
 	}
@@ -81,10 +80,6 @@ func (s *Service) SetHealthCheckStatus(status healthcheck.Status) {
 
 // Start bootstraps the service and starts the admin server.
 func (s *Service) Start(v *viper.Viper) error {
-	if err := TryLoadConfigFile(v); err != nil {
-		return fmt.Errorf("cannot load config file: %w", err)
-	}
-
 	sFlags := new(SharedFlags).InitFromViper(v)
 	newProdConfig := zap.NewProductionConfig()
 	newProdConfig.Sampling = nil

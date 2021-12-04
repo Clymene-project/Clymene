@@ -35,8 +35,8 @@ import (
 
 // ConnBuilder Struct to hold configurations
 type ConnBuilder struct {
-	// GateHostPorts is list of host:port Clymene Gates.
-	GateHostPorts []string `yaml:"gateHostPorts"`
+	// GatewayHostPorts is list of host:port Clymene Gates.
+	GatewayHostPorts []string `yaml:"gatewayHostPorts"`
 
 	MaxRetry uint
 	TLS      tlscfg.Options
@@ -74,21 +74,21 @@ func (b *ConnBuilder) CreateConnection(logger *zap.Logger) (*grpc.ClientConn, er
 		grpcResolver := grpcresolver.New(b.Notifier, b.Discoverer, logger, b.DiscoveryMinPeers)
 		dialTarget = grpcResolver.Scheme() + ":///round_robin"
 	} else {
-		if b.GateHostPorts == nil {
-			return nil, errors.New("at least one collector hostPort address is required when resolver is not available")
+		if b.GatewayHostPorts == nil {
+			return nil, errors.New("at least one GatewayHostPorts hostPort address is required when resolver is not available")
 		}
-		if len(b.GateHostPorts) > 1 {
+		if len(b.GatewayHostPorts) > 1 {
 			scheme := strconv.FormatInt(time.Now().UnixNano(), 36)
 			r := manual.NewBuilderWithScheme(scheme)
 			var resolvedAddrs []resolver.Address
-			for _, addr := range b.GateHostPorts {
+			for _, addr := range b.GatewayHostPorts {
 				resolvedAddrs = append(resolvedAddrs, resolver.Address{Addr: addr})
 			}
 			r.InitialState(resolver.State{Addresses: resolvedAddrs})
 			dialTarget = r.Scheme() + ":///round_robin"
-			logger.Info("Agent is connecting to a static list of collectors", zap.String("dialTarget", dialTarget), zap.String("collector hosts", strings.Join(b.GateHostPorts, ",")))
+			logger.Info("Agent is connecting to a static list of GatewayHostPorts", zap.String("dialTarget", dialTarget), zap.String("GatewayHostPorts hosts", strings.Join(b.GatewayHostPorts, ",")))
 		} else {
-			dialTarget = b.GateHostPorts[0]
+			dialTarget = b.GatewayHostPorts[0]
 		}
 	}
 	dialOptions = append(dialOptions, grpc.WithDefaultServiceConfig(grpcresolver.GRPCServiceConfig))

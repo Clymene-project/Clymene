@@ -19,6 +19,7 @@ package grpc
 import (
 	"flag"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
+	"github.com/Clymene-project/Clymene/ports"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -26,7 +27,7 @@ import (
 
 const (
 	gRPCPrefix        = "reporter.grpc"
-	gateHostPort      = gRPCPrefix + ".host-port"
+	gatewayHostPort   = gRPCPrefix + ".host-port"
 	retry             = gRPCPrefix + ".retry.max"
 	defaultMaxRetry   = 3
 	discoveryMinPeers = gRPCPrefix + ".discovery.min-peers"
@@ -42,15 +43,15 @@ var tlsFlagsConfig = tlscfg.ClientFlagsConfig{
 func AddFlags(flags *flag.FlagSet) {
 	flags.Uint(retry, defaultMaxRetry, "Sets the maximum number of retries for a call")
 	flags.Int(discoveryMinPeers, 3, "Max number of collectors to which the agent will try to connect at any given time")
-	flags.String(gateHostPort, "", "Comma-separated string representing host:port of a static list of collectors to connect to directly")
+	flags.String(gatewayHostPort, "localhost"+ports.PortToHostPort(ports.GatewayGRPC), "Comma-separated string representing host:port of a static list of gateways to connect to directly")
 	tlsFlagsConfig.AddFlags(flags)
 }
 
 // InitFromViper initializes Options with properties retrieved from Viper.
 func (b *ConnBuilder) InitFromViper(v *viper.Viper) *ConnBuilder {
-	hostPorts := v.GetString(gateHostPort)
+	hostPorts := v.GetString(gatewayHostPort)
 	if hostPorts != "" {
-		b.GateHostPorts = strings.Split(hostPorts, ",")
+		b.GatewayHostPorts = strings.Split(hostPorts, ",")
 	}
 	b.MaxRetry = uint(v.GetInt(retry))
 	b.TLS = tlsFlagsConfig.InitFromViper(v)
