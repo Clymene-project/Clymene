@@ -1,0 +1,38 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+    - mane
+    - release/*
+  pull_request:
+    branches:
+    - mane
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: CheckOut
+      uses: actions/checkout@v2
+    - name: Set env
+      uses: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+      
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{secrets.DOCKERHUB_USERNAME}}
+        password: ${{secrets.DOCKERHUB_TOKEN}}
+        
+    - name: build and release to DockerHub
+      env:
+        NAME: bourbonkk
+        REPO: clymene
+      run: |
+        docker build -t $REPO:${{ env.RELEASE_VERSION } .
+        docker tag $REPO:${{ env.RELEASE_VERSION }} $NAME/$REPO:${{ env.RELEASE_VERSION }}
+        docker push $NAME/$REPO:${{ env.RELEASE_VERSION }}
