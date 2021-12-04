@@ -3,11 +3,11 @@ name: Docker Image CI
 on:
   push:
     branches:
-    - mane
+    - main
     - release/*
   pull_request:
     branches:
-    - mane
+    - main
 
 jobs:
   build:
@@ -33,6 +33,6 @@ jobs:
         NAME: bourbonkk
         REPO: clymene
       run: |
-        docker build -t $REPO:${{ env.RELEASE_VERSION } .
+        docker build -t $REPO:${{ env.RELEASE_VERSION } -f cmd/agent/Dockerfile
         docker tag $REPO:${{ env.RELEASE_VERSION }} $NAME/$REPO:${{ env.RELEASE_VERSION }}
         docker push $NAME/$REPO:${{ env.RELEASE_VERSION }}
