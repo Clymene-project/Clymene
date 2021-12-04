@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v2.4.0
         with:
           submodules: true
+
       - name: Fetch git tags
         run: |
           git fetch --prune --unshallow --tags
@@ -23,8 +24,19 @@ jobs:
         with:
           go-version: ^1.16
 
-      - name: Export BRANCH variable
-        uses: ./.github/actions/setup-branch
+      - name: Setup BRANCH
+        shell: bash
+        run: |
+          case ${GITHUB_EVENT_NAME} in
+          pull_request)
+           BRANCH=${GITHUB_HEAD_REF}
+           ;;
+          push | release)
+           BRANCH=${GITHUB_REF##*/}
+           ;;
+          esac
+          echo "we are on branch=${BRANCH}"
+          echo "BRANCH=${BRANCH}" >> ${GITHUB_ENV}
 
       - name: Build clymene agent
         run: bash scripts/build-clymene-agent.sh
