@@ -77,7 +77,7 @@ func (c *SDConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	if len(c.Names) == 0 {
-		return errors.New("DNS-SD config must contain at least one SRV record name")
+		return errors.New("DNS-SD scrapeconfig must contain at least one SRV record name")
 	}
 	switch strings.ToUpper(c.Type) {
 	case "SRV":
@@ -273,7 +273,7 @@ func lookupWithSearchPath(name string, qtype uint16, logger *zap.Logger) (*dns.M
 
 // lookupFromAnyServer uses all configured servers to try and resolve a specific
 // name.  If a viable answer is received from a server, then it is
-// immediately returned, otherwise the other servers in the config are
+// immediately returned, otherwise the other servers in the scrapeconfig are
 // tried, and if none of them return a viable answer, an error is returned.
 //
 // A "viable answer" is one which indicates either:

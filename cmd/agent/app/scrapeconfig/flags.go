@@ -1,4 +1,4 @@
-package config
+package scrapeconfig
 
 import (
 	"flag"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	configFile    = "config.file"
+	configFile    = "scrapeconfig.file"
 	defaultConfig = "/etc/clymene/clymene.yml"
 	httpPort      = "http.port"
 )

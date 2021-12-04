@@ -21,6 +21,7 @@ import (
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/plugin"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
+	"github.com/Clymene-project/Clymene/plugin/storage/prometheus"
 	"github.com/Clymene-project/Clymene/storage"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"io"
@@ -77,18 +78,22 @@ func NewFactory(config FactoryConfig) (*Factory, error) {
 
 func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) {
 	switch factoryType {
-	//case cassandraStorageType:
-	//	return cassandra.NewFactory(), nil
-	//case elasticsearchStorageType:
-	//	return es.NewFactory(), nil
-	//case memoryStorageType:
-	//	return memory.NewFactory(), nil
+	case elasticsearchStorageType:
+		return nil, nil
+	case prometheusStorageType:
+		return prometheus.NewFactory(), nil
+	case cortexStorageType:
+		return prometheus.NewFactory(), nil
 	case kafkaStorageType:
 		return kafka.NewFactory(), nil
-	//case badgerStorageType:
-	//	return badger.NewFactory(), nil
-	//case grpcPluginStorageType:
-	//	return grpc.NewFactory(), nil
+	case influxDbStorageType:
+		return nil, nil
+	case gatewayStorageType:
+		return nil, nil
+	case opentsdb:
+		return nil, nil
+	case kdb:
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("unknown storage type %s. Valid types are %v", factoryType, AllStorageTypes)
 	}

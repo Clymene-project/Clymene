@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/agent/app"
-	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/config"
+	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
 	"github.com/Clymene-project/Clymene/cmd/status"
@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cannot initialize storage factory: %v", err)
 	}
-	// prometheus scrape role config
+	// prometheus scrape role scrapeconfig
 	scrapeConfig := agent_config.NewConfigBuilder()
 
 	v := viper.New()

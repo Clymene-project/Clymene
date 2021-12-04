@@ -65,7 +65,7 @@ DNS.1               = $domain_name
 EOF
 }
 
-# Generate config files.
+# Generate scrapeconfig files.
 # The server name (under alt_names in the ssl.conf) is `example.com`. (in accordance to [RFC 2006](https://tools.ietf.org/html/rfc2606))
 gen_ssl_conf example.com "$tmp_dir/ssl.conf"
 gen_ssl_conf wrong.com "$tmp_dir/wrong-ssl.conf"

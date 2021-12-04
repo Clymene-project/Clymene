@@ -248,7 +248,7 @@ func New(l *zap.Logger, conf *SDConfig) (*Discovery, error) {
 		if err != nil {
 			return nil, err
 		}
-		l.Info("Using pod service account via in-cluster config")
+		l.Info("Using pod service account via in-cluster scrapeconfig")
 	} else {
 		rt, err := config_util.NewRoundTripperFromConfig(conf.HTTPClientConfig, "kubernetes_sd")
 		if err != nil {

@@ -67,7 +67,7 @@ func (w *Writer) WriteMetric(ts []prompb.TimeSeries) error {
 
 	// The AsyncProducer accepts messages on a channel and produces them asynchronously
 	// in the background as efficiently as possible
-	// If there is no key provided, then Kafka will partition the data in a round-robin fashion. -- allen
+	// If there is no key provided, then Kafka will partition the data in a round-robin fashion. -- allen kim
 	w.producer.Input() <- &sarama.ProducerMessage{
 		Topic: w.topic,
 		Value: sarama.ByteEncoder(metricsBytes),

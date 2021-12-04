@@ -84,7 +84,7 @@ func setPlainTextConfiguration(config *PlainTextConfig, saramaConfig *sarama.Con
 		saramaConfig.Net.SASL.Mechanism = sarama.SASLTypePlaintext
 
 	default:
-		return fmt.Errorf("config plaintext.mechanism error: %s, only support 'SCRAM-SHA-256' or 'SCRAM-SHA-512' or 'PLAIN'", config.Mechanism)
+		return fmt.Errorf("scrapeconfig plaintext.mechanism error: %s, only support 'SCRAM-SHA-256' or 'SCRAM-SHA-512' or 'PLAIN'", config.Mechanism)
 
 	}
 	return nil

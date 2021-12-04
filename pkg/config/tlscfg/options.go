@@ -31,8 +31,8 @@ type Options struct {
 	CAPath         string       `mapstructure:"ca"`
 	CertPath       string       `mapstructure:"cert"`
 	KeyPath        string       `mapstructure:"key"`
-	ServerName     string       `mapstructure:"server_name"` // only for client-side TLS config
-	ClientCAPath   string       `mapstructure:"client_ca"`   // only for server-side TLS config for client auth
+	ServerName     string       `mapstructure:"server_name"` // only for client-side TLS scrapeconfig
+	ClientCAPath   string       `mapstructure:"client_ca"`   // only for server-side TLS scrapeconfig for client auth
 	SkipHostVerify bool         `mapstructure:"skip_host_verify"`
 	certWatcher    *certWatcher `mapstructure:"-"`
 }
