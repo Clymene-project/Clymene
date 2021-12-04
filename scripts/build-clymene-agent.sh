@@ -7,7 +7,7 @@ GOARCH=${GOARCH:-$(go env GOARCH)}
 
 mkdir ./out
 
-go build -ldflags "-X 'main.branch=${BRANCH}' -X 'main.BuildTime=${DATE}" -o ./out/clymene-agent ./cmd/agent/main.go
+go build -ldflags "-X 'main.branch=${BRANCH}" -o ./out/clymene-agent ./cmd/agent/main.go
 
 docker build -f ../cmd/agent/Dockerfile -t bourbonkk/clymene:"${BRANCH}"
 docker push bourbonkk/clymene:"${BRANCH}"
