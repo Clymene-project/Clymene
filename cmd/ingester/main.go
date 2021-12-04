@@ -40,7 +40,7 @@ func main() {
 	v := viper.New()
 	command := &cobra.Command{
 		Use:   ClymeneIngesterName,
-		Short: ClymeneIngesterName + "ingester consumes from Kafka and send to db.",
+		Short: ClymeneIngesterName + " consumes from Kafka and send to db.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := svc.Start(v); err != nil {
 				return err
