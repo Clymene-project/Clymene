@@ -13,7 +13,6 @@ require (
 	github.com/aws/aws-sdk-go v1.38.68
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
-	github.com/go-kit/kit v0.11.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4

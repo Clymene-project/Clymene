@@ -158,7 +158,7 @@ func (f *Factory) CreateWriter() (metricstore.Writer, error) {
 	for _, storageType := range f.WriterTypes {
 		factory, ok := f.factories[storageType]
 		if !ok {
-			return nil, fmt.Errorf("no %s backend registered for span store", storageType)
+			return nil, fmt.Errorf("no %s backend registered for metric store", storageType)
 		}
 		writer, err := factory.CreateWriter()
 		if err != nil {

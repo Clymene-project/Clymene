@@ -12,7 +12,7 @@ type WriterMetrics struct {
 	WrittenFailure metrics.Counter
 }
 
-// Writer writes metric to kafka. Implements spanstore.Writer
+// Writer writes metric to kafka. Implements metricstore.Writer
 type Writer struct {
 	metrics    WriterMetrics
 	producer   sarama.AsyncProducer
@@ -20,7 +20,7 @@ type Writer struct {
 	topic      string
 }
 
-// Close closes SpanWriter by closing producer
+// Close closes metricWriter by closing producer
 func (w *Writer) Close() error {
 	return w.producer.Close()
 }

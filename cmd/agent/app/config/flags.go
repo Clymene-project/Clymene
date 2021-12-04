@@ -8,7 +8,7 @@ import (
 
 const (
 	configFile    = "config.file"
-	defaultConfig = "clymene.yml"
+	defaultConfig = "/etc/clymene/clymene.yml"
 	httpPort      = "http.port"
 )
 

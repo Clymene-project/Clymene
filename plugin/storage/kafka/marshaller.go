@@ -9,7 +9,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
-// Marshaller encodes a span into a byte array to be sent to Kafka
+// Marshaller encodes a metric into a byte array to be sent to Kafka
 type Marshaller interface {
 	MarshalMetric([]prompb.TimeSeries) ([]byte, error)
 }

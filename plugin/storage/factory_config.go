@@ -61,7 +61,7 @@ func FactoryConfigFromEnvAndCLI(log io.Writer) FactoryConfig {
 	tsWriterTypes := strings.Split(tsStorageType, ",")
 	if len(tsWriterTypes) > 1 {
 		fmt.Fprintf(log,
-			"WARNING: multiple span storage types have been specified. "+
+			"WARNING: multiple metric storage types have been specified. "+
 				"Only the first type (%s) will be used for reading and archiving.\n\n",
 			tsWriterTypes[0],
 		)

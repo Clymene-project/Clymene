@@ -35,6 +35,17 @@ import (
 	"os"
 )
 
+var (
+	// Version is set during binary building (git revision number)
+	Version string
+	// BuildTime is set during binary building
+	BuildTime string
+)
+
+const (
+	ClymeneAgentName = "clymene-agent"
+)
+
 func main() {
 	svc := flags.NewService(ports.AgentAdminHTTP)
 	svc.NoStorage = true
@@ -56,6 +67,9 @@ func main() {
 				return err
 			}
 			logger := svc.Logger
+
+			logger.Info("start....", zap.String("component name", ClymeneAgentName))
+			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
 			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "agent"})

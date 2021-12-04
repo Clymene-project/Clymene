@@ -26,9 +26,9 @@ type CompositeWriter struct {
 }
 
 // NewCompositeWriter creates a CompositeWriter
-func NewCompositeWriter(spanWriters ...Writer) *CompositeWriter {
+func NewCompositeWriter(metricWriters ...Writer) *CompositeWriter {
 	return &CompositeWriter{
-		metricWriters: spanWriters,
+		metricWriters: metricWriters,
 	}
 }
 
