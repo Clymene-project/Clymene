@@ -23,6 +23,9 @@ jobs:
         with:
           go-version: ^1.16
 
+      - name: Export BRANCH variable
+        uses: ./.github/actions/setup-branch
+
       - name: Build clymene agent
         run: bash scripts/build-clymene-agent.sh
 
