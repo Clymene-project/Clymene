@@ -7,7 +7,7 @@ GIT_SHA=$(shell git rev-parse HEAD)
 
 mkdir ./out
 
-go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA})' -X 'main.BuildTime=${DATE}" -o ./out/clymene-agent ./cmd/agent/main.go
-
+#go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA})' -X 'main.BuildTime=${DATE}" -o ./out/clymene-agent ./cmd/agent/main.go
+go build -o ./out/clymene-agent ./cmd/agent/main.go
 docker build -f ../cmd/agent/Dockerfile -t bourbonkk/clymene:"${BRANCH}"
 docker push bourbonkk/clymene:"${BRANCH}"
