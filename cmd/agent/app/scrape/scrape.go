@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/pkg/pool"
 	"github.com/Clymene-project/Clymene/pkg/relabel"
 	"github.com/Clymene-project/Clymene/pkg/version"
@@ -148,7 +148,7 @@ type scrapePool struct {
 	logger *zap.Logger
 
 	mtx    sync.RWMutex
-	config *scrapeconfig.ScrapeConfig
+	config *config.ScrapeConfig
 	client *http.Client
 
 	// Targets and loops must always be synchronized to have the same
@@ -176,7 +176,7 @@ const maxAheadTime = 10 * time.Minute
 
 type labelsMutator func(labels.Labels) labels.Labels
 
-func newScrapePool(cfg *scrapeconfig.ScrapeConfig, app metricstore.Writer, jitterSeed uint64, logger *zap.Logger) (*scrapePool, error) {
+func newScrapePool(cfg *config.ScrapeConfig, app metricstore.Writer, jitterSeed uint64, logger *zap.Logger) (*scrapePool, error) {
 	targetScrapePools.Inc()
 	if logger == nil {
 		logger = zap.NewNop()
@@ -185,7 +185,7 @@ func newScrapePool(cfg *scrapeconfig.ScrapeConfig, app metricstore.Writer, jitte
 	httpClient, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, cfg.JobName)
 	if err != nil {
 		targetScrapePoolsFailed.Inc()
-		// Any errors that could occur here should be caught during scrapeconfig validation.
+		// Any errors that could occur here should be caught during config validation.
 		return nil, errors.Wrap(err, "error creating HTTP client")
 	}
 
@@ -273,7 +273,7 @@ func (sp *scrapePool) stop() {
 // reload the scrape pool with the given scrape configuration. The target state is preserved
 // but all scrape loops are restarted with the new scrape configuration.
 // This method returns after all scrape loops that were stopped have stopped scraping.
-func (sp *scrapePool) reload(cfg *scrapeconfig.ScrapeConfig) error {
+func (sp *scrapePool) reload(cfg *config.ScrapeConfig) error {
 	targetScrapePoolReloads.Inc()
 	start := time.Now()
 
@@ -1181,9 +1181,9 @@ func (sl *scrapeLoop) report(start time.Time, duration time.Duration, scrapeErr 
 	return
 }
 
-// zeroConfig returns a new scrape scrapeconfig that only contains configuration items
+// zeroConfig returns a new scrape config that only contains configuration items
 // that alter metrics.
-func zeroConfig(c *scrapeconfig.ScrapeConfig) *scrapeconfig.ScrapeConfig {
+func zeroConfig(c *config.ScrapeConfig) *config.ScrapeConfig {
 	z := *c
 	// We zero out the fields that for sure don't affect scrape.
 	z.ScrapeInterval = 0
@@ -1193,8 +1193,8 @@ func zeroConfig(c *scrapeconfig.ScrapeConfig) *scrapeconfig.ScrapeConfig {
 	return &z
 }
 
-// reusableCache compares two scrape scrapeconfig and tells whether the cache is still valid.
-func reusableCache(r, l *scrapeconfig.ScrapeConfig) bool {
+// reusableCache compares two scrape config and tells whether the cache is still valid.
+func reusableCache(r, l *config.ScrapeConfig) bool {
 	if r == nil || l == nil {
 		return false
 	}

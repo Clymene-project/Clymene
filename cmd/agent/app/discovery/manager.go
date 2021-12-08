@@ -38,7 +38,7 @@ var (
 			Name: "prometheus_sd_discovered_targets",
 			Help: "Current number of discovered targets.",
 		},
-		[]string{"name", "scrapeconfig"},
+		[]string{"name", "config"},
 	)
 	receivedUpdates = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -139,7 +139,7 @@ type Manager struct {
 	targets map[poolKey]map[string]*targetgroup.Group
 	// providers keeps track of SD providers.
 	providers []*provider
-	// The sync channel sends the updates as a map where the key is the job value from the scrape scrapeconfig.
+	// The sync channel sends the updates as a map where the key is the job value from the scrape config.
 	syncCh chan map[string][]*targetgroup.Group
 
 	// How long to wait before sending updates to the channel. The variable
@@ -165,7 +165,7 @@ func (m *Manager) SyncCh() <-chan map[string][]*targetgroup.Group {
 	return m.syncCh
 }
 
-// ApplyConfig removes all running discovery providers and starts new ones using the provided scrapeconfig.
+// ApplyConfig removes all running discovery providers and starts new ones using the provided config.
 func (m *Manager) ApplyConfig(cfg map[string]sd_config.ServiceDiscoveryConfig) error {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
@@ -308,7 +308,7 @@ func (m *Manager) allGroups() map[string][]*targetgroup.Group {
 	return tSets
 }
 
-// registerProviders returns a number of failed SD scrapeconfig.
+// registerProviders returns a number of failed SD config.
 func (m *Manager) registerProviders(cfg sd_config.ServiceDiscoveryConfig, setName string) int {
 	var (
 		failedCount int

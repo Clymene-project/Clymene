@@ -65,9 +65,9 @@ spec:
 #              value: prometheus
           volumeMounts:
             - mountPath: /etc/clymene/
-              name: scrapeconfig-volume
+              name: config-volume
       volumes:
-        - name: scrapeconfig-volume
+        - name: config-volume
           configMap:
             name: clymene-agent-config
       securityContext:

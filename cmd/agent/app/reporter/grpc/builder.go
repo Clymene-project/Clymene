@@ -59,7 +59,7 @@ func (b *ConnBuilder) CreateConnection(logger *zap.Logger) (*grpc.ClientConn, er
 		logger.Info("Agent requested secure grpc connection to gate(s)")
 		tlsConf, err := b.TLS.Config(logger)
 		if err != nil {
-			return nil, fmt.Errorf("failed to load TLS scrapeconfig: %w", err)
+			return nil, fmt.Errorf("failed to load TLS config: %w", err)
 		}
 
 		creds := credentials.NewTLS(tlsConf)

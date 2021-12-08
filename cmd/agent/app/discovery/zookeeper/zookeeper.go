@@ -58,14 +58,14 @@ func (c *ServersetSDConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 		return err
 	}
 	if len(c.Servers) == 0 {
-		return errors.New("serverset SD scrapeconfig must contain at least one Zookeeper server")
+		return errors.New("serverset SD config must contain at least one Zookeeper server")
 	}
 	if len(c.Paths) == 0 {
-		return errors.New("serverset SD scrapeconfig must contain at least one path")
+		return errors.New("serverset SD config must contain at least one path")
 	}
 	for _, path := range c.Paths {
 		if !strings.HasPrefix(path, "/") {
-			return errors.Errorf("serverset SD scrapeconfig paths must begin with '/': %s", path)
+			return errors.Errorf("serverset SD config paths must begin with '/': %s", path)
 		}
 	}
 	return nil
@@ -87,14 +87,14 @@ func (c *NerveSDConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	if len(c.Servers) == 0 {
-		return errors.New("nerve SD scrapeconfig must contain at least one Zookeeper server")
+		return errors.New("nerve SD config must contain at least one Zookeeper server")
 	}
 	if len(c.Paths) == 0 {
-		return errors.New("nerve SD scrapeconfig must contain at least one path")
+		return errors.New("nerve SD config must contain at least one path")
 	}
 	for _, path := range c.Paths {
 		if !strings.HasPrefix(path, "/") {
-			return errors.Errorf("nerve SD scrapeconfig paths must begin with '/': %s", path)
+			return errors.Errorf("nerve SD config paths must begin with '/': %s", path)
 		}
 	}
 	return nil
@@ -115,12 +115,12 @@ type Discovery struct {
 	logger *zap.Logger
 }
 
-// NewNerveDiscovery returns a new Discovery for the given Nerve scrapeconfig.
+// NewNerveDiscovery returns a new Discovery for the given Nerve config.
 func NewNerveDiscovery(conf *NerveSDConfig, logger *zap.Logger) (*Discovery, error) {
 	return NewDiscovery(conf.Servers, time.Duration(conf.Timeout), conf.Paths, logger, parseNerveMember)
 }
 
-// NewServersetDiscovery returns a new Discovery for the given serverset scrapeconfig.
+// NewServersetDiscovery returns a new Discovery for the given serverset config.
 func NewServersetDiscovery(conf *ServersetSDConfig, logger *zap.Logger) (*Discovery, error) {
 	return NewDiscovery(conf.Servers, time.Duration(conf.Timeout), conf.Paths, logger, parseServersetMember)
 }

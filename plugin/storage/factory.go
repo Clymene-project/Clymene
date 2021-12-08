@@ -18,6 +18,8 @@ package storage
 import (
 	"flag"
 	"fmt"
+	"github.com/Clymene-project/Clymene/plugin/storage/es"
+
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/plugin"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
@@ -79,7 +81,7 @@ func NewFactory(config FactoryConfig) (*Factory, error) {
 func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) {
 	switch factoryType {
 	case elasticsearchStorageType:
-		return nil, nil
+		return es.NewFactory(), nil
 	case prometheusStorageType:
 		return prometheus.NewFactory(), nil
 	case cortexStorageType:

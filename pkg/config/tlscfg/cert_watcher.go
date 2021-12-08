@@ -29,7 +29,7 @@ import (
 // certWatcher watches filesystem changes on certificates supplied via Options
 // The changed RootCAs and ClientCAs certificates are added to x509.CertPool without invalidating the previously used certificate.
 // The certificate and key can be obtained via certWatcher.certificate.
-// The consumers of this API should use GetCertificate or GetClientCertificate from tls.Config to supply the certificate to the scrapeconfig.
+// The consumers of this API should use GetCertificate or GetClientCertificate from tls.Config to supply the certificate to the config.
 type certWatcher struct {
 	opts    Options
 	watcher *fsnotify.Watcher

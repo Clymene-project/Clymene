@@ -31,7 +31,7 @@ const (
 	suffixKerberosUseKeyTab   = ".use-keytab"
 	suffixKerberosUsername    = ".username"
 	suffixKerberosPassword    = ".password"
-	suffixKerberosConfig      = ".scrapeconfig-file"
+	suffixKerberosConfig      = ".config-file"
 	suffixKerberosKeyTab      = ".keytab-file"
 
 	defaultKerberosConfig      = "/etc/krb5.conf"

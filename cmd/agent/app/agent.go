@@ -18,10 +18,10 @@ package app
 
 import (
 	"context"
+	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
 	sd_config "github.com/Clymene-project/Clymene/cmd/agent/app/discovery/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/scrape"
-	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/server"
 	"github.com/Clymene-project/Clymene/ports"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -122,12 +122,12 @@ func New(config *AgentConfig) *Agent {
 	}
 
 	{
-		// Initial scrapeconfig
+		// Initial config
 		cancel := make(chan struct{})
 		g.Add(
 			func() error {
 				if err := agent_config.ReloadConfig(config.ConfigFile, config.Logger, reloaders...); err != nil {
-					return errors.Wrapf(err, "error loading scrapeconfig from %q", config.ConfigFile)
+					return errors.Wrapf(err, "error loading config from %q", config.ConfigFile)
 				}
 				reloadReady.Close()
 				config.Logger.Info("Server is ready to receive web requests.")
@@ -150,7 +150,7 @@ func New(config *AgentConfig) *Agent {
 }
 
 func (a *Agent) Run() error {
-	// HTTP server for scrapeconfig reload
+	// HTTP server for config reload
 	if httpServer, err := server.StartHTTPServer(&server.HttpServerParams{
 		HostPort:   ports.PortToHostPort(a.hostPort),
 		Logger:     a.l,
@@ -170,7 +170,7 @@ func (a *Agent) Run() error {
 
 func (a *Agent) ReloadConfig() error {
 	if err := agent_config.ReloadConfig(a.configFile, a.l, a.reloaders...); err != nil {
-		return errors.Wrapf(err, "error loading scrapeconfig from %q", a.configFile)
+		return errors.Wrapf(err, "error loading config from %q", a.configFile)
 	}
 	return nil
 }

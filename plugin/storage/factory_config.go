@@ -41,7 +41,7 @@ type FactoryConfig struct {
 // FactoryConfigFromEnvAndCLI reads the desired types of storage backends from TS_STORAGE_TYPE and
 // DEPENDENCY_STORAGE_TYPE environment variables. Allowed values:
 //   * `influxdb` - built-in
-//   * `elasticsearch` - built-in
+//   * `es` - built-in
 //   * `prometheus` - built-in
 //   * `kafka` - built-in
 //   * `gateway` - built-in

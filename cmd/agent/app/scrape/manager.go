@@ -3,8 +3,8 @@ package scrape
 import (
 	"encoding"
 	"fmt"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"go.uber.org/zap"
 	"hash/fnv"
@@ -28,7 +28,7 @@ func NewManager(logger *zap.Logger, app metricstore.Writer) *Manager {
 	m := &Manager{
 		append:        app,
 		logger:        logger,
-		scrapeConfigs: make(map[string]*scrapeconfig.ScrapeConfig),
+		scrapeConfigs: make(map[string]*config.ScrapeConfig),
 		scrapePools:   make(map[string]*scrapePool),
 		graceShut:     make(chan struct{}),
 		triggerReload: make(chan struct{}, 1),
@@ -46,7 +46,7 @@ type Manager struct {
 
 	jitterSeed    uint64     // Global jitterSeed seed is used to spread scrape workload across HA setup.
 	mtxScrape     sync.Mutex // Guards the fields below.
-	scrapeConfigs map[string]*scrapeconfig.ScrapeConfig
+	scrapeConfigs map[string]*config.ScrapeConfig
 	scrapePools   map[string]*scrapePool
 	targetSets    map[string][]*targetgroup.Group
 
@@ -100,7 +100,7 @@ func (m *Manager) reload() {
 		if _, ok := m.scrapePools[setName]; !ok {
 			scrapeConfig, ok := m.scrapeConfigs[setName]
 			if !ok {
-				m.logger.Error("error reloading target set", zap.String("err", "invalid scrapeconfig id:"+setName))
+				m.logger.Error("error reloading target set", zap.String("err", "invalid config id:"+setName))
 				continue
 			}
 			sp, err := newScrapePool(scrapeConfig, m.append, m.jitterSeed, m.logger.With(zap.String("scrape_pool", setName)))
@@ -155,11 +155,11 @@ func (m *Manager) updateTsets(tsets map[string][]*targetgroup.Group) {
 }
 
 // ApplyConfig resets the manager's target providers and job configurations as defined by the new cfg.
-func (m *Manager) ApplyConfig(cfg *scrapeconfig.Config) error {
+func (m *Manager) ApplyConfig(cfg *config.Config) error {
 	m.mtxScrape.Lock()
 	defer m.mtxScrape.Unlock()
 
-	c := make(map[string]*scrapeconfig.ScrapeConfig)
+	c := make(map[string]*config.ScrapeConfig)
 	for _, scfg := range cfg.ScrapeConfigs {
 		c[scfg.JobName] = scfg
 	}

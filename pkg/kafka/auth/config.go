@@ -46,7 +46,7 @@ type AuthenticationConfig struct {
 	PlainText      PlainTextConfig `mapstructure:"plaintext"`
 }
 
-//SetConfiguration set configure authentication into sarama scrapeconfig structure
+//SetConfiguration set configure authentication into sarama config structure
 func (config *AuthenticationConfig) SetConfiguration(saramaConfig *sarama.Config, logger *zap.Logger) error {
 	authentication := strings.ToLower(config.Authentication)
 	if strings.Trim(authentication, " ") == "" {

@@ -58,7 +58,7 @@ func (c *SDConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	if len(c.Files) == 0 {
-		return errors.New("file service discovery scrapeconfig must contain at least one path name")
+		return errors.New("file service discovery config must contain at least one path name")
 	}
 	for _, name := range c.Files {
 		if !patFileSDName.MatchString(name) {

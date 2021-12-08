@@ -22,7 +22,7 @@ import (
 )
 
 // Configurable interface can be implemented by plugins that require external configuration,
-// such as CLI flags, scrapeconfig files, or environment variables.
+// such as CLI flags, config files, or environment variables.
 type Configurable interface {
 	// AddFlags adds CLI flags for configuring this component.
 	AddFlags(flagSet *flag.FlagSet)

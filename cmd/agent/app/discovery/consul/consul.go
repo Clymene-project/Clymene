@@ -162,7 +162,7 @@ type Discovery struct {
 	logger           *zap.Logger
 }
 
-// NewDiscovery returns a new Discovery for the given scrapeconfig.
+// NewDiscovery returns a new Discovery for the given config.
 func NewDiscovery(conf *SDConfig, logger *zap.Logger) (*Discovery, error) {
 	if logger == nil {
 		logger = zap.NewNop()

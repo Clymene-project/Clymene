@@ -1,4 +1,4 @@
-package scrapeconfig
+package config
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ var (
 // Load parses the YAML input s into a Config.
 func Load(s string) (*Config, error) {
 	cfg := &Config{}
-	// If the entire scrapeconfig body is empty the UnmarshalYAML method is
+	// If the entire config body is empty the UnmarshalYAML method is
 	// never called. We thus have to set the DefaultConfig at the entry
 	// point as well.
 	*cfg = DefaultConfig
@@ -53,7 +53,7 @@ func LoadFile(filename string) (*Config, error) {
 	return cfg, nil
 }
 
-// The defaults applied before parsing the respective scrapeconfig sections.
+// The defaults applied before parsing the respective config sections.
 var (
 	// DefaultConfig is the default top-level configuration.
 	DefaultConfig = Config{
@@ -83,7 +83,7 @@ var (
 	}
 )
 
-// Config is the top-level configuration for Prometheus's scrapeconfig files.
+// Config is the top-level configuration for Prometheus's config files.
 type Config struct {
 	GlobalConfig  GlobalConfig    `yaml:"global"`
 	RuleFiles     []string        `yaml:"rule_files,omitempty"`
@@ -91,7 +91,7 @@ type Config struct {
 
 	RemoteReadConfigs []*RemoteReadConfig `yaml:"remote_read,omitempty"`
 
-	// original is the input from which the scrapeconfig was parsed.
+	// original is the input from which the config was parsed.
 	original string
 }
 
@@ -159,7 +159,7 @@ func resolveFilepaths(baseDir string, cfg *Config) {
 func (c Config) String() string {
 	b, err := yaml.Marshal(c)
 	if err != nil {
-		return fmt.Sprintf("<error creating scrapeconfig string: %s>", err)
+		return fmt.Sprintf("<error creating config string: %s>", err)
 	}
 	return string(b)
 }
@@ -175,7 +175,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	// If a global block was open but empty the default global scrapeconfig is overwritten.
+	// If a global block was open but empty the default global config is overwritten.
 	// We have to restore it here.
 	if c.GlobalConfig.isZero() {
 		c.GlobalConfig = DefaultGlobalConfig
@@ -190,7 +190,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jobNames := map[string]struct{}{}
 	for _, scfg := range c.ScrapeConfigs {
 		if scfg == nil {
-			return errors.New("empty or null scrape scrapeconfig section")
+			return errors.New("empty or null scrape config section")
 		}
 		// First set the correct scrape interval, then check that the timeout
 		// (inferred or explicit) is not greater than that.
@@ -198,7 +198,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			scfg.ScrapeInterval = c.GlobalConfig.ScrapeInterval
 		}
 		if scfg.ScrapeTimeout > scfg.ScrapeInterval {
-			return errors.Errorf("scrape timeout greater than scrape interval for scrape scrapeconfig with job name %q", scfg.JobName)
+			return errors.Errorf("scrape timeout greater than scrape interval for scrape config with job name %q", scfg.JobName)
 		}
 		if scfg.ScrapeTimeout == 0 {
 			if c.GlobalConfig.ScrapeTimeout > scfg.ScrapeInterval {
@@ -217,9 +217,9 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	rrNames := map[string]struct{}{}
 	for _, rrcfg := range c.RemoteReadConfigs {
 		if rrcfg == nil {
-			return errors.New("empty or null remote read scrapeconfig section")
+			return errors.New("empty or null remote read config section")
 		}
-		// Skip empty names, we fill their name with their scrapeconfig hash in remote read code.
+		// Skip empty names, we fill their name with their config hash in remote read code.
 		if _, ok := rrNames[rrcfg.Name]; ok && rrcfg.Name != "" {
 			return errors.Errorf("found multiple remote read configs with job name %q", rrcfg.Name)
 		}
@@ -249,7 +249,7 @@ type GlobalConfig struct {
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
 func (c *GlobalConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// Create a clean global scrapeconfig as the previous one was already populated
+	// Create a clean global config as the previous one was already populated
 	// by the default due to the YAML parser behavior for empty blocks.
 	gc := &GlobalConfig{}
 	type plain GlobalConfig
@@ -288,7 +288,7 @@ func (c *GlobalConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-// isZero returns true iff the global scrapeconfig is the zero value.
+// isZero returns true iff the global config is the zero value.
 func (c *GlobalConfig) isZero() bool {
 	return c.ExternalLabels == nil &&
 		c.ScrapeInterval == 0 &&
@@ -307,9 +307,9 @@ type ScrapeConfig struct {
 	HonorTimestamps bool `yaml:"honor_timestamps"`
 	// A set of query parameters with which the target is scraped.
 	Params url.Values `yaml:"params,omitempty"`
-	// How frequently to scrape the targets of this scrape scrapeconfig.
+	// How frequently to scrape the targets of this scrape config.
 	ScrapeInterval model.Duration `yaml:"scrape_interval,omitempty"`
-	// The timeout for scraping targets of this scrapeconfig.
+	// The timeout for scraping targets of this config.
 	ScrapeTimeout model.Duration `yaml:"scrape_timeout,omitempty"`
 	// The HTTP resource path on which to fetch metrics from targets.
 	MetricsPath string `yaml:"metrics_path,omitempty"`
@@ -366,16 +366,16 @@ func (c *ScrapeConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	for _, rlcfg := range c.RelabelConfigs {
 		if rlcfg == nil {
-			return errors.New("empty or null target relabeling rule in scrape scrapeconfig")
+			return errors.New("empty or null target relabeling rule in scrape config")
 		}
 	}
 	for _, rlcfg := range c.MetricRelabelConfigs {
 		if rlcfg == nil {
-			return errors.New("empty or null metric relabeling rule in scrape scrapeconfig")
+			return errors.New("empty or null metric relabeling rule in scrape config")
 		}
 	}
 
-	// Add index to the static scrapeconfig target groups for unique identification
+	// Add index to the static config target groups for unique identification
 	// within scrape pool.
 	for i, tg := range c.ServiceDiscoveryConfig.StaticConfigs {
 		tg.Source = fmt.Sprintf("%d", i)
@@ -451,7 +451,7 @@ func ReloadConfig(filename string, logger *zap.Logger, rls ...func(*Config) erro
 	logger.Info("Loading configuration file", zap.String("filename", filename))
 	conf, err := LoadFile(filename)
 	if err != nil {
-		return errors.Wrapf(err, "couldn't load configuration (--scrapeconfig.file=%q)", filename)
+		return errors.Wrapf(err, "couldn't load configuration (--config.file=%q)", filename)
 	}
 
 	failed := false
@@ -462,7 +462,7 @@ func ReloadConfig(filename string, logger *zap.Logger, rls ...func(*Config) erro
 		}
 	}
 	if failed {
-		return errors.Errorf("one or more errors occurred while applying the new configuration (--scrapeconfig.file=%q)", filename)
+		return errors.Errorf("one or more errors occurred while applying the new configuration (--config.file=%q)", filename)
 	}
 
 	logger.Info("Completed loading of configuration file", zap.String("filename", filename))

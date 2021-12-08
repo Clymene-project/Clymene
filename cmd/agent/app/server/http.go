@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/Clymene-project/Clymene/cmd/agent/app/scrapeconfig"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/pkg/recoveryhandler"
 	"net"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 type HttpServerParams struct {
 	HostPort   string
 	Logger     *zap.Logger
-	Reloader   []func(cfg *scrapeconfig.Config) error
+	Reloader   []func(cfg *config.Config) error
 	ConfigFile string
 }
 
