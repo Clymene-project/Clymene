@@ -1,0 +1,27 @@
+version: '2'
+services:
+  clymene-agent:
+    image: bourbonkk/clymene-agent:main
+    ports:
+      - "15691:15691"
+      - "15692:15692"
+    environment:
+      - TS_STORAGE_TYPE=kafka
+    volumes:
+      - ./config/clymene_scrape_config.yml:/etc/clymene/clymene.yml
+    command:
+      - --log-level=debug
+      - --kafka.producer.brokers=[KAFKA-IP]:9092
+
+  clymene-ingester:
+    image: bourbonkk/clymene-ingester:main
+    ports:
+      - "15694:15694"
+    environment:
+#      - TS_STORAGE_TYPE=elasticsearch,prometheus   # use composite writer
+      - TS_STORAGE_TYPE=elasticsearch
+    command:
+      - --log-level=debug
+      - --kafka.consumer.brokers=[KAFKA-IP]:9092
+      - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
+#      - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write

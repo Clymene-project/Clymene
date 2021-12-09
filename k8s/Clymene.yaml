@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: clymene-ingester
-  #  namespace: clymene
+  namespace: clymene
   labels:
     app: clymene-ingester
 spec:
@@ -35,7 +35,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: clymene-agent
-  #  namespace: clymene
+  namespace: clymene
   labels:
     app: clymene-agent
 spec:
@@ -77,7 +77,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: clymene-agent
-  #  namespace: clymene
+  namespace: clymene
   labels:
     app: clymene-agent
 spec:
@@ -95,7 +95,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clymene-agent-config
-#  namespace: clymene
+  namespace: clymene
 data:
   clymene.yml: |
     global:

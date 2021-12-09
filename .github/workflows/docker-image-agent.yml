@@ -47,5 +47,3 @@ jobs:
 
       - name: Build clymene agent
         run: bash scripts/build-clymene-agent.sh
-
-
