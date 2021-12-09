@@ -17,63 +17,55 @@
 package es
 
 import (
-	"context"
 	"github.com/Clymene-project/Clymene/pkg/es"
+	"github.com/Clymene-project/Clymene/plugin/storage/es/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
-	storageMetrics "github.com/Clymene-project/Clymene/storage/metricstore/metrics"
-	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
-	"strings"
+)
+
+const (
+	clymeneIndex = "clymene-metrics"
+	metricType   = "metric"
 )
 
 type MetricWriter struct {
-	client        es.Client
-	logger        *zap.Logger
-	writerMetrics metricWriterMetrics
-}
-
-type metricWriterMetrics struct {
-	indexCreate *storageMetrics.WriteMetrics
+	client      es.Client
+	logger      *zap.Logger
+	metricIndex string
+	converter   dbmodel.Converter
 }
 
 // MetricWriterParams holds constructor parameters for NewMetricWriter
 type MetricWriterParams struct {
-	Client              es.Client
-	Logger              *zap.Logger
-	MetricsFactory      metrics.Factory
-	IndexPrefix         string
-	IndexDateLayout     string
-	AllTagsAsFields     bool
-	TagKeysAsFields     []string
-	TagDotReplacement   string
-	Archive             bool
-	UseReadWriteAliases bool
+	Client      es.Client
+	Logger      *zap.Logger
+	IndexPrefix string
+	Archive     bool
 }
 
 // NewMetricWriter creates a new MetricWriter for use
 func NewMetricWriter(p MetricWriterParams) *MetricWriter {
+	prefix := ""
+	if p.IndexPrefix != "" {
+		prefix = p.IndexPrefix + "-"
+	}
 	return &MetricWriter{
-		client: p.Client,
-		logger: p.Logger,
-		writerMetrics: metricWriterMetrics{
-			indexCreate: storageMetrics.NewWriteMetrics(p.MetricsFactory, "index_create"),
-		},
+		client:      p.Client,
+		logger:      p.Logger,
+		metricIndex: prefix + clymeneIndex,
+		converter:   dbmodel.Converter{},
 	}
 }
 
-// CreateTemplates creates index templates.
-func (s *MetricWriter) CreateTemplates(metricTemplate, indexPrefix string) error {
-	if indexPrefix != "" && !strings.HasSuffix(indexPrefix, "-") {
-		indexPrefix += "-"
-	}
-	_, err := s.client.CreateTemplate(indexPrefix + "clymene-metrics").Body(metricTemplate).Do(context.Background())
-	if err != nil {
-		return err
+func (s *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
+	for _, metric := range metrics {
+		jsonTimeSeries := s.converter.ConvertTsToJSON(metric)
+		s.writeMetric(&jsonTimeSeries)
 	}
 	return nil
 }
 
-func (s *MetricWriter) WriteMetric(metric []prompb.TimeSeries) error {
-	//TODO implement me
-	panic("implement me")
+// bulk insert
+func (s *MetricWriter) writeMetric(metric *map[string]interface{}) {
+	s.client.Index().Index(s.metricIndex).Type(metricType).BodyJson(&metric).Add()
 }

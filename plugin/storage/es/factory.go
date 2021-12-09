@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/es"
 	"github.com/Clymene-project/Clymene/pkg/es/config"
-	"github.com/Clymene-project/Clymene/plugin/storage/es/mappings"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -93,56 +92,21 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 }
 
 func (f *Factory) CreateWriter() (metricstore.Writer, error) {
-	return createMetricWriter(f.metricsFactory, f.logger, f.primaryClient, f.primaryConfig, false)
+	return createMetricWriter(f.logger, f.primaryClient, f.primaryConfig, false)
 }
 
 func createMetricWriter(
-	mFactory metrics.Factory,
 	logger *zap.Logger,
 	client es.Client,
 	cfg config.ClientBuilder,
 	archive bool,
 ) (metricstore.Writer, error) {
-	var tags []string
-	var err error
-	if cfg.GetUseILM() && !cfg.GetUseReadWriteAliases() {
-		return nil, fmt.Errorf("--es.use-ilm must always be used in conjunction with --es.use-aliases to ensure ES writers and readers refer to the single index mapping")
-	}
-	if tags, err = cfg.TagKeysAsFields(); err != nil {
-		logger.Error("failed to get tag keys", zap.Error(err))
-		return nil, err
-	}
-
-	mappingBuilder := mappings.MappingBuilder{
-		TemplateBuilder: es.TextTemplateBuilder{},
-		Shards:          cfg.GetNumShards(),
-		Replicas:        cfg.GetNumReplicas(),
-		EsVersion:       cfg.GetVersion(),
-		IndexPrefix:     cfg.GetIndexPrefix(),
-		UseILM:          cfg.GetUseILM(),
-	}
-
-	metricMapping, err := mappingBuilder.GetMetricsMappings()
-	if err != nil {
-		return nil, err
-	}
 	writer := NewMetricWriter(MetricWriterParams{
-		Client:              client,
-		Logger:              logger,
-		MetricsFactory:      mFactory,
-		IndexPrefix:         cfg.GetIndexPrefix(),
-		IndexDateLayout:     cfg.GetIndexDateLayout(),
-		AllTagsAsFields:     cfg.GetAllTagsAsFields(),
-		TagKeysAsFields:     tags,
-		TagDotReplacement:   cfg.GetTagDotReplacement(),
-		Archive:             archive,
-		UseReadWriteAliases: cfg.GetUseReadWriteAliases(),
+		Client:      client,
+		Logger:      logger,
+		IndexPrefix: cfg.GetIndexPrefix(),
+		Archive:     archive,
 	})
-	if cfg.IsCreateIndexTemplates() {
-		err := writer.CreateTemplates(metricMapping, cfg.GetIndexPrefix())
-		if err != nil {
-			return nil, err
-		}
-	}
+
 	return writer, nil
 }

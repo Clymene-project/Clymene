@@ -1,22 +1,22 @@
-// Copyright (c) 2019 The Jaeger Authors.
-// Copyright (c) 2017 Uber Technologies, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright (c) 2021 The Clymene Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package config
 
 import (
-	"bufio"
 	"context"
 	"crypto/tls"
 	"errors"
@@ -27,7 +27,6 @@ import (
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -52,61 +51,28 @@ type Configuration struct {
 	AllowTokenFromContext bool           `mapstructure:"-"`
 	Sniffer               bool           `mapstructure:"sniffer"` // https://github.com/olivere/elastic/wiki/Sniffing
 	SnifferTLSEnabled     bool           `mapstructure:"sniffer_tls_enabled"`
-	MaxDocCount           int            `mapstructure:"-"`                       // Defines maximum number of results to fetch from storage per query
-	MaxMetricAge          time.Duration  `yaml:"max_metric_age" mapstructure:"-"` // configures the maximum lookback on metric reads
-	NumShards             int64          `yaml:"shards" mapstructure:"num_shards"`
-	NumReplicas           int64          `yaml:"replicas" mapstructure:"num_replicas"`
+	MaxDocCount           int            `mapstructure:"-"` // Defines maximum number of results to fetch from storage per query
 	Timeout               time.Duration  `validate:"min=500" mapstructure:"-"`
 	BulkSize              int            `mapstructure:"-"`
 	BulkWorkers           int            `mapstructure:"-"`
 	BulkActions           int            `mapstructure:"-"`
 	BulkFlushInterval     time.Duration  `mapstructure:"-"`
 	IndexPrefix           string         `mapstructure:"index_prefix"`
-	IndexDateLayout       string         `mapstructure:"index_date_layout"`
-	Tags                  TagsAsFields   `mapstructure:"tags_as_fields"`
 	Enabled               bool           `mapstructure:"-"`
 	TLS                   tlscfg.Options `mapstructure:"tls"`
-	UseReadWriteAliases   bool           `mapstructure:"use_aliases"`
-	CreateIndexTemplates  bool           `mapstructure:"create_mappings"`
-	UseILM                bool           `mapstructure:"use_ilm"`
 	Version               uint           `mapstructure:"version"`
 	LogLevel              string         `mapstructure:"log_level"`
-}
-
-// TagsAsFields holds configuration for tag schema.
-// By default Jaeger stores tags in an array of nested objects.
-// This configurations allows to store tags as object fields for better Kibana support.
-type TagsAsFields struct {
-	// Store all tags as object fields, instead nested objects
-	AllAsFields bool `mapstructure:"all"`
-	// Dot replacement for tag keys when stored as object fields
-	DotReplacement string `mapstructure:"dot_replacement"`
-	// File path to tag keys which should be stored as object fields
-	File string `mapstructure:"config_file"`
-	// Comma delimited list of tags to store as object fields
-	Include string `mapstructure:"include"`
 }
 
 // ClientBuilder creates new es.Client
 type ClientBuilder interface {
 	NewClient(logger *zap.Logger, metricsFactory metrics.Factory) (es.Client, error)
 	GetRemoteReadClusters() []string
-	GetNumShards() int64
-	GetNumReplicas() int64
-	GetMaxMetricAge() time.Duration
 	GetMaxDocCount() int
 	GetIndexPrefix() string
-	GetIndexDateLayout() string
-	GetTagsFilePath() string
-	GetAllTagsAsFields() bool
-	GetTagDotReplacement() string
-	GetUseReadWriteAliases() bool
 	GetTokenFilePath() string
 	IsStorageEnabled() bool
-	IsCreateIndexTemplates() bool
 	GetVersion() uint
-	TagKeysAsFields() ([]string, error)
-	GetUseILM() bool
 	GetLogLevel() string
 }
 
@@ -207,15 +173,6 @@ func (c *Configuration) ApplyDefaults(source *Configuration) {
 	if !c.Sniffer {
 		c.Sniffer = source.Sniffer
 	}
-	if c.MaxMetricAge == 0 {
-		c.MaxMetricAge = source.MaxMetricAge
-	}
-	if c.NumShards == 0 {
-		c.NumShards = source.NumShards
-	}
-	if c.NumReplicas == 0 {
-		c.NumReplicas = source.NumReplicas
-	}
 	if c.BulkSize == 0 {
 		c.BulkSize = source.BulkSize
 	}
@@ -231,18 +188,6 @@ func (c *Configuration) ApplyDefaults(source *Configuration) {
 	if !c.SnifferTLSEnabled {
 		c.SnifferTLSEnabled = source.SnifferTLSEnabled
 	}
-	if !c.Tags.AllAsFields {
-		c.Tags.AllAsFields = source.Tags.AllAsFields
-	}
-	if c.Tags.DotReplacement == "" {
-		c.Tags.DotReplacement = source.Tags.DotReplacement
-	}
-	if c.Tags.Include == "" {
-		c.Tags.Include = source.Tags.Include
-	}
-	if c.Tags.File == "" {
-		c.Tags.File = source.Tags.File
-	}
 	if c.MaxDocCount == 0 {
 		c.MaxDocCount = source.MaxDocCount
 	}
@@ -256,21 +201,6 @@ func (c *Configuration) GetRemoteReadClusters() []string {
 	return c.RemoteReadClusters
 }
 
-// GetNumShards returns number of shards from Configuration
-func (c *Configuration) GetNumShards() int64 {
-	return c.NumShards
-}
-
-// GetNumReplicas returns number of replicas from Configuration
-func (c *Configuration) GetNumReplicas() int64 {
-	return c.NumReplicas
-}
-
-// GetMaxMetricAge returns max metric age from Configuration
-func (c *Configuration) GetMaxMetricAge() time.Duration {
-	return c.MaxMetricAge
-}
-
 // GetMaxDocCount returns the maximum number of documents that a query should return
 func (c *Configuration) GetMaxDocCount() int {
 	return c.MaxDocCount
@@ -281,40 +211,9 @@ func (c *Configuration) GetIndexPrefix() string {
 	return c.IndexPrefix
 }
 
-// GetIndexDateLayout returns index date layout
-func (c *Configuration) GetIndexDateLayout() string {
-	return c.IndexDateLayout
-}
-
-// GetTagsFilePath returns a path to file containing tag keys
-func (c *Configuration) GetTagsFilePath() string {
-	return c.Tags.File
-}
-
-// GetAllTagsAsFields returns true if all tags should be stored as object fields
-func (c *Configuration) GetAllTagsAsFields() bool {
-	return c.Tags.AllAsFields
-}
-
 // GetVersion returns Elasticsearch version
 func (c *Configuration) GetVersion() uint {
 	return c.Version
-}
-
-// GetTagDotReplacement returns character is used to replace dots in tag keys, when
-// the tag is stored as object field.
-func (c *Configuration) GetTagDotReplacement() string {
-	return c.Tags.DotReplacement
-}
-
-// GetUseReadWriteAliases indicates whether read alias should be used
-func (c *Configuration) GetUseReadWriteAliases() bool {
-	return c.UseReadWriteAliases
-}
-
-// GetUseILM indicates whether ILM should be used
-func (c *Configuration) GetUseILM() bool {
-	return c.UseILM
 }
 
 // GetLogLevel returns the log-level the ES client should log at.
@@ -330,42 +229,6 @@ func (c *Configuration) GetTokenFilePath() string {
 // IsStorageEnabled determines whether storage is enabled
 func (c *Configuration) IsStorageEnabled() bool {
 	return c.Enabled
-}
-
-// IsCreateIndexTemplates determines whether index templates should be created or not
-func (c *Configuration) IsCreateIndexTemplates() bool {
-	return c.CreateIndexTemplates
-}
-
-// TagKeysAsFields returns tags from the file and command line merged
-func (c *Configuration) TagKeysAsFields() ([]string, error) {
-	var tags []string
-
-	// from file
-	if c.Tags.File != "" {
-		file, err := os.Open(filepath.Clean(c.Tags.File))
-		if err != nil {
-			return nil, err
-		}
-
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if tag := strings.TrimSpace(line); tag != "" {
-				tags = append(tags, tag)
-			}
-		}
-		if err := file.Close(); err != nil {
-			return nil, err
-		}
-	}
-
-	// from params
-	if c.Tags.Include != "" {
-		tags = append(tags, strings.Split(c.Tags.Include, ",")...)
-	}
-
-	return tags, nil
 }
 
 // getConfigOptions wraps the configs to feed to the ElasticSearch client init

@@ -17,7 +17,6 @@ package es
 
 import (
 	"flag"
-	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
 	"github.com/Clymene-project/Clymene/pkg/es/config"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -28,42 +27,29 @@ import (
 )
 
 const (
-	suffixUsername            = ".username"
-	suffixPassword            = ".password"
-	suffixSniffer             = ".sniffer"
-	suffixSnifferTLSEnabled   = ".sniffer-tls-enabled"
-	suffixTokenPath           = ".token-file"
-	suffixServerURLs          = ".server-urls"
-	suffixRemoteReadClusters  = ".remote-read-clusters"
-	suffixMaxMetricAge        = ".max-metric-age"
-	suffixNumShards           = ".num-shards"
-	suffixNumReplicas         = ".num-replicas"
-	suffixBulkSize            = ".bulk.size"
-	suffixBulkWorkers         = ".bulk.workers"
-	suffixBulkActions         = ".bulk.actions"
-	suffixBulkFlushInterval   = ".bulk.flush-interval"
-	suffixTimeout             = ".timeout"
-	suffixIndexPrefix         = ".index-prefix"
-	suffixIndexDateSeparator  = ".index-date-separator"
-	suffixTagsAsFields        = ".tags-as-fields"
-	suffixTagsAsFieldsAll     = suffixTagsAsFields + ".all"
-	suffixTagsAsFieldsInclude = suffixTagsAsFields + ".include"
-	suffixTagsFile            = suffixTagsAsFields + ".config-file"
-	suffixTagDeDotChar        = suffixTagsAsFields + ".dot-replacement"
-	suffixReadAlias           = ".use-aliases"
-	suffixUseILM              = ".use-ilm"
-	suffixCreateIndexTemplate = ".create-index-templates"
-	suffixEnabled             = ".enabled"
-	suffixVersion             = ".version"
-	suffixMaxDocCount         = ".max-doc-count"
-	suffixLogLevel            = ".log-level"
+	suffixUsername           = ".username"
+	suffixPassword           = ".password"
+	suffixSniffer            = ".sniffer"
+	suffixSnifferTLSEnabled  = ".sniffer-tls-enabled"
+	suffixTokenPath          = ".token-file"
+	suffixServerURLs         = ".server-urls"
+	suffixRemoteReadClusters = ".remote-read-clusters"
+	suffixBulkSize           = ".bulk.size"
+	suffixBulkWorkers        = ".bulk.workers"
+	suffixBulkActions        = ".bulk.actions"
+	suffixBulkFlushInterval  = ".bulk.flush-interval"
+	suffixTimeout            = ".timeout"
+	suffixIndexPrefix        = ".index-prefix"
+	suffixEnabled            = ".enabled"
+	suffixVersion            = ".version"
+	suffixMaxDocCount        = ".max-doc-count"
+	suffixLogLevel           = ".log-level"
 	// default number of documents to return from a query (es allowed limit)
 	// see search.max_buckets and index.max_result_window
 	defaultMaxDocCount        = 10_000
 	defaultServerURL          = "http://127.0.0.1:9200"
 	defaultRemoteReadClusters = ""
 	// default separator for Elasticsearch index date layout.
-	defaultIndexDateSeparator = "-"
 )
 
 // TODO this should be moved next to config.Configuration struct (maybe ./flags package)
@@ -84,28 +70,22 @@ type namespaceConfig struct {
 
 // NewOptions creates a new Options struct.
 func NewOptions(primaryNamespace string, otherNamespaces ...string) *Options {
-	// TODO all default values should be defined via cobra flags
 	defaultConfig := config.Configuration{
-		Username:          "",
-		Password:          "",
-		Sniffer:           false,
-		MaxMetricAge:      72 * time.Hour,
-		NumShards:         5,
-		NumReplicas:       1,
+		Username: "",
+		Password: "",
+		Sniffer:  false,
+
 		BulkSize:          5 * 1000 * 1000,
 		BulkWorkers:       1,
 		BulkActions:       1000,
 		BulkFlushInterval: time.Millisecond * 200,
-		Tags: config.TagsAsFields{
-			DotReplacement: "@",
-		},
-		Enabled:              true,
-		CreateIndexTemplates: true,
-		Version:              0,
-		Servers:              []string{defaultServerURL},
-		RemoteReadClusters:   []string{},
-		MaxDocCount:          defaultMaxDocCount,
-		LogLevel:             "error",
+
+		Enabled:            true,
+		Version:            0,
+		Servers:            []string{defaultServerURL},
+		RemoteReadClusters: []string{},
+		MaxDocCount:        defaultMaxDocCount,
+		LogLevel:           "error",
 	}
 	options := &Options{
 		Primary: namespaceConfig{
@@ -173,14 +153,6 @@ func addFlags(flagSet *flag.FlagSet, nsConfig *namespaceConfig) {
 		nsConfig.namespace+suffixTimeout,
 		nsConfig.Timeout,
 		"Timeout used for queries. A Timeout of zero means no timeout")
-	flagSet.Int64(
-		nsConfig.namespace+suffixNumShards,
-		nsConfig.NumShards,
-		"The number of shards per index in Elasticsearch")
-	flagSet.Int64(
-		nsConfig.namespace+suffixNumReplicas,
-		nsConfig.NumReplicas,
-		"The number of replicas per index in Elasticsearch")
 	flagSet.Int(
 		nsConfig.namespace+suffixBulkSize,
 		nsConfig.BulkSize,
@@ -197,46 +169,6 @@ func addFlags(flagSet *flag.FlagSet, nsConfig *namespaceConfig) {
 		nsConfig.namespace+suffixBulkFlushInterval,
 		nsConfig.BulkFlushInterval,
 		"A time.Duration after which bulk requests are committed, regardless of other thresholds. Set to zero to disable. By default, this is disabled.")
-	flagSet.String(
-		nsConfig.namespace+suffixIndexPrefix,
-		nsConfig.IndexPrefix,
-		"Optional prefix of Jaeger indices. For example \"production\" creates \"production-jaeger-*\".")
-	flagSet.String(
-		nsConfig.namespace+suffixIndexDateSeparator,
-		defaultIndexDateSeparator,
-		"Optional date separator of Jaeger indices. For example \".\" creates \"clymene-metrics-2020.11.20 \".")
-	flagSet.Bool(
-		nsConfig.namespace+suffixTagsAsFieldsAll,
-		nsConfig.Tags.AllAsFields,
-		"(experimental) Store all metrics and process tags as object fields. If true "+suffixTagsFile+" and "+suffixTagsAsFieldsInclude+" is ignored. Binary tags are always stored as nested objects.")
-	flagSet.String(
-		nsConfig.namespace+suffixTagsAsFieldsInclude,
-		nsConfig.Tags.Include,
-		"(experimental) Comma delimited list of tag keys which will be stored as object fields. Merged with the contents of "+suffixTagsFile)
-	flagSet.String(
-		nsConfig.namespace+suffixTagsFile,
-		nsConfig.Tags.File,
-		"(experimental) Optional path to a file containing tag keys which will be stored as object fields. Each key should be on a separate line.  Merged with "+suffixTagsAsFieldsInclude)
-	flagSet.String(
-		nsConfig.namespace+suffixTagDeDotChar,
-		nsConfig.Tags.DotReplacement,
-		"(experimental) The character used to replace dots (\".\") in tag keys stored as object fields.")
-	flagSet.Bool(
-		nsConfig.namespace+suffixReadAlias,
-		nsConfig.UseReadWriteAliases,
-		"Use read and write aliases for indices. Use this option with Elasticsearch rollover "+
-			"API. It requires an external component to create aliases before startup and then performing its management. "+
-			"Note that es"+suffixMaxMetricAge+" will influence trace search window start times.")
-	flagSet.Bool(
-		nsConfig.namespace+suffixUseILM,
-		nsConfig.UseILM,
-		"(experimental) Option to enable ILM for clymene metric & service indices. Use this option with  "+nsConfig.namespace+suffixReadAlias+". "+
-			"It requires an external component to create aliases before startup and then performing its management. "+
-			"ILM policy must be manually created in ES before startup. Supported only for es version 7+.")
-	flagSet.Bool(
-		nsConfig.namespace+suffixCreateIndexTemplate,
-		nsConfig.CreateIndexTemplates,
-		"Create index templates at application startup. Set to false when templates are installed manually.")
 	flagSet.Uint(
 		nsConfig.namespace+suffixVersion,
 		0,
@@ -259,14 +191,8 @@ func addFlags(flagSet *flag.FlagSet, nsConfig *namespaceConfig) {
 			nsConfig.namespace+suffixEnabled,
 			nsConfig.Enabled,
 			"Enable extra storage")
-	} else {
-		// MaxMetricAge is only relevant when searching for unarchived traces.
-		// Archived traces are searched with no look-back limit.
-		flagSet.Duration(
-			nsConfig.namespace+suffixMaxMetricAge,
-			nsConfig.MaxMetricAge,
-			"The maximum lookback for metrics in Elasticsearch")
 	}
+
 	nsConfig.getTLSFlagsConfig().AddFlags(flagSet)
 }
 
@@ -285,28 +211,16 @@ func initFromViper(cfg *namespaceConfig, v *viper.Viper) {
 	cfg.Sniffer = v.GetBool(cfg.namespace + suffixSniffer)
 	cfg.SnifferTLSEnabled = v.GetBool(cfg.namespace + suffixSnifferTLSEnabled)
 	cfg.Servers = strings.Split(stripWhiteSpace(v.GetString(cfg.namespace+suffixServerURLs)), ",")
-	cfg.MaxMetricAge = v.GetDuration(cfg.namespace + suffixMaxMetricAge)
-	cfg.NumShards = v.GetInt64(cfg.namespace + suffixNumShards)
-	cfg.NumReplicas = v.GetInt64(cfg.namespace + suffixNumReplicas)
 	cfg.BulkSize = v.GetInt(cfg.namespace + suffixBulkSize)
 	cfg.BulkWorkers = v.GetInt(cfg.namespace + suffixBulkWorkers)
 	cfg.BulkActions = v.GetInt(cfg.namespace + suffixBulkActions)
 	cfg.BulkFlushInterval = v.GetDuration(cfg.namespace + suffixBulkFlushInterval)
 	cfg.Timeout = v.GetDuration(cfg.namespace + suffixTimeout)
 	cfg.IndexPrefix = v.GetString(cfg.namespace + suffixIndexPrefix)
-	cfg.IndexDateLayout = initDateLayout(v.GetString(cfg.namespace + suffixIndexDateSeparator))
-	cfg.Tags.AllAsFields = v.GetBool(cfg.namespace + suffixTagsAsFieldsAll)
-	cfg.Tags.Include = v.GetString(cfg.namespace + suffixTagsAsFieldsInclude)
-	cfg.Tags.File = v.GetString(cfg.namespace + suffixTagsFile)
-	cfg.Tags.DotReplacement = v.GetString(cfg.namespace + suffixTagDeDotChar)
-	cfg.UseReadWriteAliases = v.GetBool(cfg.namespace + suffixReadAlias)
 	cfg.Enabled = v.GetBool(cfg.namespace + suffixEnabled)
-	cfg.CreateIndexTemplates = v.GetBool(cfg.namespace + suffixCreateIndexTemplate)
 	cfg.Version = uint(v.GetInt(cfg.namespace + suffixVersion))
 	cfg.LogLevel = v.GetString(cfg.namespace + suffixLogLevel)
-
 	cfg.MaxDocCount = v.GetInt(cfg.namespace + suffixMaxDocCount)
-	cfg.UseILM = v.GetBool(cfg.namespace + suffixUseILM)
 
 	// TODO: Need to figure out a better way for do this.
 	cfg.AllowTokenFromContext = v.GetBool(metricstore.StoragePropagationKey)
@@ -340,8 +254,4 @@ func (opt *Options) Get(namespace string) *config.Configuration {
 // stripWhiteSpace removes all whitespace characters from a string
 func stripWhiteSpace(str string) string {
 	return strings.Replace(str, " ", "", -1)
-}
-
-func initDateLayout(separator string) string {
-	return fmt.Sprintf("2006%s01%s02", separator, separator)
 }

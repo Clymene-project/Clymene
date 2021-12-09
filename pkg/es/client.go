@@ -24,9 +24,6 @@ import (
 
 // Client is an abstraction for elastic.Client
 type Client interface {
-	IndexExists(index string) IndicesExistsService
-	CreateIndex(index string) IndicesCreateService
-	CreateTemplate(id string) TemplateCreateService
 	Index() IndexService
 	Search(indices ...string) SearchService
 	MultiSearch() MultiSearchService

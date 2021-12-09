@@ -1,17 +1,18 @@
-// Copyright (c) 2019 The Jaeger Authors.
-// Copyright (c) 2017 Uber Technologies, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright (c) 2021 The Clymene Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package eswrapper
 
@@ -39,21 +40,6 @@ func (c ClientWrapper) GetVersion() uint {
 // WrapESClient creates a ESClient out of *elastic.Client.
 func WrapESClient(client *elastic.Client, s *elastic.BulkProcessor, esVersion uint) ClientWrapper {
 	return ClientWrapper{client: client, bulkService: s, esVersion: esVersion}
-}
-
-// IndexExists calls this function to internal client.
-func (c ClientWrapper) IndexExists(index string) es.IndicesExistsService {
-	return WrapESIndicesExistsService(c.client.IndexExists(index))
-}
-
-// CreateIndex calls this function to internal client.
-func (c ClientWrapper) CreateIndex(index string) es.IndicesCreateService {
-	return WrapESIndicesCreateService(c.client.CreateIndex(index))
-}
-
-// CreateTemplate calls this function to internal client.
-func (c ClientWrapper) CreateTemplate(ttype string) es.TemplateCreateService {
-	return WrapESTemplateCreateService(c.client.IndexPutTemplate(ttype))
 }
 
 // Index calls this function to internal client.
@@ -176,8 +162,6 @@ func (i IndexServiceWrapper) Type(typ string) es.IndexService {
 func (i IndexServiceWrapper) Add() {
 	i.bulkService.Add(i.bulkIndexReq)
 }
-
-// ---
 
 // SearchServiceWrapper is a wrapper around elastic.ESSearchService
 type SearchServiceWrapper struct {
