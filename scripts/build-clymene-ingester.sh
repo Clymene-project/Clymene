@@ -6,7 +6,7 @@ BRANCH=${BRANCH:?'missing BRANCH env var'}
 GIT_SHA=${GIT_SHA:?'missing GIT_SHA env var'}
 #GIT_BRANCH=${GIT_BRANCH:-$(shell git branch)}
 
-DATE=${GIT_SHA:?'missing DATE env var'}
+DATE=${DATE:?'missing DATE env var'}
 
 mkdir ./out
 
