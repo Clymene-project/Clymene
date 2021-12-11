@@ -38,6 +38,8 @@ import (
 var (
 	// Version is set during binary building (git revision number)
 	Version string
+	// BuildTime is set during binary building
+	BuildTime string
 )
 
 const (
@@ -67,7 +69,7 @@ func main() {
 			logger := svc.Logger
 
 			logger.Info("start....", zap.String("component name", ClymeneAgentName))
-			logger.Info("build info", zap.String("version", Version))
+			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
 			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "agent"})

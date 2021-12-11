@@ -1,4 +1,5 @@
 ./output
+./out
 *.iml
 *.yml
 .idea
