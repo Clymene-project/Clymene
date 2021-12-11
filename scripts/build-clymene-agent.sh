@@ -3,8 +3,8 @@
 #BRANCH=${BRANCH:?'missing BRANCH env var'}
 #GOARCH=${GOARCH:-$(go env GOARCH)}
 
-GIT_SHA=$(shell git rev-parse HEAD)
-GIT_BRANCH=$(shell git branch)
+GIT_SHA=${GIT_SHA:-$(shell git rev-parse HEAD)}
+GIT_BRANCH=${GIT_BRANCH:-$(shell git branch)}
 
 DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
