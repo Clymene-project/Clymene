@@ -25,21 +25,27 @@ jobs:
         with:
           go-version: ^1.16
 
-      - name: Setup BRANCH
-        shell: bash
+#      - name: Setup BRANCH
+#        shell: bash
+#        run: |
+#          case ${GITHUB_EVENT_NAME} in
+#          pull_request)
+#           BRANCH=${GITHUB_HEAD_REF}
+#           ;;
+#          push | release)
+#           BRANCH=${GITHUB_REF##*/}
+#           ;;
+#          esac
+#          echo "we are on branch=${BRANCH}"
+#          echo "BRANCH=${BRANCH}" >> ${GITHUB_ENV}
+
+      - name: Extract branch name
+        id: extract_branch
+        uses: keptn/gh-action-extract-branch-name@main
+
+      - name: set env
         run: |
-          case ${GITHUB_EVENT_NAME} in
-          pull_request)
-           BRANCH=${GITHUB_HEAD_REF}
-           ;;
-          push | release)
-           BRANCH=${GITHUB_REF##*/}
-           ;;
-          esac
-          echo "we are on branch=${BRANCH}"
-          echo "BRANCH=${BRANCH}" >> ${GITHUB_ENV}
           echo "GIT_SHA=${{ steps.extract_branch.outputs.GIT_SHA }}" >> ${GITHUB_ENV}
-          echo "BRANCH_SLUG=${{ steps.extract_branch.outputs.BRANCH_SLUG }}" >> ${GITHUB_ENV}
           echo "BRANCH=${{ steps.extract_branch.outputs.BRANCH }}" >> ${GITHUB_ENV}
 
       - name: Login to DockerHub
