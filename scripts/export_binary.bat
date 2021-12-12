@@ -1,6 +1,13 @@
 @echo off
 set DOCKERID=build
-set RELEASE=1.0.0
+set RELEASE=1_0_0
+
+mkdir ./out/clymene-%RELEASE%-linux-amd64/
+mkdir ./out/clymene-%RELEASE%-windows-amd64/
+mkdir ./out/clymene-%RELEASE%-darwin-amd64/
+mkdir ./out/clymene-%RELEASE%-linux-s390x/
+mkdir ./out/clymene-%RELEASE%-linux-arm64/
+mkdir ./out/clymene-%RELEASE%-linux-ppc64le/
 
 docker cp %DOCKERID%:/clymene/out/clymene-agent-linux-amd64 ./out/clymene-%RELEASE%-linux-amd64/
 docker cp %DOCKERID%:/clymene/out/clymene-agent-windows-amd64 ./out/clymene-%RELEASE%-windows-amd64/clymene-agent-windows-amd64.exe
