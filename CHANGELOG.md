@@ -1,7 +1,7 @@
 Changes by Version
 ==================
 
-1.0.0 (2021-12-19)
+1.0.0 (2021-12-12)
 ------------------
 Use kafka with clymene-agent and clymene-ingester.  
 With only clymene-agent, you can collect timeseries of various environments and store them in DB.
