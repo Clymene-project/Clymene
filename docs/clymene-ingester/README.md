@@ -1,6 +1,6 @@
 # Clymene Ingester Getting Start
 
-The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
+The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database  
 Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베이스에 삽입하는 선택적 서비스이다
 
 1. Kafka message consume
