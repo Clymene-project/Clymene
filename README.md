@@ -1,10 +1,10 @@
 # Clymene
 
-The Clymene is a distributed system time series data collection platform inspired by [Prometheus](https://prometheus.io)
+The Clymene is a time series data collection platform for distributed systems inspired by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
 different types of databases. Various time series data analysis functions will be added.
 
-Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertracing.io)에서 영감을 받은 분산 시스템 시계열 데이터 수집 플랫폼입니다.
+Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertracing.io)에서 영감을 받은 분산 시스템을 위한 시계열 데이터 수집 플랫폼입니다.
 다양한 환경의 시계열 데이터를 수집하고 여러 종류의 데이터베이스에 저장할 수 있습니다. 다양한 시계열 데이터 분석 기능이 추가될 예정입니다.
 
 # Architecture
