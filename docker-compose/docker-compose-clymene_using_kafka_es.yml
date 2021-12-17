@@ -1,17 +1,17 @@
 version: '2'
 services:
   clymene-agent:
-    image: bourbonkk/clymene-agent:main
+    image: bourbonkk/clymene-agent:v1.0.0
     ports:
       - "15691:15691"
       - "15692:15692"
     environment:
-      - TS_STORAGE_TYPE=kafka
+      - TS_STORAGE_TYPE=elasticsearch
     volumes:
       - ./config/clymene_scrape_config.yml:/etc/clymene/clymene.yml
     command:
       - --log-level=debug
-      - --kafka.producer.brokers=[KAFKA-IP]:9092
+      - --es.server-urls=http://localhost:9200
 
   clymene-ingester:
     image: bourbonkk/clymene-ingester:main
