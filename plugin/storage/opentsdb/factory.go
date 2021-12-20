@@ -14,4 +14,27 @@
  * limitations under the License.
  */
 
-package grpc
+package opentsdb
+
+import (
+	"github.com/Clymene-project/Clymene/storage/metricstore"
+	"github.com/uber/jaeger-lib/metrics"
+	"go.uber.org/zap"
+)
+
+type Factory struct {
+}
+
+func (f Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f Factory) CreateWriter() (metricstore.Writer, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func NewFactory() *Factory {
+	return &Factory{}
+}

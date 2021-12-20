@@ -18,11 +18,14 @@ package storage
 import (
 	"flag"
 	"fmt"
-	"github.com/Clymene-project/Clymene/plugin/storage/es"
-
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/plugin"
+	"github.com/Clymene-project/Clymene/plugin/storage/es"
+	"github.com/Clymene-project/Clymene/plugin/storage/gateway"
+	"github.com/Clymene-project/Clymene/plugin/storage/influxdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
+	"github.com/Clymene-project/Clymene/plugin/storage/kdb"
+	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/prometheus"
 	"github.com/Clymene-project/Clymene/storage"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -40,15 +43,15 @@ const (
 	kafkaStorageType         = "kafka"
 	gatewayStorageType       = "gateway"
 	cortexStorageType        = "cortex"
-	kdb                      = "kdb"
-	opentsdb                 = "opentsdb"
+	kdbStorageType           = "kdb"
+	opentsdbStorageType      = "opentsdb"
 
 	tsStorageType = "ts-storage-type"
 )
 
 // AllStorageTypes defines all available storage backends
 var AllStorageTypes = []string{influxDbStorageType, elasticsearchStorageType, prometheusStorageType, kafkaStorageType,
-	gatewayStorageType, cortexStorageType, kdb, opentsdb}
+	gatewayStorageType, cortexStorageType, kdbStorageType, opentsdbStorageType}
 
 // Factory implements storage.Factory interface as a meta-factory for storage components.
 type Factory struct {
@@ -89,13 +92,13 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 	case kafkaStorageType:
 		return kafka.NewFactory(), nil
 	case influxDbStorageType:
-		return nil, nil
+		return influxdb.NewFactory(), nil
 	case gatewayStorageType:
-		return nil, nil
-	case opentsdb:
-		return nil, nil
-	case kdb:
-		return nil, nil
+		return gateway.NewFactory(), nil
+	case opentsdbStorageType:
+		return opentsdb.NewFactory(), nil
+	case kdbStorageType:
+		return kdb.NewFactory(), nil
 	default:
 		return nil, fmt.Errorf("unknown storage type %s. Valid types are %v", factoryType, AllStorageTypes)
 	}

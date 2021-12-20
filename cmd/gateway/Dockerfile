@@ -7,8 +7,9 @@ WORKDIR /
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-ADD ./out/clymene-ingester /clymene-ingester
+ADD ./out/clymene-gateway /clymene-gateway
 
-EXPOSE 15694
+EXPOSE 15610
+EXPOSE 15690
 
-ENTRYPOINT ["/clymene-ingester"]
+ENTRYPOINT ["/clymene-gateway"]

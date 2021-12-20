@@ -39,7 +39,7 @@ GIT_SHA=$(shell git rev-parse HEAD)
 GIT_BRANCH=$(shell git branch)
 
 DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-BUILD_INFO_IMPORT_PATH=$(JAEGER_IMPORT_PATH)/pkg/version
+
 BUILD_INFO=-ldflags "-X 'main.Version=$(GIT_BRANCH)($(GIT_SHA))' -X 'main.BuildTime=$(DATE)'"
 
 .PHONY: build-agent
@@ -50,6 +50,9 @@ build-agent :
 build-ingester :
 	$(GOBUILD) -o ./out/clymene-ingester-$(GOOS)-$(GOARCH) $(BUILD_INFO) ./cmd/ingester/main.go
 
+.PHONY: build-gateway
+build-gateway :
+	$(GOBUILD) -o ./out/clymene-gateway-$(GOOS)-$(GOARCH) $(BUILD_INFO) ./cmd/gateway/main.go
 
 .PHONY: docker
 docker: build-binaries-linux docker-images-only
@@ -81,6 +84,7 @@ build-binaries-ppc64le:
 .PHONY: build-platform-binaries
 build-platform-binaries: build-agent \
 	build-ingester \
+	build-gateway \
 
 .PHONY: build-all-platforms
 build-all-platforms: build-binaries-linux build-binaries-windows build-binaries-darwin build-binaries-s390x build-binaries-arm64 build-binaries-ppc64le

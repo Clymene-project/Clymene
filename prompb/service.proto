@@ -1,0 +1,12 @@
+syntax = "proto3";
+package prometheus;
+
+option go_package = "prompb";
+
+import "remote.proto";
+
+service ClymeneService {
+  rpc RequestMetrics (prometheus.WriteRequest) returns (MetricsResponse){}
+}
+
+message MetricsResponse {}

@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	gRPCPrefix        = "reporter.grpc"
+	gRPCPrefix        = "gateway.grpc"
 	gatewayHostPort   = gRPCPrefix + ".host-port"
 	retry             = gRPCPrefix + ".retry.max"
 	defaultMaxRetry   = 3

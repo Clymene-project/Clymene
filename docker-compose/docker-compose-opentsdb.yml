@@ -1,0 +1,10 @@
+version: '2'
+services:
+  opentsdb:
+    hostname: otsdb-host
+    image: petergrace/opentsdb-docker:latest
+    environment:
+      - WAITSECS=30
+    ports:
+      - "4242:4242"
+      - "60030:60030"

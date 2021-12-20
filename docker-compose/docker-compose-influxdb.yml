@@ -1,0 +1,9 @@
+version: '2'
+services:
+  influxdb:
+    image: "influxdb:2.1.1"
+    #    volumes:
+    #      - ./influxdb:/var/lib/influxdb
+    ports:
+      - "8086:8086"
+      - "8083:8083"
