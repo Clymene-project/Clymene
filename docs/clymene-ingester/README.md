@@ -36,17 +36,21 @@ Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베�
 ## How to set up the Storage Type
 1. Setting environmental variables
 
-ElasticSearch
+ElasticSearch  
 ```
 TS_STORAGE_TYPE=elasticsearch
 ```
-Kafka
+Kafka  
 ```
 TS_STORAGE_TYPE=kafka
 ```
-prometheus
+prometheus  
 ```
 TS_STORAGE_TYPE=prometheus
+```
+gateway  
+```
+TS_STORAGE_TYPE=gateway
 ```
 Several
 ```
