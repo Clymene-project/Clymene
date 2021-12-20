@@ -1,6 +1,12 @@
 Changes by Version
 ==================
 
+1.1.0 (2021-12-20)
+-----------------
+A gateway supporting gRPC communication has been added.  
+Try using it in various architectures.  
+- gRPC support (TS_STORAGE_TYPE=gateway)  
+
 1.0.0 (2021-12-12)
 ------------------
 Use kafka with clymene-agent and clymene-ingester.  
