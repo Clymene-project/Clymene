@@ -9,7 +9,7 @@ Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertra
 
 # Architecture
 
-## Release v1.0.0
+## Release v1.1.0
 
 ### Use only agent(Agent만 사용)  
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at once.  
