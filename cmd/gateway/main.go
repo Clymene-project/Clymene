@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
-	"github.com/Clymene-project/Clymene/cmd/ingester/app"
-	"github.com/Clymene-project/Clymene/cmd/ingester/app/builder"
+	"github.com/Clymene-project/Clymene/cmd/gateway/app"
 	"github.com/Clymene-project/Clymene/pkg/config"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/plugin/storage"
@@ -43,11 +42,11 @@ var (
 )
 
 const (
-	ClymeneIngesterName = "Clymene-ingester"
+	ClymeneGatewayName = "Clymene-gateway"
 )
 
 func main() {
-	svc := flags.NewService(ports.IngesterAdminHTTP)
+	svc := flags.NewService(ports.GatewayAdminHTTP)
 	svc.NoStorage = true
 
 	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Stderr))
@@ -57,19 +56,19 @@ func main() {
 
 	v := viper.New()
 	command := &cobra.Command{
-		Use:   ClymeneIngesterName,
-		Short: ClymeneIngesterName + " consumes from Kafka and send to db.",
+		Use:   ClymeneGatewayName,
+		Short: ClymeneGatewayName + " can receive data through gRPC.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := svc.Start(v); err != nil {
 				return err
 			}
 			logger := svc.Logger
 
-			logger.Info("start....", zap.String("component name", ClymeneIngesterName))
+			logger.Info("start....", zap.String("component name", ClymeneGatewayName))
 			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
-			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "ingester"})
+			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "gateway"})
 
 			storageFactory.InitFromViper(v)
 			if err := storageFactory.Initialize(baseFactory, logger); err != nil {
@@ -80,26 +79,21 @@ func main() {
 			if err != nil {
 				logger.Fatal("Failed to create metric writer", zap.Error(err))
 			}
+			gatewayOpt := new(app.GatewayOptions).InitFromViper(v)
 
-			options := app.Options{}
-			options.InitFromViper(v) // default encode is protobuf
-			consumer, err := builder.CreateConsumer(
-				logger.With(zap.String("component", "consumer")),
-				metricsFactory,
-				metricWriter,
-				options,
-			)
-			if err != nil {
-				logger.Fatal("Unable to create consumer", zap.Error(err))
+			gateway := app.New(&app.GatewayParams{
+				Logger:        logger,
+				MetricFactory: metricsFactory,
+				MetricWriter:  metricWriter,
+			})
+
+			if err := gateway.Start(gatewayOpt); err != nil {
+				log.Fatal(err)
 			}
-			consumer.Start()
 
 			svc.RunAndThen(func() {
-				if err := options.TLS.Close(); err != nil {
-					logger.Error("Failed to close TLS certificates watcher", zap.Error(err))
-				}
-				if err = consumer.Close(); err != nil {
-					logger.Error("Failed to close consumer", zap.Error(err))
+				if err = gateway.Close(); err != nil {
+					logger.Error("Failed to close gateway", zap.Error(err))
 				}
 				if closer, ok := metricWriter.(io.Closer); ok {
 					err := closer.Close()
