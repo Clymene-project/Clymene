@@ -47,8 +47,8 @@ type ConnBuilder struct {
 }
 
 // NewConnBuilder creates a new grpc connection builder.
-func NewConnBuilder() *ConnBuilder {
-	return &ConnBuilder{}
+func NewConnBuilder() ConnBuilder {
+	return ConnBuilder{}
 }
 
 // CreateConnection creates the gRPC connection

@@ -31,18 +31,20 @@ The Clymene-agent is service that collects time series data(does not use disks)
 2. scrape time series data
 3. Time-series data transfer to gateway(gRPC) (Optional) (TODO)
 4. Time-series data transfer to kafka (Optional)
-5. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)
+5. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, ETC) (Optional)
 
 
 ### Clymene Ingester(Optional) ([Getting Started](./docs/clymene-ingester/README.md))  
 
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
+2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, ETC) (Optional)  
+
+### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
+
+The Clymene Gateway is an optional service that can receive metric data from the agent through gRPC communication.  
+1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)  
-
-### Clymene Gateway(Optional) (Coming to v1.1.x)
-
-The Clymene gateway is an optional service responsible for produce Time series data message to kafka from clymene agent.
 
 ## Roadmap
 

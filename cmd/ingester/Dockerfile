@@ -1,7 +1,7 @@
 FROM alpine:latest as certs
 RUN apk add --update --no-cache ca-certificates
 
-FROM busybox
+FROM alpine
 
 WORKDIR /
 

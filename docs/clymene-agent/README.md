@@ -60,6 +60,7 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Prometheus & cortex option](./prometheus_cortex/prometheus_cortex-option.md)
+- [gateway option](./gateway/gataway-option.md)
 
 
 ### Docker-compose Example
