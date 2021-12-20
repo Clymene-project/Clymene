@@ -2,22 +2,26 @@
 
 The Clymene is a time series data collection platform for distributed systems inspired by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
-different types of databases. Various time series data analysis functions will be added.
+different types of databases. It can be configured in a variety of architectures. Various time series data analysis functions will be added.
 
 Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertracing.io)에서 영감을 받은 분산 시스템을 위한 시계열 데이터 수집 플랫폼입니다.
-다양한 환경의 시계열 데이터를 수집하고 여러 종류의 데이터베이스에 저장할 수 있습니다. 다양한 시계열 데이터 분석 기능이 추가될 예정입니다.
+다양한 환경의 시계열 데이터를 수집하고 여러 종류의 데이터베이스에 저장할 수 있습니다. 여러 컴포넌트를 이용해 다양한 아키텍처로 구성할 수 있습니다. 다양한 시계열 데이터 분석 기능이 추가될 예정입니다. 
 
 # Architecture
 
 ## Release v1.0.0
 
-### Use only agent(Agent만 사용)
+### Use only agent(Agent만 사용)  
+Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at once.
+![Release_1.0.0.png](docs/images/clymene_architecture_v1.0.0_composite.png)
 
-![Release_1.0.0.png](docs/images/clymene_architecture_v1.0.0.png)
+### Including kafka and ingester(Kafka 사용 시)  
+Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.
+![Including_kafka_Release_1.0.0.png](docs/images/clymene_architecture_include_kafka_v1.0.0_composite.png)
 
-### Including kafka and ingester(Kafka 사용 시)
-
-![Including_kafka_Release_1.0.0.png](docs/images/clymene_architecture_include_kafka_v1.0.0.png)
+### Use gateway(Gateway 사용 시)  
+Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.
+![Release_1.1.0.png](docs/images/clymene_architecture_v1.1.0.png)
 
 # components
 
@@ -42,7 +46,7 @@ The Clymene ingester is an optional service responsible for insert time series d
 
 ### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
 
-The Clymene Gateway is an optional service that can receive metric data from the agent through gRPC communication.  
+The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)  
 
