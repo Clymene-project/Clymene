@@ -25,3 +25,14 @@ services:
       - --kafka.consumer.brokers=[KAFKA-IP]:9092
       - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
 #      - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
+
+  clymene-gateway:
+    image: bourbonkk/clymene-gateway:v1.1.0
+    ports:
+      - "15610:15610"
+      - "15690:15690"
+    environment:
+      - TS_STORAGE_TYPE=elasticsearch
+    command:
+      - --log-level=debug
+      - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
