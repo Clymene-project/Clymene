@@ -26,7 +26,7 @@ Gateway collects time series data through gRPC communication, stores time series
 # components
 
 ### Clymene Agent([Getting Started](./docs/clymene-agent/README.md))
-
+```official docker image: bourbonkk/clymene-agent:v1.1.0```  
 The Clymene-agent is service that collects time series data(does not use disks)
 
 1. Service Discovery
@@ -39,13 +39,13 @@ The Clymene-agent is service that collects time series data(does not use disks)
 
 
 ### Clymene Ingester(Optional) ([Getting Started](./docs/clymene-ingester/README.md))  
-
+```official docker image: bourbonkk/clymene-ingester:v1.1.0```  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, ETC) (Optional)  
 
 ### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
-
+```official docker image: bourbonkk/clymene-gateway:v1.1.0```  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)  
