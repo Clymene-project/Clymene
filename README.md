@@ -13,15 +13,23 @@ Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertra
 
 ### Use only agent(Agent만 사용)  
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at once.  
-![Release_1.0.0.png](docs/images/clymene_architecture_v1.0.0_composite.png)
+
+[//]: # (![Release_1.0.0.png]&#40;docs/images/clymene_architecture_v1.0.0_composite.png&#41;)
+<img src="docs/images/clymene_architecture_v1.0.0_composite.png" width="80%" height="80%" alt="architecture_v1.1.0">
 
 ### Including kafka and ingester(Kafka 사용 시)  
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.  
-![Including_kafka_Release_1.0.0.png](docs/images/clymene_architecture_include_kafka_v1.1.0_composite.png)
+
+[//]: # (![Including_kafka_Release_1.0.0.png]&#40;docs/images/clymene_architecture_include_kafka_v1.1.0_composite.png&#41;)
+<img src="docs/images/clymene_architecture_include_kafka_v1.1.0_composite.png" width="80%" height="80%" alt="architecture_v1.1.0_ingester">  
+
 
 ### Use gateway(Gateway 사용 시)  
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.  
-![Release_1.1.0.png](docs/images/clymene_architecture_v1.1.0.png)
+
+[//]: # (![Release_1.1.0.png]&#40;docs/images/clymene_architecture_v1.1.0.png&#41;)
+<img src="docs/images/clymene_architecture_v1.1.0.png" width="80%" height="80%" alt="architecture_v1.1.0_gateway">
+
 
 # components
 
