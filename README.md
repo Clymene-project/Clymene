@@ -50,6 +50,14 @@ The Clymene Gateway is an optional service that can receive metric data from the
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)  
 
+## k8s usage  
+
+For example, see the [clymene_using_gateway.yaml](./k8s/Clymene_using_gateway.yaml)
+
+## docker-compose usage
+
+For example, see the [docker-compose-clymene_using_gateway.yml](./docker-compose/docker-compose-clymene_using_gateway.yml)
+
 ## Roadmap
 
 1. Various DB support(influxdb, kdb, opentsdb, druid)

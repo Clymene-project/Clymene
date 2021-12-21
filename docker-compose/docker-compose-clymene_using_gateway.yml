@@ -1,0 +1,34 @@
+version: '2'
+services:
+  clymene-agent:
+    image: bourbonkk/clymene-agent:v1.1.0
+    ports:
+      - "15691:15691"
+      - "15692:15692"
+    environment:
+      - TS_STORAGE_TYPE=gateway
+    volumes:
+      - ./config/clymene_scrape_config.yml:/etc/clymene/clymene.yml
+    command:
+      - --gateway.grpc.host-port=[CLYMENE-GATEWAY]:15610
+
+  clymene-ingester:
+    image: bourbonkk/clymene-ingester:v1.1.0
+    ports:
+      - "15694:15694"
+    environment:
+      - TS_STORAGE_TYPE=elasticsearch
+    command:
+      - --kafka.consumer.brokers=[KAFKA-BROKER-IP]:9092
+      - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
+
+  clymene-gateway:
+    image: bourbonkk/clymene-gateway:v1.1.0
+    ports:
+      - "15610:15610"
+      - "15690:15690"
+    environment:
+      - TS_STORAGE_TYPE=kafka
+    command:
+      - --kafka.producer.brokers=[KAFKA-BROKER-IP]:9092
+
