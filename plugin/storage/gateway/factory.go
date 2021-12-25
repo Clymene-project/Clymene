@@ -37,6 +37,7 @@ type Factory struct {
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "gateway"))
 
 	conn, err := f.Options.ConnBuilder.CreateConnection(logger)
 	if err != nil {

@@ -17,24 +17,47 @@
 package opentsdb
 
 import (
+	"flag"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
+	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 )
 
+// The opentsdb factory was developed based on opentsdb's tcollector.
+
 type Factory struct {
-}
+	options Options
 
-func (f Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f Factory) CreateWriter() (metricstore.Writer, error) {
-	//TODO implement me
-	panic("implement me")
+	metricsFactory metrics.Factory
+	logger         *zap.Logger
 }
 
 func NewFactory() *Factory {
 	return &Factory{}
+}
+
+// AddFlags implements plugin.Configurable
+func (f *Factory) AddFlags(flagSet *flag.FlagSet) {
+	f.options.AddFlags(flagSet)
+}
+
+// InitFromViper implements plugin.Configurable
+func (f *Factory) InitFromViper(v *viper.Viper) {
+	f.options.InitFromViper(v)
+}
+
+// InitFromOptions initializes factory from options.
+func (f *Factory) InitFromOptions(o Options) {
+	f.options = o
+}
+
+func (f Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
+	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "opentsdb"))
+	return nil
+}
+
+func (f Factory) CreateWriter() (metricstore.Writer, error) {
+	return NewMetricWriter(), nil
 }

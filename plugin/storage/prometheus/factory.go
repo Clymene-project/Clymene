@@ -36,6 +36,7 @@ type Factory struct {
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "prometheus or cortex"))
 	logger.Info("prometheus factory", zap.String("url", f.options.url))
 	switch f.options.Encoding {
 	case kafka.EncodingProto:

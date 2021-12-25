@@ -49,6 +49,8 @@ func (f *Factory) InitFromOptions(o Options) {
 // Initialize implements storage.Factory
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "kafka"))
+
 	logger.Info("Kafka factory",
 		zap.Any("producer builder", f.Builder),
 		zap.Any("topic", f.options.Topic))

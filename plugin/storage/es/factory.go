@@ -76,6 +76,7 @@ func (f *Factory) InitFromOptions(o Options) {
 // Initialize implements storage.Factory
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "elasticsearch"))
 
 	primaryClient, err := f.primaryConfig.NewClient(logger, metricsFactory)
 	if err != nil {
