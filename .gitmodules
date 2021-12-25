@@ -1,0 +1,3 @@
+[submodule "clymene-idl"]
+	path = clymene-idl
+	url = https://github.com/Clymene-project/clymene-idl.git
