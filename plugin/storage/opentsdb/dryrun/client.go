@@ -14,36 +14,25 @@
  * limitations under the License.
  */
 
-package opentsdb
+package dryrun
 
 import (
+	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
-	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 )
 
-// The opentsdb factory was developed based on opentsdb's tcollector.
-
-type Writer struct {
-	metrics WriterMetrics
-	client  Client
-	l       *zap.Logger
+type Client struct {
 }
-type WriterMetrics struct {
-	WrittenSuccess metrics.Counter
-	WrittenFailure metrics.Counter
+type Options struct {
 }
 
-func NewMetricWriter(
-	l *zap.Logger,
-	c Client,
-) *Writer {
-	return &Writer{
-		client: c,
-		l:      l,
-	}
+func (c Client) SendData(series []prompb.TimeSeries) error {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (w *Writer) WriteMetric(metrics []prompb.TimeSeries) error {
-	return w.client.SendData(metrics)
+func NewClient(converter *dbmodel.Converter, l *zap.Logger) *Client {
+
+	return nil
 }

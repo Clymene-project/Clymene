@@ -18,32 +18,10 @@ package opentsdb
 
 import (
 	"github.com/Clymene-project/Clymene/prompb"
-	"github.com/uber/jaeger-lib/metrics"
-	"go.uber.org/zap"
 )
 
-// The opentsdb factory was developed based on opentsdb's tcollector.
-
-type Writer struct {
-	metrics WriterMetrics
-	client  Client
-	l       *zap.Logger
-}
-type WriterMetrics struct {
-	WrittenSuccess metrics.Counter
-	WrittenFailure metrics.Counter
-}
-
-func NewMetricWriter(
-	l *zap.Logger,
-	c Client,
-) *Writer {
-	return &Writer{
-		client: c,
-		l:      l,
-	}
-}
-
-func (w *Writer) WriteMetric(metrics []prompb.TimeSeries) error {
-	return w.client.SendData(metrics)
+type Client interface {
+	SendData(series []prompb.TimeSeries) error
+	//VerifyConn()
+	//MaintainConn()
 }

@@ -72,6 +72,12 @@ For example, see the [docker-compose-clymene_using_gateway.yml](./docker-compose
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
 3. Website development for clymene(https://github.com/Clymene-project/documentation)
 
+## Get in Touch
+Have questions, suggestions, bug reports? Reach the project community via these channels:
+
+* GitHub [issues](https://github.com/clymene-project/clymene/issues)
+
+
 # Code Style
 
 #### 1. https://github.com/golang/go/wiki/CodeReviewComments

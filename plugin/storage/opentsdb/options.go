@@ -19,67 +19,61 @@ package opentsdb
 import (
 	"flag"
 	"github.com/spf13/viper"
+	"time"
 )
 
 // The opentsdb factory was developed based on opentsdb's tcollector.
 
 const (
-	configPrefix                = "opentsdb"
-	suffixDryRun                = ".dry-run"
-	suffixHost                  = ".host"
-	suffixEvictInterval         = ".evict-interval"
-	suffixDeDupInterval         = ".dedup-interval"
-	suffixDeDupOnlyZero         = ".dedup-only-zero"
-	suffixAllowedInactivityTime = ".allowed-inactivity-time"
-	suffixMaxTags               = ".max-tags"
-	suffixHttpPassword          = ".http-password"
-	suffixHttpUsername          = ".http-username"
-	suffixReconnectInterval     = ".reconnect-interval"
-	suffixPort                  = ".port"
-	suffixHttp                  = ".http"
-	suffixHttpApiPath           = ".http-api-path"
-	suffixSSL                   = ".ssl"
-	suffixStdin                 = ".stdin"
-	suffixHosts                 = ".hosts"
-	suffixNamespacePrefix       = ".namespace-prefix"
+	configPrefix = "opentsdb"
 
-	defaultDryRun                = false
-	defaultEvictInterval         = 6000
-	defaultDeDupInterval         = 300
-	defaultHost                  = "localhost"
-	defaultDeDupOnlyZero         = false
-	defaultAllowedInactivityTime = 600
-	defaultMaxTags               = 8
-	defaultHttpPassword          = false
-	defaultHttpUsername          = false
-	defaultReconnectInterval     = 0
-	defaultPort                  = 4242
-	defaultHttp                  = false
-	defaultHttpApiPath           = "api/put"
-	defaultSSL                   = false
-	defaultStdin                 = false
-	defaultHosts                 = ""
-	defaultNamespacePrefix       = ""
+	suffixDryRun            = ".dry-run"
+	suffixHost              = ".host"
+	suffixMaxTags           = ".max-tags"
+	suffixHttpPassword      = ".http-password"
+	suffixHttpUsername      = ".http-username"
+	suffixReconnectInterval = ".reconnect-interval"
+	suffixPort              = ".port"
+	suffixHttp              = ".http"
+	suffixHttpApiPath       = ".http-api-path"
+	suffixSSL               = ".ssl"
+	suffixHosts             = ".hosts"
+	suffixTimeout           = ".timeout"
+	suffixMaxChunk          = ".max-chunk"
+
+	defaultDryRun            = false
+	defaultHost              = "localhost"
+	defaultMaxTags           = 8
+	defaultHttpPassword      = ""
+	defaultHttpUsername      = ""
+	defaultReconnectInterval = 0
+	defaultPort              = 4242
+	defaultHttp              = true
+	defaultHttpApiPath       = "api/put"
+	defaultSSL               = false
+	defaultHosts             = ""
+	defaultTimeout           = 10 * time.Second
+	defaultMaxChunk          = 512
 )
 
 type Options struct {
-	evictInterval         int
-	deDupInterval         int
-	deDupOnlyZero         bool
-	allowedInactivityTime int
-	dryRun                bool
-	maxTags               int
-	httpPassword          bool
-	httpUsername          bool
-	reconnectInterval     int
-	port                  int
-	http                  bool
-	httpApiPath           string
-	host                  string
-	ssl                   bool
-	stdin                 bool
-	hosts                 string
-	namespacePrefix       string
+	dryRun bool
+
+	maxTags int
+
+	http bool
+	port int
+
+	reconnectInterval int
+
+	httpPassword string
+	httpUsername string
+	httpApiPath  string
+	host         string
+	ssl          bool
+	hosts        string
+	timeout      time.Duration
+	maxChunk     int
 }
 
 func (o *Options) AddFlags(flagSet *flag.FlagSet) {
@@ -88,42 +82,22 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultDryRun,
 		"Don't actually send anything to the TSD, just print the datapoints.",
 	)
-	flagSet.Int(
-		configPrefix+suffixEvictInterval,
-		defaultEvictInterval,
-		"Number of seconds after which to remove cached values of old data points to save memory",
-	)
 	flagSet.String(
 		configPrefix+suffixHost,
 		defaultHost,
 		"Hostname to use to connect to the TSD.",
 	)
 	flagSet.Int(
-		configPrefix+suffixDeDupInterval,
-		defaultDeDupInterval,
-		"Number of seconds in which successive duplicate datapoints are suppressed before sending to the TSD. Use zero to disable",
-	)
-	flagSet.Bool(
-		configPrefix+suffixDeDupOnlyZero,
-		defaultDeDupOnlyZero,
-		"Only dedup 0 values.",
-	)
-	flagSet.Int(
-		configPrefix+suffixAllowedInactivityTime,
-		defaultAllowedInactivityTime,
-		"How long to wait for datapoints before assuming a collector is dead and restart it",
-	)
-	flagSet.Int(
 		configPrefix+suffixMaxTags,
 		defaultMaxTags,
 		"The maximum number of tags to send to our TSD Instances",
 	)
-	flagSet.Bool(
+	flagSet.String(
 		configPrefix+suffixHttpPassword,
 		defaultHttpPassword,
 		"Password to use for HTTP Basic Auth when sending the data via HTTP",
 	)
-	flagSet.Bool(
+	flagSet.String(
 		configPrefix+suffixHttpUsername,
 		defaultHttpUsername,
 		"Username to use for HTTP Basic Auth when sending the data via HTTP",
@@ -153,40 +127,42 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultSSL,
 		"Enable SSL - used in conjunction with http",
 	)
-	flagSet.Bool(
-		configPrefix+suffixStdin,
-		defaultStdin,
-		"Run once, read and dedup data points from stdin",
-	)
 	flagSet.String(
 		configPrefix+suffixHosts,
 		defaultHosts,
 		"List of host:port to connect to tsd's (comma separated)",
 	)
-	flagSet.String(
-		configPrefix+suffixNamespacePrefix,
-		defaultNamespacePrefix,
-		"Prefix to prepend to all metric names collected",
+	flagSet.Duration(
+		configPrefix+suffixTimeout,
+		defaultTimeout,
+		"Time out when doing http insert(sec, default 10 sec)",
 	)
-
+	flagSet.Int(
+		configPrefix+suffixMaxChunk,
+		defaultMaxChunk,
+		"The maximum request body size to support for incoming HTTP requests when chunking is enabled",
+	)
 }
 
 func (o *Options) InitFromViper(v *viper.Viper) {
 	o.dryRun = v.GetBool(configPrefix + suffixDryRun)
-	o.evictInterval = v.GetInt(configPrefix + suffixEvictInterval)
-	o.deDupInterval = v.GetInt(configPrefix + suffixDeDupInterval)
-	o.deDupOnlyZero = v.GetBool(configPrefix + suffixDeDupOnlyZero)
-	o.allowedInactivityTime = v.GetInt(configPrefix + suffixAllowedInactivityTime)
-	o.maxTags = v.GetInt(configPrefix + suffixMaxTags)
-	o.httpPassword = v.GetBool(configPrefix + suffixHttpPassword)
-	o.httpUsername = v.GetBool(configPrefix + suffixHttpUsername)
-	o.reconnectInterval = v.GetInt(configPrefix + suffixReconnectInterval)
-	o.port = v.GetInt(configPrefix + suffixPort)
+
 	o.http = v.GetBool(configPrefix + suffixHttp)
-	o.httpApiPath = v.GetString(configPrefix + suffixHttpApiPath)
-	o.host = v.GetString(configPrefix + suffixHost)
+
+	// http
+	o.httpPassword = v.GetString(configPrefix + suffixHttpPassword)
+	o.httpUsername = v.GetString(configPrefix + suffixHttpUsername)
 	o.ssl = v.GetBool(configPrefix + suffixSSL)
-	o.stdin = v.GetBool(configPrefix + suffixStdin)
+	o.httpApiPath = v.GetString(configPrefix + suffixHttpApiPath)
+	o.timeout = v.GetDuration(configPrefix + suffixTimeout)
+	o.maxChunk = v.GetInt(configPrefix + suffixMaxChunk)
+
+	//socket
+	o.reconnectInterval = v.GetInt(configPrefix + suffixReconnectInterval)
+
+	// common
+	o.host = v.GetString(configPrefix + suffixHost)
+	o.port = v.GetInt(configPrefix + suffixPort)
 	o.hosts = v.GetString(configPrefix + suffixHosts)
-	o.namespacePrefix = v.GetString(configPrefix + suffixNamespacePrefix)
+	o.maxTags = v.GetInt(configPrefix + suffixMaxTags)
 }

@@ -80,6 +80,7 @@ func (w *Writer) WriteMetric(metric []prompb.TimeSeries) error {
 		// Errors from NewRequest are from unparsable URLs, so are not
 		// recoverable.
 		w.logger.Error("NewRequest", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
 		return err
 	}
 	httpReq.Header.Add("Content-Encoding", "snappy")
@@ -95,6 +96,7 @@ func (w *Writer) WriteMetric(metric []prompb.TimeSeries) error {
 		// Errors from client.Do are from (for example) network errors, so are
 		// recoverable.
 		w.logger.Error("client.Do", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
 		return err
 	}
 	defer func() {
@@ -112,7 +114,11 @@ func (w *Writer) WriteMetric(metric []prompb.TimeSeries) error {
 	}
 	if httpResp.StatusCode/100 == 5 {
 		w.logger.Error("HTTP status error", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
 		return err
+	}
+	if err == nil {
+		w.metrics.WrittenSuccess.Inc(1)
 	}
 	return err
 }
