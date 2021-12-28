@@ -1,6 +1,6 @@
 # Clymene
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800)][hub]
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800)
 
 The Clymene is a time series data collection platform for distributed systems inspired by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
