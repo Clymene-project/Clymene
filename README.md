@@ -66,7 +66,7 @@ For example, see the [docker-compose-clymene_using_gateway.yml](./docker-compose
 
 ## Roadmap
 
-1. Various DB support(influxdb, kdb, opentsdb, druid)
+1. Various DB support(influxdb, kdb, druid)
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
 3. Website development for clymene(https://github.com/Clymene-project/documentation)
 
