@@ -1,5 +1,7 @@
 # Clymene
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800)][hub]
+
 The Clymene is a time series data collection platform for distributed systems inspired by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
 different types of databases. It can be configured in a variety of architectures. Various time series data analysis functions will be added.
@@ -75,6 +77,14 @@ Have questions, suggestions, bug reports? Reach the project community via these 
 
 * GitHub [issues](https://github.com/clymene-project/clymene/issues)
 
+[//]: # (## Contributing)
+
+[//]: # ()
+[//]: # (Refer to [CONTRIBUTING.md]&#40;https://github.com/clymene-project/clymene/blob/main/CONTRIBUTING.md&#41;)
+
+## License
+
+Apache License 2.0, see [LICENSE](https://github.com/Clymene-project/Clymene/blob/main/LICENSE).
 
 # Code Style
 
