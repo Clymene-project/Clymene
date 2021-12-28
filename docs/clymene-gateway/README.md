@@ -39,14 +39,14 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Prometheus & cortex option](./prometheus_cortex/prometheus_cortex-option.md)
-
+- [Opentsdb option](./opentsdb/opentsdb-option.md)
 
 ### Docker-compose Example
 ```yaml
 version: '2'
 services:
   clymene-ingester:
-    image: bourbonkk/clymene-gateway:v1.1.0
+    image: bourbonkk/clymene-gateway:v1.2.0
     ports:
       - "15610:15610"
     environment:
@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
         - name: clymene-gateway
-          image: bourbonkk/clymene-gateway:v1.1.0
+          image: bourbonkk/clymene-gateway:v1.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 15610

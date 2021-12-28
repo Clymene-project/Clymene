@@ -23,16 +23,40 @@ import (
 )
 
 type Client struct {
+	maxChunk  int
+	converter *dbmodel.Converter
+	logger    *zap.Logger
 }
 type Options struct {
+	maxChunk int
 }
 
-func (c Client) SendData(series []prompb.TimeSeries) error {
-	//TODO implement me
-	panic("implement me")
-}
+func (c *Client) SendData(metrics []prompb.TimeSeries) error {
+	q := len(metrics) / c.maxChunk
+	r := len(metrics) % c.maxChunk
+	if r != 0 {
+		q += 1
+	}
+	for i := 1; i <= q; i++ {
+		var timeSeriesDiv []prompb.TimeSeries
+		if i == 1 {
+			timeSeriesDiv = metrics[:i*c.maxChunk]
+		} else if i != q {
+			timeSeriesDiv = metrics[(i-1)*c.maxChunk : i*c.maxChunk]
+		} else {
+			timeSeriesDiv = metrics[(i-1)*c.maxChunk:]
+		}
+		jsonTS, _ := c.converter.ConvertTsToOpenTSDBJSON(timeSeriesDiv)
 
-func NewClient(converter *dbmodel.Converter, l *zap.Logger) *Client {
-
+		c.logger.Info("dryRun", zap.String("sendData", string(jsonTS)))
+	}
 	return nil
+}
+
+func NewClient(maxChunk int, converter *dbmodel.Converter, l *zap.Logger) *Client {
+	return &Client{
+		maxChunk:  maxChunk,
+		converter: converter,
+		logger:    l,
+	}
 }

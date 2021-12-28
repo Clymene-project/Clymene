@@ -173,8 +173,8 @@ func NewClient(o *Options, converter *dbmodel.Converter, l *zap.Logger) *Client 
 		converter:     converter,
 		writeMetrics:  writeMetrics,
 		timeout:       o.Timeout,
-		l:             l,
 		maxChunk:      o.MaxChunk,
+		l:             l,
 	}
 }
 

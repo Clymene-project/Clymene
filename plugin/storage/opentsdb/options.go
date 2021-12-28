@@ -41,19 +41,18 @@ const (
 	suffixTimeout           = ".timeout"
 	suffixMaxChunk          = ".max-chunk"
 
-	defaultDryRun            = false
-	defaultHost              = "localhost"
-	defaultMaxTags           = 8
-	defaultHttpPassword      = ""
-	defaultHttpUsername      = ""
-	defaultReconnectInterval = 0
-	defaultPort              = 4242
-	defaultHttp              = true
-	defaultHttpApiPath       = "api/put"
-	defaultSSL               = false
-	defaultHosts             = ""
-	defaultTimeout           = 10 * time.Second
-	defaultMaxChunk          = 512
+	defaultDryRun       = false
+	defaultHost         = "localhost"
+	defaultMaxTags      = 8
+	defaultHttpPassword = ""
+	defaultHttpUsername = ""
+	defaultPort         = 4242
+	defaultHttp         = false
+	defaultHttpApiPath  = "api/put"
+	defaultSSL          = false
+	defaultHosts        = ""
+	defaultTimeout      = 10 * time.Second
+	defaultMaxChunk     = 512
 )
 
 type Options struct {
@@ -63,8 +62,6 @@ type Options struct {
 
 	http bool
 	port int
-
-	reconnectInterval int
 
 	httpPassword string
 	httpUsername string
@@ -103,11 +100,6 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		"Username to use for HTTP Basic Auth when sending the data via HTTP",
 	)
 	flagSet.Int(
-		configPrefix+suffixReconnectInterval,
-		defaultReconnectInterval,
-		"Number of seconds after which the connection to the TSD hostname reconnects itself. This is useful when the hostname is a multiple A record (RRDNS)",
-	)
-	flagSet.Int(
 		configPrefix+suffixPort,
 		defaultPort,
 		"Port to connect to the TSD instance on",
@@ -115,7 +107,7 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.Bool(
 		configPrefix+suffixHttp,
 		defaultHttp,
-		"Send the data via the http interface",
+		"Send the data via the http interface (default 'false')",
 	)
 	flagSet.String(
 		configPrefix+suffixHttpApiPath,
@@ -125,7 +117,7 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.Bool(
 		configPrefix+suffixSSL,
 		defaultSSL,
-		"Enable SSL - used in conjunction with http",
+		"Enable SSL - used in conjunction with http (default 'false')",
 	)
 	flagSet.String(
 		configPrefix+suffixHosts,
@@ -156,9 +148,6 @@ func (o *Options) InitFromViper(v *viper.Viper) {
 	o.httpApiPath = v.GetString(configPrefix + suffixHttpApiPath)
 	o.timeout = v.GetDuration(configPrefix + suffixTimeout)
 	o.maxChunk = v.GetInt(configPrefix + suffixMaxChunk)
-
-	//socket
-	o.reconnectInterval = v.GetInt(configPrefix + suffixReconnectInterval)
 
 	// common
 	o.host = v.GetString(configPrefix + suffixHost)

@@ -27,7 +27,7 @@ services:
 #      - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
 
   clymene-gateway:
-    image: bourbonkk/clymene-gateway:v1.1.0
+    image: bourbonkk/clymene-gateway:v1.2.0
     ports:
       - "15610:15610"
       - "15690:15690"

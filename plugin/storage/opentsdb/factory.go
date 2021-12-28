@@ -102,12 +102,15 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 		}, converter, f.logger)
 	} else if f.options.dryRun {
 		// dryrun
-		f.client = dryrun.NewClient(converter, f.logger)
+		f.client = dryrun.NewClient(
+			f.options.maxChunk,
+			converter,
+			f.logger,
+		)
 	} else {
 		//	socket
 		f.client = socket.NewClient(&socket.Options{
-			Hosts:             hosts,
-			ReconnectInterval: f.options.reconnectInterval,
+			Hosts: hosts,
 		}, converter, f.logger)
 	}
 

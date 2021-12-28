@@ -17,35 +17,63 @@
 package socket
 
 import (
+	"fmt"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/http"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
 	"go.uber.org/zap"
+	"net"
 )
 
 type Client struct {
+	connections []net.Conn
+	converter   *dbmodel.Converter
+	hosts       []http.Hosts
+	l           *zap.Logger
 }
 type Options struct {
-	Hosts             []http.Hosts
-	ReconnectInterval int
+	Hosts []http.Hosts
 }
 
-func (c Client) SendData(series []prompb.TimeSeries) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c Client) VerifyConn() {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c Client) MaintainConn() {
-	//TODO implement me
-	panic("implement me")
+func (c *Client) SendData(metrics []prompb.TimeSeries) error {
+	data, err := c.converter.ConvertTsToOpenTSDBSocket(metrics)
+	if err != nil {
+		c.l.Error("data convert Error", zap.Error(err))
+		return err
+	}
+	for _, conn := range c.makeConn() {
+		_, err = conn.Write(data)
+		if err != nil {
+			c.l.Error("socket Write Error", zap.Error(err))
+		}
+	}
+	c.closeConn()
+	return nil
 }
 
 func NewClient(o *Options, converter *dbmodel.Converter, l *zap.Logger) *Client {
+	c := &Client{
+		converter: converter,
+		hosts:     o.Hosts,
+		l:         l,
+	}
+	return c
+}
 
-	return nil
+func (c *Client) makeConn() []net.Conn {
+	var cons []net.Conn
+	for _, h := range c.hosts {
+		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", h.Host, h.Port))
+		if err != nil {
+			c.l.Error("socket connect Error", zap.Error(err))
+		}
+		cons = append(cons, conn)
+	}
+	return cons
+}
+
+func (c *Client) closeConn() {
+	for _, c := range c.connections {
+		_ = c.Close()
+	}
 }

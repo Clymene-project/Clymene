@@ -1,6 +1,12 @@
 Changes by Version
 ==================
 
+1.2.0 (2021-12-29)
+-----------------
+Now, you can use the optsdb in Clymene.  
+- opentsdb support (TS_STORAGE_TYPE=opentsdb)
+- optsdb supports two methods: socket and http()
+
 1.1.0 (2021-12-20)
 -----------------
 A gateway supporting gRPC communication has been added.  

@@ -9,32 +9,30 @@ Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertra
 
 # Architecture
 
-## Release v1.1.0
+## Release v1.2.0
 
 ### Use only agent(Agent만 사용)  
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at once.  
 
 [//]: # (![Release_1.0.0.png]&#40;docs/images/clymene_architecture_v1.0.0_composite.png&#41;)
-<img src="docs/images/clymene_architecture_v1.0.0_composite.png" width="80%" height="80%" alt="architecture_v1.1.0">
+<img src="docs/images/clymene_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0">
 
 ### Including kafka and ingester(Kafka 사용 시)  
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.  
 
-[//]: # (![Including_kafka_Release_1.0.0.png]&#40;docs/images/clymene_architecture_include_kafka_v1.1.0_composite.png&#41;)
-<img src="docs/images/clymene_architecture_include_kafka_v1.1.0_composite.png" width="80%" height="80%" alt="architecture_v1.1.0_ingester">  
+<img src="docs/images/clymene_kafka_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0_ingester">  
 
 
 ### Use gateway(Gateway 사용 시)  
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports Composite Writers that can be stored in multiple DBs at once.  
 
-[//]: # (![Release_1.1.0.png]&#40;docs/images/clymene_architecture_v1.1.0.png&#41;)
-<img src="docs/images/clymene_architecture_v1.1.0.png" width="80%" height="80%" alt="architecture_v1.1.0_gateway">
+<img src="docs/images/clymene_gateway_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0_gateway">
 
 
 # components
 
 ### Clymene Agent([Getting Started](./docs/clymene-agent/README.md))
-```official docker image: bourbonkk/clymene-agent:v1.1.0```  
+```official docker image: bourbonkk/clymene-agent:v1.2.0```  
 The Clymene-agent is service that collects time series data(does not use disks)
 
 1. Service Discovery
@@ -47,13 +45,13 @@ The Clymene-agent is service that collects time series data(does not use disks)
 
 
 ### Clymene Ingester(Optional) ([Getting Started](./docs/clymene-ingester/README.md))  
-```official docker image: bourbonkk/clymene-ingester:v1.1.0```  
+```official docker image: bourbonkk/clymene-ingester:v1.2.0```  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, ETC) (Optional)  
 
 ### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
-```official docker image: bourbonkk/clymene-gateway:v1.1.0```  
+```official docker image: bourbonkk/clymene-gateway:v1.2.0```  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)  

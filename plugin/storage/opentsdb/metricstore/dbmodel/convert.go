@@ -18,6 +18,7 @@ package dbmodel
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Clymene-project/Clymene/prompb"
 	"regexp"
 )
@@ -41,7 +42,6 @@ func (c *Converter) ConvertTsToOpenTSDBJSON(metrics []prompb.TimeSeries) ([]byte
 		entry := make(map[string]interface{})
 		tags := make(map[string]interface{})
 		for _, label := range metric.Labels {
-
 			if label.Name == "__name__" {
 				entry["metric"] = label.Value
 				continue
@@ -64,4 +64,37 @@ func (c *Converter) ConvertTsToOpenTSDBJSON(metrics []prompb.TimeSeries) ([]byte
 		openTSDBJson = append(openTSDBJson, entry)
 	}
 	return json.Marshal(openTSDBJson)
+}
+
+func (c *Converter) ConvertTsToOpenTSDBSocket(metrics []prompb.TimeSeries) ([]byte, error) {
+	openTSDBsocket := ""
+	for _, metric := range metrics {
+		oneMetric := "put "
+		tagCount := 0
+		tags := ""
+		for _, label := range metric.Labels {
+			if label.Name == "__name__" {
+				oneMetric += label.Value
+				continue
+			}
+			if tagCount < c.MaxTags {
+				// Only the following characters are allowed: a to z, A to Z, 0 to 9, -, _, ., / or Unicode letters (as per the specification)
+				match, _ := regexp.MatchString("[`~!@#$%^&*()|+=?;:'\", <>{}\\[\\]\\\\/ㄱ-ㅎ|ㅏ-ㅣ|가-힣]", label.Value)
+				if !match {
+					if label.Value != "" {
+						tags += " " + label.Name + "=" + label.Value
+						tagCount++
+					}
+				}
+			}
+		}
+		tags += "\n"
+		for _, sample := range metric.Samples {
+			oneMetric += fmt.Sprintf(" %v", sample.Timestamp)
+			oneMetric += fmt.Sprintf(" %f", sample.Value)
+		}
+		oneMetric += tags
+		openTSDBsocket += oneMetric
+	}
+	return []byte(openTSDBsocket), nil
 }

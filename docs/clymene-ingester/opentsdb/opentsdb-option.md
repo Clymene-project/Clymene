@@ -1,13 +1,17 @@
-# Clymene Ingester Getting Start
+## Clymene-ingester
 
-The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database  
-Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베이스에 삽입하는 선택적 서비스이다
+Clymene-ingester consumes from Kafka and send to db.
 
-1. Kafka message consume
-2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional) 
-
-## How to setting kafka consumer  
 ```
+Clymene-ingester [flags]
+```
+
+### Options
+
+```
+--admin.http.host-ports string                  The host:ports (e.g. 127.0.0.1:15694 or :15694) for the admin server, including health check, /metrics, etc. (default ":15694")
+--clymene-ingester.deadlockInterval duration    Interval to check for deadlocks. If no messages gets processed in given time, clymene-ingester app will exit. Value of 0 disables deadlock check. (default 0s)
+--clymene-ingester.parallelism string           The number of messages to process in parallel (default "1000")
 --kafka.consumer.authentication string          Authentication type used to authenticate with kafka cluster. e.g. none, kerberos, tls, plaintext (default "none")
 --kafka.consumer.brokers string                 The comma-separated list of kafka brokers. i.e. '127.0.0.1:9092,0.0.0:1234' (default "127.0.0.1:9092")
 --kafka.consumer.client-id string               The Consumer Client ID that clymene-ingester will use (default "clymene")
@@ -31,90 +35,17 @@ Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베�
 --kafka.consumer.tls.server-name string         Override the TLS server name we expect in the certificate of the remote server(s)
 --kafka.consumer.tls.skip-host-verify           (insecure) Skip server's certificate chain and host name verification
 --kafka.consumer.topic string                   The name of the kafka topic to consume from (default "clymene")
-```
-
-## How to set up the Storage Type
-1. Setting environmental variables
-
-ElasticSearch  
-```
-TS_STORAGE_TYPE=elasticsearch
-```
-Kafka  
-```
-TS_STORAGE_TYPE=kafka
-```
-prometheus  
-```
-TS_STORAGE_TYPE=prometheus
-```
-gateway  
-```
-TS_STORAGE_TYPE=gateway
-```
-Several
-```
-TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
-```
-
-2. Option description by storage type
-- [Kafka option](./kafka/kafka-option.md)
-- [ElasticSearch option](./elasticsearch/es-option.md)
-- [Prometheus & cortex option](./prometheus_cortex/prometheus_cortex-options.md)
-- [gateway option](./gateway/gataway-option.md)
-- [Opentsdb option](./opentsdb/opentsdb-option.md)
-
-
-### Docker-compose Example
-```yaml
-version: '2'
-services:
-  clymene-ingester:
-    image: bourbonkk/clymene-ingester:main
-    ports:
-      - "15694:15694"
-    environment:
-      #      - TS_STORAGE_TYPE=elasticsearch,prometheus   # use composite writer
-      - TS_STORAGE_TYPE=elasticsearch
-    command:
-      - --log-level=debug
-      - --kafka.consumer.brokers=[KAFKA-IP]:9092
-      - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
-#      - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
-```
-
-### k8s Example
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: clymene-ingester
-  namespace: clymene
-  labels:
-    app: clymene-ingester
-spec:
-  selector:
-    matchLabels:
-      app: clymene-ingester
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: clymene-ingester
-    spec:
-      containers:
-        - name: clymene-ingester
-          image: bourbonkk/clymene-ingester:main
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 15694
-          args:
-            - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
-            - --log-level=info
-            - --kafka.consumer.brokers=clymene-kafka-broker:9092
-          env:
-            - name: TS_STORAGE_TYPE
-              value: prometheus
-      securityContext:
-        runAsUser: 1000
+--log-level string                              Minimal allowed log Level. For more levels see https://github.com/uber-go/zap (default "info")
+--opentsdb.dry-run                              Don't actually send anything to the TSD, just print the datapoints.
+--opentsdb.host string                          Hostname to use to connect to the TSD. (default "localhost")
+--opentsdb.hosts string                         List of host:port to connect to tsd's (comma separated)
+--opentsdb.http                                 Send the data via the http interface (default 'false')
+--opentsdb.http-api-path string                 URL path to use for HTTP requests to TSD. (default "api/put")
+--opentsdb.http-password string                 Password to use for HTTP Basic Auth when sending the data via HTTP
+--opentsdb.http-username string                 Username to use for HTTP Basic Auth when sending the data via HTTP
+--opentsdb.max-chunk int                        The maximum request body size to support for incoming HTTP requests when chunking is enabled (default 512)
+--opentsdb.max-tags int                         The maximum number of tags to send to our TSD Instances (default 8)
+--opentsdb.port int                             Port to connect to the TSD instance on (default 4242)
+--opentsdb.ssl                                  Enable SSL - used in conjunction with http (default 'false')
+--opentsdb.timeout duration                     Time out when doing http insert(sec, default 10 sec) (default 10s)
 ```

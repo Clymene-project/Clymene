@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: clymene-agent
-          image: bourbonkk/clymene-gateway:v1.1.0
+          image: bourbonkk/clymene-gateway:v1.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 15694
@@ -64,7 +64,7 @@ spec:
     spec:
       containers:
         - name: clymene-agent
-          image: bourbonkk/clymene-ingester:v1.1.0
+          image: bourbonkk/clymene-ingester:v1.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 15694
@@ -97,7 +97,7 @@ spec:
     spec:
       containers:
         - name: clymene-agent
-          image: bourbonkk/clymene-agent:v1.1.0
+          image: bourbonkk/clymene-agent:v1.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 15691
