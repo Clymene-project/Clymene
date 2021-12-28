@@ -33,7 +33,7 @@ Gateway collects time series data through gRPC communication, stores time series
 
 # components
 
-### Clymene Agent([Getting Started](./docs/clymene-agent/README.md))
+### Clymene Agent([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md))
 ```official docker image: bourbonkk/clymene-agent:v1.2.0```  
 The Clymene-agent is service that collects time series data(does not use disks)
 
@@ -46,13 +46,13 @@ The Clymene-agent is service that collects time series data(does not use disks)
 5. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)
 
 
-### Clymene Ingester(Optional) ([Getting Started](./docs/clymene-ingester/README.md))  
+### Clymene Ingester(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md))  
 ```official docker image: bourbonkk/clymene-ingester:v1.2.0```  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)  
 
-### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
+### Clymene Gateway(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md))  
 ```official docker image: bourbonkk/clymene-gateway:v1.2.0```  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
@@ -60,11 +60,11 @@ The Clymene Gateway is an optional service that can receive metric data from the
 
 ## How to work it on k8s  
 
-For example, see the [clymene_using_gateway.yaml](./k8s/Clymene_using_gateway.yaml)
+For example, see the [clymene_using_gateway.yaml](https://github.com/Clymene-project/Clymene/blob/main/k8s/Clymene_using_gateway.yaml)
 
 ## How to work it on docker-compose  
 
-For example, see the [docker-compose-clymene_using_gateway.yml](./docker-compose/docker-compose-clymene_using_gateway.yml)
+For example, see the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-project/Clymene/blob/main/docker-compose/docker-compose-clymene_using_gateway.yml)
 
 ## Roadmap
 
