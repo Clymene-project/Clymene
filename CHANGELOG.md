@@ -3,7 +3,7 @@ Changes by Version
 
 1.2.0 (2021-12-29)
 -----------------
-Now, you can use the optsdb in Clymene.  
+Now, you can use the opentsdb in Clymene.  
 - opentsdb support (TS_STORAGE_TYPE=opentsdb)
 - opentsdb supports two methods: socket(default) and http([Opentsdb option](./docs/clymene-agent/opentsdb/opentsdb-option.md))
 
