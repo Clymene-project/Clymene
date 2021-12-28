@@ -39,7 +39,7 @@ The Clymene-agent is service that collects time series data(does not use disks)
    - [Prometheus's Service Discovery](https://docs.sysdig.com/en/docs/sysdig-monitor/integrations-for-sysdig-monitor/collect-prometheus-metrics/enable-prometheus-native-service-discovery/)
    feature finds Metric collection endpoints.
 2. scrape time series data
-3. Time-series data transfer to gateway(gRPC) (Optional) (TODO)
+3. Time-series data transfer to gateway(gRPC) (Optional)
 4. Time-series data transfer to kafka (Optional)
 5. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)
 
