@@ -1,9 +1,5 @@
 # Clymene
 
-clymene-agent: ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status)  
-clymene-ingester: ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status)  
-clymene-gateway: ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status)  
-
 The Clymene is a time series data collection platform for distributed systems inspired by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
 different types of databases. It can be configured in a variety of architectures. Various time series data analysis functions will be added.
@@ -37,6 +33,7 @@ Gateway collects time series data through gRPC communication, stores time series
 
 ### Clymene Agent([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md))
 ```official docker image: bourbonkk/clymene-agent:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status)   
 The Clymene-agent is service that collects time series data(does not use disks)
 
 1. Service Discovery
@@ -50,12 +47,14 @@ The Clymene-agent is service that collects time series data(does not use disks)
 
 ### Clymene Ingester(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md))  
 ```official docker image: bourbonkk/clymene-ingester:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status)  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)  
 
 ### Clymene Gateway(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md))  
 ```official docker image: bourbonkk/clymene-gateway:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=604800) ![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status)  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, Opentsdb) (Optional)  
@@ -77,7 +76,7 @@ For example, see the [docker-compose-clymene_using_gateway.yml](https://github.c
 ## Get in Touch
 Have questions, suggestions, bug reports? Reach the project community via these channels:
 
-* GitHub [issues](https://github.com/clymene-project/clymene/issues)
+* GitHub [issues](https://github.com/clymene-project/clymene/issues)  and [discussions](https://github.com/Clymene-project/Clymene/discussions)
 
 [//]: # (## Contributing)
 
