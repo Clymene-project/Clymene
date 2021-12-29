@@ -30,6 +30,10 @@ prometheus
 ```
 TS_STORAGE_TYPE=prometheus
 ```
+opentsdb
+```
+TS_STORAGE_TYPE=opentsdb
+```
 Several
 ```
 TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write

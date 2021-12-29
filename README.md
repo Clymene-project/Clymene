@@ -31,50 +31,61 @@ Gateway collects time series data through gRPC communication, stores time series
 
 # components
 
-### Clymene Agent([Getting Started](./docs/clymene-agent/README.md))
+### Clymene Agent([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md))
 ```official docker image: bourbonkk/clymene-agent:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-agent)   
 The Clymene-agent is service that collects time series data(does not use disks)
 
 1. Service Discovery
    - [Prometheus's Service Discovery](https://docs.sysdig.com/en/docs/sysdig-monitor/integrations-for-sysdig-monitor/collect-prometheus-metrics/enable-prometheus-native-service-discovery/)
    feature finds Metric collection endpoints.
 2. scrape time series data
-3. Time-series data transfer to gateway(gRPC) (Optional) (TODO)
+3. Time-series data transfer to gateway(gRPC) (Optional)
 4. Time-series data transfer to kafka (Optional)
 5. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)
 
 
-### Clymene Ingester(Optional) ([Getting Started](./docs/clymene-ingester/README.md))  
+### Clymene Ingester(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md))  
 ```official docker image: bourbonkk/clymene-ingester:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-ingester)  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.  
 1. Kafka message consume  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, gateway, Opentsdb) (Optional)  
 
-### Clymene Gateway(Optional) ([Getting Started](./docs/clymene-gateway/README.md))  
+### Clymene Gateway(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md))  
 ```official docker image: bourbonkk/clymene-gateway:v1.2.0```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-gateway)  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC communication.  
 1. gRPC Service  
 2. Time-series data insert to Database(ElasticSearch, Prometheus, Opentsdb) (Optional)  
 
 ## How to work it on k8s  
 
-For example, see the [clymene_using_gateway.yaml](./k8s/Clymene_using_gateway.yaml)
+For example, see the [clymene_using_gateway.yaml](https://github.com/Clymene-project/Clymene/blob/main/k8s/Clymene_using_gateway.yaml)
 
 ## How to work it on docker-compose  
 
-For example, see the [docker-compose-clymene_using_gateway.yml](./docker-compose/docker-compose-clymene_using_gateway.yml)
+For example, see the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-project/Clymene/blob/main/docker-compose/docker-compose-clymene_using_gateway.yml)
 
 ## Roadmap
 
-1. Various DB support(influxdb, kdb, opentsdb, druid)
+1. Various DB support(influxdb, kdb, druid)
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
 3. Website development for clymene(https://github.com/Clymene-project/documentation)
 
 ## Get in Touch
 Have questions, suggestions, bug reports? Reach the project community via these channels:
 
-* GitHub [issues](https://github.com/clymene-project/clymene/issues)
+* GitHub [issues](https://github.com/clymene-project/clymene/issues)  and [discussions](https://github.com/Clymene-project/Clymene/discussions)
 
+[//]: # (## Contributing)
+
+[//]: # ()
+[//]: # (Refer to [CONTRIBUTING.md]&#40;https://github.com/clymene-project/clymene/blob/main/CONTRIBUTING.md&#41;)
+
+## License
+
+Apache License 2.0, see [LICENSE](https://github.com/Clymene-project/Clymene/blob/main/LICENSE).
 
 # Code Style
 
