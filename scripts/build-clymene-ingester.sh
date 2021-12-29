@@ -15,4 +15,8 @@ CGO_ENABLED=0 go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA}))' -X 'ma
 cp ./cmd/ingester/Dockerfile ./
 
 docker build -t bourbonkk/clymene-ingester:"${BRANCH}" .
+
+docker tag bourbonkk/clymene-ingester:"${BRANCH}" quay.io/clymene/clymene-ingester:"${BRANCH}"
+
 docker push bourbonkk/clymene-ingester:"${BRANCH}"
+docker push quay.io/clymene/clymene-ingester:"${BRANCH}"

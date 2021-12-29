@@ -3,11 +3,16 @@ name: Docker Image CI
 on:
   push:
     branches:
-    - main
+    - master
     - "v*"
   pull_request:
     branches:
     - "**"
+
+env:
+  IMAGE_REGISTRY: quay.io
+  REGISTRY_USER: ${{ secrets.QUAY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
 
 jobs:
   build:
@@ -46,6 +51,14 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Log in to Quay.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+
 
       - name: Build clymene ingester
         run: bash scripts/build-clymene-ingester.sh
