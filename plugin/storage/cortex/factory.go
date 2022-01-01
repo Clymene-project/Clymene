@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package prometheus
+package cortex
 
 import (
 	"errors"
@@ -36,8 +36,8 @@ type Factory struct {
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
-	logger.Info("Factory Initialize", zap.String("type", "prometheus"))
-	logger.Info("prometheus factory", zap.String("url", f.options.url))
+	logger.Info("Factory Initialize", zap.String("type", "cortex"))
+	logger.Info("cortex factory", zap.String("url", f.options.url))
 	switch f.options.Encoding {
 	case kafka.EncodingProto:
 		f.marshaller = newProtobufMarshaller()

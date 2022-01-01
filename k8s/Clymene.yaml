@@ -22,7 +22,7 @@ spec:
           ports:
             - containerPort: 15694
           args:
-            - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
+            - --prometheus.remote.url=http://prometheus:9090/api/v1/write
             - --log-level=info
             - --kafka.consumer.brokers=clymene-kafka-broker:9092
           env:

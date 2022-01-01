@@ -24,7 +24,7 @@ services:
       - --log-level=debug
       - --kafka.consumer.brokers=[KAFKA-IP]:9092
       - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
-#      - --prometheus_cortex.remote.url=http://prometheus:9090/api/v1/write
+#      - --prometheus.remote.url=http://prometheus:9090/api/v1/write
 
   clymene-gateway:
     image: bourbonkk/clymene-gateway:v1.2.0

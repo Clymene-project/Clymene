@@ -51,6 +51,10 @@ prometheus
 ```
 TS_STORAGE_TYPE=prometheus
 ```
+cortex
+```
+TS_STORAGE_TYPE=cortex
+```
 gateway  
 ```
 TS_STORAGE_TYPE=gateway
@@ -67,7 +71,8 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 2. Option description by storage type
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
-- [Prometheus & cortex option](./prometheus_cortex/prometheus_cortex-option.md)
+- [Prometheus option](prometheus/prometheus-option.md)
+- [cortex option](./cortex/cortex-option.md)
 - [gateway option](./gateway/gataway-option.md)
 - [Opentsdb option](./opentsdb/opentsdb-option.md)
 

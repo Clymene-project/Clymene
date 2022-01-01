@@ -30,6 +30,10 @@ prometheus
 ```
 TS_STORAGE_TYPE=prometheus
 ```
+cortex
+```
+TS_STORAGE_TYPE=cortex
+```
 opentsdb
 ```
 TS_STORAGE_TYPE=opentsdb
@@ -42,7 +46,8 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 2. Option description by storage type
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
-- [Prometheus & cortex option](./prometheus_cortex/prometheus_cortex-option.md)
+- [Prometheus option](prometheus/prometheus-option.md)
+- [cortex option](./cortex/cortex-option.md)
 - [Opentsdb option](./opentsdb/opentsdb-option.md)
 
 ### Docker-compose Example

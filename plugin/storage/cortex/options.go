@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package prometheus
+package cortex
 
 import (
 	"flag"
@@ -34,24 +34,24 @@ type Options struct {
 }
 
 const (
-	configPrefix       = "prometheus.remote"
+	configPrefix       = "cortex.distributor"
 	suffixUrl          = ".url"
 	suffixUserAgent    = ".user.agent"
 	suffixTimeout      = ".timeout"
 	suffixmaxErrMsgLen = ".max.err.msg.len"
 	suffixEncoding     = ".kafka.encoding"
 
-	defaultPrometheusUrl = "http://localhost:9090/api/v1/write"
-	defaultTimeout       = 10 * time.Second
-	defaultMaxErrMsgLen  = 256
-	defaultEncoding      = kafka.EncodingProto
+	defaultDistributorUrl = "http://localhost/api/v1/push"
+	defaultTimeout        = 10 * time.Second
+	defaultMaxErrMsgLen   = 256
+	defaultEncoding       = kafka.EncodingProto
 )
 
 func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
 		configPrefix+suffixUrl,
-		defaultPrometheusUrl,
-		"the prometheus remote write receiver endpoint(/api/v1/write)",
+		defaultDistributorUrl,
+		"the cortex distributor remote write receiver endpoint(/api/v1/push)",
 	)
 	flagSet.Duration(
 		configPrefix+suffixTimeout,

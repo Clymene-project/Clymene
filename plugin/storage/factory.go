@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/plugin"
+	"github.com/Clymene-project/Clymene/plugin/storage/cortex"
 	"github.com/Clymene-project/Clymene/plugin/storage/es"
 	"github.com/Clymene-project/Clymene/plugin/storage/gateway"
 	"github.com/Clymene-project/Clymene/plugin/storage/influxdb"
@@ -88,7 +89,7 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 	case prometheusStorageType:
 		return prometheus.NewFactory(), nil
 	case cortexStorageType:
-		return prometheus.NewFactory(), nil
+		return cortex.NewFactory(), nil
 	case kafkaStorageType:
 		return kafka.NewFactory(), nil
 	case influxDbStorageType:
