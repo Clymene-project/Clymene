@@ -22,21 +22,21 @@ Agent can store time series data in a variety of DBs and support Composite Write
 once.
 
 [//]: # (![Release_1.0.0.png]&#40;docs/images/clymene_architecture_v1.0.0_composite.png&#41;)
-<img src="docs/images/clymene_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0">
+<img src="docs/images/clymene_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0">
 
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
 Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/clymene_kafka_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0_ingester">  
+<img src="docs/images/clymene_kafka_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0_ingester">  
 
 ### Use gateway
 
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
 Composite Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/clymene_gateway_v1.2.0.png" width="80%" height="80%" alt="architecture_v1.2.0_gateway">
+<img src="docs/images/clymene_gateway_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0_gateway">
 
 # components
 
