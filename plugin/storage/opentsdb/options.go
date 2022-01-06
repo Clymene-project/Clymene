@@ -27,19 +27,19 @@ import (
 const (
 	configPrefix = "opentsdb"
 
-	suffixDryRun            = ".dry-run"
-	suffixHost              = ".host"
-	suffixMaxTags           = ".max-tags"
-	suffixHttpPassword      = ".http-password"
-	suffixHttpUsername      = ".http-username"
-	suffixReconnectInterval = ".reconnect-interval"
-	suffixPort              = ".port"
-	suffixHttp              = ".http"
-	suffixHttpApiPath       = ".http-api-path"
-	suffixSSL               = ".ssl"
-	suffixHosts             = ".hosts"
-	suffixTimeout           = ".timeout"
-	suffixMaxChunk          = ".max-chunk"
+	suffixDryRun       = ".dry-run"
+	suffixHost         = ".host"
+	suffixMaxTags      = ".max-tags"
+	suffixHttpPassword = ".http-password"
+	suffixHttpUsername = ".http-username"
+
+	suffixPort        = ".port"
+	suffixHttp        = ".http"
+	suffixHttpApiPath = ".http-api-path"
+	suffixSSL         = ".ssl"
+	suffixHosts       = ".hosts"
+	suffixTimeout     = ".timeout"
+	suffixMaxChunk    = ".max-chunk"
 
 	defaultDryRun       = false
 	defaultHost         = "localhost"

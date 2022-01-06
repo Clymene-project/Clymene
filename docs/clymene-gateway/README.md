@@ -38,6 +38,10 @@ opentsdb
 ```
 TS_STORAGE_TYPE=opentsdb
 ```
+influxdb
+```
+TS_STORAGE_TYPE=influxdb
+```
 Several
 ```
 TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
@@ -49,6 +53,7 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 - [Prometheus option](prometheus/prometheus-option.md)
 - [cortex option](./cortex/cortex-option.md)
 - [Opentsdb option](./opentsdb/opentsdb-option.md)
+- [influxdb option](./influxdb/influxdb-options.md)
 
 ### Docker-compose Example
 ```yaml

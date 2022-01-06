@@ -4,9 +4,10 @@ The Clymene ingester is an optional service responsible for insert time series d
 Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베이스에 삽입하는 선택적 서비스이다
 
 1. Kafka message consume
-2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional) 
+2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional)
 
-## How to setting kafka consumer  
+## How to setting kafka consumer
+
 ```
 --kafka.consumer.authentication string          Authentication type used to authenticate with kafka cluster. e.g. none, kerberos, tls, plaintext (default "none")
 --kafka.consumer.brokers string                 The comma-separated list of kafka brokers. i.e. '127.0.0.1:9092,0.0.0:1234' (default "127.0.0.1:9092")
@@ -34,47 +35,70 @@ Clymene ingester는 카프카에 적재된 시계열 데이터를 데이터베�
 ```
 
 ## How to set up the Storage Type
+
 1. Setting environmental variables
 
-ElasticSearch  
+ElasticSearch
+
 ```
 TS_STORAGE_TYPE=elasticsearch
 ```
-Kafka  
+
+Kafka
+
 ```
 TS_STORAGE_TYPE=kafka
 ```
-prometheus  
+
+prometheus
+
 ```
 TS_STORAGE_TYPE=prometheus
 ```
+
 cortex
+
 ```
 TS_STORAGE_TYPE=cortex
 ```
-gateway  
+
+gateway
+
 ```
 TS_STORAGE_TYPE=gateway
 ```
+
 opentsdb
+
 ```
 TS_STORAGE_TYPE=opentsdb
 ```
+
+influxdb
+
+```
+TS_STORAGE_TYPE=influxdb
+```
+
 Several
+
 ```
 TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
 ```
 
 2. Option description by storage type
+
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Prometheus option](prometheus/prometheus-option.md)
 - [cortex option](./cortex/cortex-option.md)
 - [gateway option](./gateway/gataway-option.md)
 - [Opentsdb option](./opentsdb/opentsdb-option.md)
-
+- [influxdb option](./influxdb/influxdb-options.md)
+-
 
 ### Docker-compose Example
+
 ```yaml
 version: '2'
 services:
@@ -93,6 +117,7 @@ services:
 ```
 
 ### k8s Example
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment

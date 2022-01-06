@@ -22,6 +22,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/consul/api v1.10.1
+	github.com/influxdata/influxdb-client-go/v2 v2.6.0
 	github.com/jaegertracing/jaeger v1.29.0
 	github.com/miekg/dns v1.1.26
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
