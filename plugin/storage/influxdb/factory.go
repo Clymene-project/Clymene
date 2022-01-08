@@ -19,6 +19,7 @@ package influxdb
 import (
 	"flag"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -29,19 +30,27 @@ type Factory struct {
 
 	metricsFactory metrics.Factory
 	logger         *zap.Logger
+	client         influxdb2.Client
 }
 
-func (f Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
+func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
 	logger.Info("Factory Initialize", zap.String("type", "influxdb"))
 
-	//client := influxdb2.NewClientWithOptions("http://localhost:8086", "my-token", &f.options.Options)
+	if f.options.TLS.Enabled {
+		tls, err := f.options.TLS.Config(logger)
+		if err != nil {
+			logger.Panic("please check TLS Setting", zap.Error(err))
+		}
+		f.options.Options.SetTLSConfig(tls)
+	}
+	f.client = influxdb2.NewClientWithOptions(f.options.url, f.options.token, &f.options.Options)
 
 	//client.
 	return nil
 }
 
-func (f Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateWriter() (metricstore.Writer, error) {
 	//TODO implement me
 	panic("implement me")
 }

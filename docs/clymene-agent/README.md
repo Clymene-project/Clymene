@@ -37,7 +37,7 @@ scrape_configs:
 ```
 
 ## How to set up the Storage Type
-1. Setting environmental variables  
+#### 1. Setting environmental variables  
 
 ElasticSearch
 ```
@@ -72,7 +72,7 @@ Several
 TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
 ```
 
-2. Option description by storage type
+#### 2. Option description by storage type
 - [Kafka option](./kafka/kafka-option.md)
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Prometheus option](prometheus/prometheus-option.md)
