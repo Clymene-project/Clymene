@@ -1,9 +1,6 @@
 Changes by Version
 ==================
 
-
-
-
 1.3.0 (2022-01-08)
 -----------------
 influxdb is now officially supported. The options below are mandatory.
