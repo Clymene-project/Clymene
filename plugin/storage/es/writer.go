@@ -29,16 +29,16 @@ const (
 )
 
 type MetricWriter struct {
-	client      es.Client
 	logger      *zap.Logger
+	client      es.Client
 	metricIndex string
 	converter   dbmodel.Converter
 }
 
 // MetricWriterParams holds constructor parameters for NewMetricWriter
 type MetricWriterParams struct {
-	Client      es.Client
 	Logger      *zap.Logger
+	Client      es.Client
 	IndexPrefix string
 	Archive     bool
 }

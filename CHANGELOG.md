@@ -1,6 +1,22 @@
 Changes by Version
 ==================
 
+
+
+
+1.3.0 (2022-01-08)
+-----------------
+influxdb is now officially supported. The options below are mandatory.
+```
+--influxdb.bucket string    influx bucket, A bucket is a named location where time series data is stored
+--influxdb.org string       influx organization, An organization is a workspace for a group of users.
+--influxdb.token string     Use the Authorization header and the Token scheme
+```
+TDengin support has been added to the roadmap.
+
+- influxdb option (TS_STORAGE_TYPE=influxdb)
+- [Influxdb option](./docs/clymene-agent/influxdb/influxdb-options.md)
+
 1.2.1 (2022-01-01)
 -----------------
 Separate the prometheus option and the cortex option to block confusion

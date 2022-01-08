@@ -18,6 +18,7 @@ package influxdb
 
 import (
 	"flag"
+	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/spf13/viper"
@@ -33,9 +34,10 @@ const (
 	writePrefix  = ".write"
 	httpPrefix   = ".http"
 
-	suffixUrl   = ".url"
-	suffixToken = ".token"
-	suffixOrg   = ".org"
+	suffixUrl    = ".url"
+	suffixToken  = ".token"
+	suffixOrg    = ".org"
+	suffixBucket = ".bucket"
 
 	// writeOptions
 	suffixBatchSize        = writePrefix + ".batch-size"
@@ -50,9 +52,10 @@ const (
 	suffixMaxRetryTime     = writePrefix + ".max-retry-time"
 	suffixExponentialBase  = writePrefix + ".exponential-base"
 
-	defaultUrl   = "http://localhost:8086"
-	defaultToken = ""
-	defaultOrg   = ""
+	defaultUrl    = "http://localhost:8086"
+	defaultToken  = ""
+	defaultOrg    = ""
+	defaultBucket = ""
 
 	// writeOptions
 	defaultBatchSize        = 5_000
@@ -79,9 +82,10 @@ var tlsFlagsConfig = tlscfg.ClientFlagsConfig{
 }
 
 type Options struct {
-	url   string
-	token string
-	org   string
+	url    string
+	token  string
+	org    string
+	bucket string
 
 	influxdb2.Options
 	TLS tlscfg.Options
@@ -101,7 +105,12 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
 		configPrefix+suffixOrg,
 		defaultOrg,
-		"Pass as orgID in the request body",
+		"influx organization, An organization is a workspace for a group of users.",
+	)
+	flagSet.String(
+		configPrefix+suffixBucket,
+		defaultBucket,
+		"influx bucket, A bucket is a named location where time series data is stored",
 	)
 	flagSet.Uint(
 		configPrefix+suffixBatchSize,
@@ -170,7 +179,7 @@ func (o *Options) InitFromViper(v *viper.Viper) {
 	o.url = v.GetString(configPrefix + suffixUrl)
 	o.token = v.GetString(configPrefix + suffixToken)
 	o.org = v.GetString(configPrefix + suffixOrg)
-	o.Options = influxdb2.Options{}
+	o.bucket = v.GetString(configPrefix + suffixBucket)
 
 	// writeOptions
 	o.SetBatchSize(v.GetUint(configPrefix + suffixBatchSize))
@@ -200,4 +209,17 @@ func (o *Options) makeTags(StringTags string) {
 		splitTag := strings.Split(tag, "=")
 		o.AddDefaultTag(splitTag[0], splitTag[1])
 	}
+}
+
+func (o *Options) checkNecessaryOptions() error {
+	if o.bucket == "" {
+		return fmt.Errorf("influxdb bucket is not set, it is necessary")
+	}
+	if o.token == "" {
+		return fmt.Errorf("influxdb token is not set, it is necessary")
+	}
+	if o.org == "" {
+		return fmt.Errorf("influxdb org is not set, it is necessary")
+	}
+	return nil
 }

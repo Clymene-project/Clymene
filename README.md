@@ -21,22 +21,21 @@ Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertra
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at
 once.
 
-[//]: # (![Release_1.0.0.png]&#40;docs/images/clymene_architecture_v1.0.0_composite.png&#41;)
-<img src="docs/images/clymene_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0">
+<img src="docs/images/v1.3.0/agent-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0">
 
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
 Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/clymene_kafka_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0_ingester">  
+<img src="docs/images/v1.3.0/ingester-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0_ingester">  
 
 ### Use gateway
 
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
 Composite Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/clymene_gateway_v1.2.0.png" width="60%" height="60%" alt="architecture_v1.2.0_gateway">
+<img src="docs/images/v1.3.0/gateway-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0_gateway">
 
 # components
 
@@ -53,7 +52,7 @@ The Clymene-agent is service that collects time series data(does not use disks)
 2. scrape time series data
 3. Time-series data transfer to gateway(gRPC) (Optional)
 4. Time-series data transfer to kafka (Optional)
-5. Time-series data insert to Database(ElasticSearch, Prometheus, cortex, gateway, Opentsdb) (Optional)
+5. Time-series data insert to Database([supported DB](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md#Option-description-by-storage-type)) (Optional)
 
 ### Clymene Ingester(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md))
 
@@ -63,7 +62,7 @@ The Clymene-agent is service that collects time series data(does not use disks)
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.
 
 1. Kafka message consume
-2. Time-series data insert to Database(ElasticSearch, Prometheus, cortex, gateway, Opentsdb) (Optional)
+2. Time-series data insert to Database([supported DB](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md#Option-description-by-storage-type)) (Optional)
 
 ### Clymene Gateway(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md))
 
@@ -74,7 +73,7 @@ The Clymene Gateway is an optional service that can receive metric data from the
 communication.
 
 1. gRPC Service
-2. Time-series data insert to Database(ElasticSearch, Prometheus, cortex, Opentsdb) (Optional)
+2. Time-series data insert to Database([supported DB](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md#Option-description-by-storage-type)) (Optional)
 
 ## How to work it on k8s
 
@@ -88,7 +87,7 @@ the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-projec
 
 ## Roadmap
 
-1. Various DB support(influxdb, kdb, druid)
+1. Various DB support(ElasticSearch, Prometheus, Cortex, OpenTSDB, influxdb, TDengine, kdb, druid)
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
 3. Website development for clymene(https://github.com/Clymene-project/documentation)
 

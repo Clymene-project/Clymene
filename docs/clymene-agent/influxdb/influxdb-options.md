@@ -16,8 +16,9 @@ clymene-agent [flags]
 --admin.http.host-ports string                  The host:ports (e.g. 127.0.0.1:15691 or :15691) for the admin server, including health check, /metrics, etc. (default ":15691")
 --config.file string                            configuration file path. (default "/etc/clymene/clymene.yml")
 --http.port int                                 http port (default 15692)
+--influxdb.bucket string                        influx bucket, A bucket is a named location where time series data is stored
 --influxdb.http.http-request-timeout duration   HTTP request timeout in sec (default 10s)
---influxdb.org string                           Pass as orgID in the request body
+--influxdb.org string                           influx organization, An organization is a workspace for a group of users.
 --influxdb.tls.ca string                        Path to a TLS CA (Certification Authority) file used to verify the remote server(s) (by default will use the system truststore)
 --influxdb.tls.cert string                      Path to a TLS Certificate file, used to identify this process to the remote server(s)
 --influxdb.tls.enabled                          Enable TLS when talking to the remote server(s)

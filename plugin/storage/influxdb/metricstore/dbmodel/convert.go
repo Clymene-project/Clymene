@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package influxdb
+package dbmodel
 
 import (
-	"github.com/Clymene-project/Clymene/plugin/storage/influxdb/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"go.uber.org/zap"
+	"time"
 )
 
-type MetricWriter struct {
-	logger    *zap.Logger
-	client    api.WriteAPI
-	converter dbmodel.Converter
+type Converter struct {
+	Logger *zap.Logger
 }
 
-// WriteMetric is Asynchronous writer, and it is bulk insert
-func (m *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
-	for _, metric := range metrics {
-		m.client.WritePoint(m.converter.ConvertTsToPoint(metric))
+func (c *Converter) ConvertTsToPoint(metric prompb.TimeSeries) *write.Point {
+	tags := make(map[string]string)
+	for _, label := range metric.Labels {
+		tags[label.Name] = label.Value
 	}
-	return nil
+	field := make(map[string]interface{})
+	var timestamp int64
+	for _, sample := range metric.Samples {
+		timestamp = sample.Timestamp
+		field["value"] = sample.Value
+	}
+	return influxdb2.NewPoint(tags["__name__"], tags, field, c.timestampMsToTime(timestamp))
 }
 
-func NewMetricWriter(l *zap.Logger, client influxdb2.Client, org string, bucket string) *MetricWriter {
-	return &MetricWriter{
-		logger: l,
-		client: client.WriteAPI(org, bucket),
-		converter: dbmodel.Converter{
-			Logger: l,
-		},
-	}
+func (c *Converter) timestampMsToTime(ms int64) time.Time {
+	return time.Unix(0, ms*int64(time.Millisecond))
 }
