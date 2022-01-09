@@ -47,7 +47,7 @@ Composite Writers that can be stored in multiple DBs at once.
 
 ```dockerhub : bourbonkk/clymene-agent:v1.x.x```  
 ```redhatQuay: quay.io/clymene/clymene-agent:v1.x.x```  
-![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-agent)   
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-agent)   
 The Clymene-agent is service that collects time series data(does not use disks)
 
 1. Service Discovery
@@ -62,7 +62,7 @@ The Clymene-agent is service that collects time series data(does not use disks)
 
 ```dockerhub : bourbonkk/clymene-ingester:v1.x.x```  
 ```redhatQuay: quay.io/clymene/clymene-ingester:v1.x.x```  
-![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-ingester)  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-ingester)  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.
 
 1. Kafka message consume
@@ -72,7 +72,7 @@ The Clymene ingester is an optional service responsible for insert time series d
 
 ```dockerhub : bourbonkk/clymene-gateway:v1.x.x```  
 ```redhatQuay: quay.io/clymene/clymene-gateway:v1.x.x```  
-![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=604800) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-gateway)  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-gateway)  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC
 communication.
 
