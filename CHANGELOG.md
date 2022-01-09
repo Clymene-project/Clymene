@@ -1,6 +1,15 @@
 Changes by Version
 ==================
 
+
+1.3.1 (2022-01-10)
+-----------------
+Clymene official logo added!
+Creating metrics for Clymene components issue: #33  
+- clymene-agent metric port = :15691/metrics  
+- clymene-ingester metric port = :15694/metrics  
+- clymene-gateway metric port = :15690/metrics  
+
 1.3.0 (2022-01-08)
 -----------------
 influxdb is now officially supported. The options below are mandatory.

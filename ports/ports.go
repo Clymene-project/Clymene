@@ -22,10 +22,16 @@ import (
 )
 
 const (
-	GatewayGRPC       = 15610
-	GatewayAdminHTTP  = 15690
-	AgentAdminHTTP    = 15691
-	AgentReloadHTTP   = 15692
+	GatewayGRPC = 15610
+
+	// GatewayAdminHTTP gateway metrics
+	GatewayAdminHTTP = 15690
+
+	// AgentAdminHTTP agent metrics
+	AgentAdminHTTP  = 15691
+	AgentReloadHTTP = 15692
+
+	// IngesterAdminHTTP ingester metrics
 	IngesterAdminHTTP = 15694
 )
 
