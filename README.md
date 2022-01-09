@@ -6,7 +6,7 @@
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch)
 ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) 
 
-<img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148681479-3ddf237c-6e5d-49a1-a517-8b3bfa92f54e.png" alt="clymene_logo">
+<img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148681762-112a1d92-59ab-421c-94bd-2572a8ee4420.png" alt="clymene_logo">
 
 The Clymene is a time series data collection platform for distributed systems inspired
 by [Prometheus](https://prometheus.io)
