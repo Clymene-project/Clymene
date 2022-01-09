@@ -38,7 +38,7 @@ var errNameLabelMandatory = fmt.Errorf("missing metric name (%s label)", labels.
 var (
 	targetIntervalLength = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Name:       "prometheus_target_interval_length_seconds",
+			Name:       "clymene_target_interval_length_seconds",
 			Help:       "Actual intervals between scrapes.",
 			Objectives: map[float64]float64{0.01: 0.001, 0.05: 0.005, 0.5: 0.05, 0.90: 0.01, 0.99: 0.001},
 		},
@@ -46,7 +46,7 @@ var (
 	)
 	targetReloadIntervalLength = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Name:       "prometheus_target_reload_length_seconds",
+			Name:       "clymene_target_reload_length_seconds",
 			Help:       "Actual interval to reload the scrape pool with a given configuration.",
 			Objectives: map[float64]float64{0.01: 0.001, 0.05: 0.005, 0.5: 0.05, 0.90: 0.01, 0.99: 0.001},
 		},
@@ -54,31 +54,31 @@ var (
 	)
 	targetScrapePools = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrape_pools_total",
+			Name: "clymene_target_scrape_pools_total",
 			Help: "Total number of scrape pool creation attempts.",
 		},
 	)
 	targetScrapePoolsFailed = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrape_pools_failed_total",
+			Name: "clymene_target_scrape_pools_failed_total",
 			Help: "Total number of scrape pool creations that failed.",
 		},
 	)
 	targetScrapePoolReloads = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrape_pool_reloads_total",
+			Name: "clymene_target_scrape_pool_reloads_total",
 			Help: "Total number of scrape loop reloads.",
 		},
 	)
 	targetScrapePoolReloadsFailed = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrape_pool_reloads_failed_total",
+			Name: "clymene_target_scrape_pool_reloads_failed_total",
 			Help: "Total number of failed scrape loop reloads.",
 		},
 	)
 	targetSyncIntervalLength = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Name:       "prometheus_target_sync_length_seconds",
+			Name:       "clymene_target_sync_length_seconds",
 			Help:       "Actual interval to sync the scrape pool.",
 			Objectives: map[float64]float64{0.01: 0.001, 0.05: 0.005, 0.5: 0.05, 0.90: 0.01, 0.99: 0.001},
 		},
@@ -86,38 +86,38 @@ var (
 	)
 	targetScrapePoolSyncsCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrape_pool_sync_total",
+			Name: "clymene_target_scrape_pool_sync_total",
 			Help: "Total number of syncs that were executed on a scrape pool.",
 		},
 		[]string{"scrape_job"},
 	)
 	targetScrapeSampleLimit = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrapes_exceeded_sample_limit_total",
+			Name: "clymene_target_scrapes_exceeded_sample_limit_total",
 			Help: "Total number of scrapes that hit the sample limit and were rejected.",
 		},
 	)
 	targetScrapeSampleDuplicate = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrapes_sample_duplicate_timestamp_total",
+			Name: "clymene_target_scrapes_sample_duplicate_timestamp_total",
 			Help: "Total number of samples rejected due to duplicate timestamps but different values",
 		},
 	)
 	targetScrapeSampleOutOfOrder = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrapes_sample_out_of_order_total",
+			Name: "clymene_target_scrapes_sample_out_of_order_total",
 			Help: "Total number of samples rejected due to not being out of the expected order",
 		},
 	)
 	targetScrapeSampleOutOfBounds = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrapes_sample_out_of_bounds_total",
+			Name: "clymene_target_scrapes_sample_out_of_bounds_total",
 			Help: "Total number of samples rejected due to timestamp falling outside of the time bounds",
 		},
 	)
 	targetScrapeCacheFlushForced = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "prometheus_target_scrapes_cache_flush_forced_total",
+			Name: "clymene_target_scrapes_cache_flush_forced_total",
 			Help: "How many times a scrape cache was flushed due to getting big while scrapes are failing.",
 		},
 	)

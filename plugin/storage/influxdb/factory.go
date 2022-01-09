@@ -23,8 +23,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
-	"net/http"
-	"time"
 )
 
 type Factory struct {
@@ -45,11 +43,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 		}
 		f.options.Options.SetTLSConfig(tls)
 	}
-	f.options.SetHTTPClient(
-		&http.Client{
-			Transport: newLatencyTransport(http.DefaultTransport, metricsFactory),
-			Timeout:   time.Second * time.Duration(f.options.HTTPRequestTimeout()),
-		})
+
 	err := f.options.checkNecessaryOptions()
 	if err != nil {
 		return err
@@ -81,30 +75,4 @@ func (f *Factory) InitFromViper(v *viper.Viper) {
 // InitFromOptions initializes factory from options.
 func (f *Factory) InitFromOptions(o Options) {
 	f.options = o
-}
-
-type latencyTransport struct {
-	transport http.RoundTripper
-	latency   metrics.Timer
-	errors    metrics.Counter
-}
-
-func (l *latencyTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	now := time.Now()
-	resp, err := l.transport.RoundTrip(request)
-	if err != nil {
-		l.errors.Inc(1)
-		return resp, err
-	}
-	l.latency.Record(time.Since(now))
-	return resp, err
-}
-
-func newLatencyTransport(t http.RoundTripper, f metrics.Factory) http.RoundTripper {
-	m := f.Namespace(metrics.NSOptions{Name: "influxdb", Tags: nil})
-	return &latencyTransport{
-		transport: t,
-		latency:   m.Timer(metrics.TimerOptions{Name: "latency", Tags: nil}),
-		errors:    m.Counter(metrics.Options{Name: "errors", Tags: nil}),
-	}
 }

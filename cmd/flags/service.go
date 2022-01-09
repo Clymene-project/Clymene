@@ -19,9 +19,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/healthcheck"
+	pMetrics "github.com/Clymene-project/Clymene/pkg/metrics"
 	"github.com/Clymene-project/Clymene/ports"
 	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	pMetrics "github.com/jaegertracing/jaeger/pkg/metrics"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -70,6 +70,7 @@ func (s *Service) AddFlags(flagSet *flag.FlagSet) {
 	if s.NoStorage {
 		AddLoggingFlag(flagSet)
 	}
+	pMetrics.AddFlags(flagSet)
 	s.Admin.AddFlags(flagSet)
 }
 

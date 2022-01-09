@@ -47,5 +47,6 @@ func serveHTTP(server *http.Server, listener net.Listener, params *HttpServerPar
 				params.Logger.Fatal("Could not start HTTP collector", zap.Error(err))
 			}
 		}
+
 	}()
 }
