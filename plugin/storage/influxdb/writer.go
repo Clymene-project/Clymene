@@ -39,15 +39,9 @@ func (m *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
 }
 
 func NewMetricWriter(l *zap.Logger, client influxdb2.Client, org string, bucket string) *MetricWriter {
-	writerAPI := client.WriteAPI(org, bucket)
-	go func() {
-		for err := range writerAPI.Errors() {
-			l.Error("influx writer err", zap.Error(err))
-		}
-	}()
 	return &MetricWriter{
 		logger: l,
-		client: writerAPI,
+		client: client.WriteAPI(org, bucket),
 		converter: dbmodel.Converter{
 			Logger: l,
 		},
