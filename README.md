@@ -1,4 +1,6 @@
-# Clymene
+# Clymene  
+
+<img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148680945-b0f435f7-611a-4873-b93e-f386c2eed739.png" alt="clymene_logo">
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5491/badge)](https://bestpractices.coreinfrastructure.org/projects/5491) ![CodeQL](https://github.com/clymene-project/clymene/workflows/CodeQL/badge.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/clymene-project/clymene) [![Go Reference](https://pkg.go.dev/badge/github.com/Clymene-project/Clymene.svg)](https://pkg.go.dev/github.com/Clymene-project/Clymene)  
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch)
@@ -21,21 +23,21 @@ Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertra
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at
 once.
 
-<img src="docs/images/v1.3.0/agent-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0">
+<img src="https://user-images.githubusercontent.com/25188468/148680397-aa9ca8a8-810c-4141-aefb-7e5d8ed87d13.png" width="70%" height="70%" alt="architecture_v1.3.0">
 
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
 Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/v1.3.0/ingester-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0_ingester">  
+<img src="https://user-images.githubusercontent.com/25188468/148680487-de5b083d-024e-4aaa-aeac-d362bbcec8de.png" width="70%" height="70%" alt="architecture_v1.3.0_ingester">  
 
 ### Use gateway
 
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
 Composite Writers that can be stored in multiple DBs at once.
 
-<img src="docs/images/v1.3.0/gateway-v1.3.0.png" width="70%" height="70%" alt="architecture_v1.3.0_gateway">
+<img src="https://user-images.githubusercontent.com/25188468/148680473-290f098e-fab6-4e87-a958-cdd96ff12a15.png" width="70%" height="70%" alt="architecture_v1.3.0_gateway">
 
 # components
 
