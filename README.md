@@ -110,6 +110,12 @@ Have questions, suggestions, bug reports? Reach the project community via these 
 
 [//]: # (Refer to [CONTRIBUTING.md]&#40;https://github.com/clymene-project/clymene/blob/main/CONTRIBUTING.md&#41;)
 
+## Further reading
+To learn more about Clymene, consult the following talks and articles.
+
+### Recent talks and articles
+- Jan 2022 blog post "[Efficient time series data collection and management plan in a distributed environment](https://medium.com/@clymeneallen/efficient-time-series-data-collection-and-management-plan-in-a-distributed-environment-5c4a62d45e36)"
+
 ## License
 
 Apache License 2.0, see [LICENSE](https://github.com/Clymene-project/Clymene/blob/main/LICENSE).
