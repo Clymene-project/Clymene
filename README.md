@@ -14,10 +14,6 @@ and [Jaeger](https://www.jaegertracing.io). Time series data from various enviro
 different types of databases. It can be configured in a variety of architectures. Various time series data analysis
 functions will be added.
 
-Clymene는 [Prometheus](https://prometheus.io)와 [Jaeger](https://www.jaegertracing.io)에서 영감을 받은 분산 시스템을 위한 시계열 데이터 수집
-플랫폼입니다. 다양한 환경의 시계열 데이터를 수집하고 여러 종류의 데이터베이스에 저장할 수 있습니다. 여러 컴포넌트를 이용해 다양한 아키텍처로 구성할 수 있습니다. 다양한 시계열 데이터 분석 기능이 추가될
-예정입니다.
-
 # Architecture
 
 ### Use only agent
