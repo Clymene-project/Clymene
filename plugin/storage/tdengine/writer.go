@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package opentsdb
+package tdengine
 
-import (
-	"github.com/Clymene-project/Clymene/prompb"
-)
+/*
+/rest/sql,		timestamp format: "2018-10-03 14:38:05.000"
+/rest/sqlt, 	timestamp format: 1538548685000
+/rest/sqlutc, 	timestamp format: "2018-10-03T14:38:05.000+0800"
 
-type Client interface {
-	SendData(series []prompb.TimeSeries) error
-}
+*/

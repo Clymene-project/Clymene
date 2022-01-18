@@ -28,6 +28,7 @@ import (
 	"github.com/Clymene-project/Clymene/plugin/storage/kdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/prometheus"
+	"github.com/Clymene-project/Clymene/plugin/storage/tdengine"
 	"github.com/Clymene-project/Clymene/storage"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"io"
@@ -46,6 +47,7 @@ const (
 	cortexStorageType        = "cortex"
 	kdbStorageType           = "kdb"
 	opentsdbStorageType      = "opentsdb"
+	tdengineStorageType      = "tdengine"
 
 	tsStorageType = "ts-storage-type"
 )
@@ -100,6 +102,8 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 		return opentsdb.NewFactory(), nil
 	case kdbStorageType:
 		return kdb.NewFactory(), nil
+	case tdengineStorageType:
+		return tdengine.NewFactory(), nil
 	default:
 		return nil, fmt.Errorf("unknown storage type %s. Valid types are %v", factoryType, AllStorageTypes)
 	}

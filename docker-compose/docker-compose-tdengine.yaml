@@ -1,0 +1,63 @@
+version: '3.5'
+
+services:
+  tdengine_cluster_init:
+    image: wwbgo/tdengine:2.4.0.0
+    restart: "no"
+    container_name: tdengine_cluster_init
+    command: bash +x /root/cluster_init.sh tdengine_1:6130 tdengine_2:6230
+    environment:
+      TAOS_firstEp: tdengine_0:6030
+    depends_on:
+      - tdengine_0
+  tdengine_0:
+    image: wwbgo/tdengine:2.4.0.0
+    restart: always
+    container_name: tdengine_0
+    environment:
+      TAOS_firstEp: tdengine_0:6030
+      TAOS_fqdn: tdengine_0
+      TAOS_serverPort: 6030
+    ports:
+      - "6030-6042:6030-6042/tcp"
+      - "6030-6042:6030-6042/udp"
+#    volumes:
+#      - /opt/tdengine/0/lib:/var/lib/taos
+#      - /opt/tdengine/0/log:/var/log/taos
+  tdengine_1:
+    image: wwbgo/tdengine:2.4.0.0
+    restart: always
+    container_name: tdengine_1
+    environment:
+      TAOS_firstEp: tdengine_0:6030
+      TAOS_fqdn: tdengine_1
+      TAOS_serverPort: 6130
+    ports:
+      - "6130-6142:6130-6142/tcp"
+      - "6130-6142:6130-6142/udp"
+    depends_on:
+      - tdengine_0
+#    volumes:
+#      - /opt/tdengine/1/lib:/var/lib/taos
+#      - /opt/tdengine/1/log:/var/log/taos
+  tdengine_2:
+    image: wwbgo/tdengine:2.4.0.0
+    restart: always
+    container_name: tdengine_2
+    environment:
+      TAOS_firstEp: tdengine_0:6030
+      TAOS_fqdn: tdengine_2
+      TAOS_serverPort: 6230
+    ports:
+      - "6230-6242:6230-6242/tcp"
+      - "6230-6242:6230-6242/udp"
+    depends_on:
+      - tdengine_0
+#    volumes:
+#      - /opt/tdengine/2/lib:/var/lib/taos
+#      - /opt/tdengine/2/log:/var/log/taos
+
+networks:
+  default:
+    external: true
+    name: localnet
