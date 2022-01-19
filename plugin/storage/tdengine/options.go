@@ -38,6 +38,10 @@ const (
 	suffixNumOfThreads         = ".num-of-threads"
 	suffixStartTimestamp       = ".start-timestamp"
 
+	suffixMaxConnect  = ".max-connect"
+	suffixMaxIdle     = ".max-idle"
+	suffixIdleTimeout = ".idle-timeout"
+
 	defaultHostName             = "127.0.0.1"
 	defaultServerPort           = 6030
 	defaultUser                 = "root"
@@ -50,6 +54,10 @@ const (
 	defaultNumOfRecordsPerReq   = 3
 	defaultNumOfThreads         = 1
 	defaultStartTimestamp       = "2020-10-01 08:00:00"
+
+	defaultMaxConnect  = 4000
+	defaultMaxIdle     = 4000
+	defaultIdleTimeout = time.Hour
 
 	defaultSupTblName = "meters"
 	defaultKeep       = 365 * 20
@@ -71,6 +79,10 @@ type Options struct {
 	numOfThreads         int
 	startTimestamp       string
 	startTs              int64
+
+	maxConnect  int
+	maxIdle     int
+	idleTimeout time.Duration
 
 	keep int
 	days int
@@ -137,7 +149,21 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultStartTimestamp,
 		"The start timestamp for one table",
 	)
-
+	flagSet.Int(
+		configPrefix+suffixMaxConnect,
+		defaultMaxConnect,
+		"max connections to taosd",
+	)
+	flagSet.Int(
+		configPrefix+suffixMaxIdle,
+		defaultMaxIdle,
+		"max idle connections to taosd",
+	)
+	flagSet.Duration(
+		configPrefix+suffixIdleTimeout,
+		defaultIdleTimeout,
+		"Set idle connection timeout",
+	)
 }
 
 func (o *Options) InitFromViper(v *viper.Viper) {
@@ -158,6 +184,10 @@ func (o *Options) InitFromViper(v *viper.Viper) {
 	if err == nil {
 		o.startTs = startTs.UnixNano() / 1e6
 	}
+
+	o.maxConnect = v.GetInt(configPrefix + suffixMaxConnect)
+	o.maxIdle = v.GetInt(configPrefix + suffixMaxIdle)
+	o.idleTimeout = v.GetDuration(configPrefix + suffixIdleTimeout)
 
 	o.supTblName = defaultSupTblName
 	o.keep = defaultKeep

@@ -3,14 +3,12 @@ module github.com/Clymene-project/Clymene
 go 1.16
 
 require (
-	github.com/Azure/azure-sdk-for-go v49.2.0+incompatible
+	github.com/Azure/azure-sdk-for-go v51.1.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.18
-	github.com/Azure/go-autorest/autorest/adal v0.9.13
-	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
-	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.9.15
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/Shopify/sarama v1.30.0
-	github.com/aws/aws-sdk-go v1.38.68
+	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gogo/protobuf v1.3.2
@@ -24,7 +22,7 @@ require (
 	github.com/hashicorp/consul/api v1.10.1
 	github.com/influxdata/influxdb-client-go/v2 v2.6.0
 	github.com/jaegertracing/jaeger v1.29.0
-	github.com/miekg/dns v1.1.26
+	github.com/miekg/dns v1.1.43
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
 	github.com/oklog/run v1.1.0
 	github.com/olivere/elastic v6.2.37+incompatible
@@ -34,20 +32,23 @@ require (
 	github.com/prometheus/common v0.32.1
 	github.com/prometheus/prometheus v2.5.0+incompatible
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
+	github.com/silenceper/pool v1.0.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
+	github.com/taosdata/driver-go/v2 v2.0.1-0.20220113110107-e2b7f0b8b6df
+	github.com/taosdata/taosadapter v0.0.0-20220119131555-6d401bb95e11
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/xdg-go/scram v1.0.2
 	go.uber.org/zap v1.19.1
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
-	google.golang.org/api v0.56.0
-	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71
+	google.golang.org/api v0.57.0
+	google.golang.org/genproto v0.0.0-20210921142501-181ce0d877f6
 	google.golang.org/grpc v1.41.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.21.0
-	k8s.io/apimachinery v0.21.0
+	k8s.io/apimachinery v0.21.1
 	k8s.io/client-go v0.21.0
 )
