@@ -24,18 +24,18 @@ import (
 	"go.uber.org/zap"
 )
 
-// Factory implements storage.Factory and creates write-only storage components backed by kafka.
+// Factory implements storage.Factory
 type Factory struct {
 	options Options
-	//logger         *zap.Logger
+	logger  *zap.Logger
 	//marshaller     kafka.Marshaller
-	//metricsFactory metrics.Factory
+	metricsFactory metrics.Factory
 }
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
-	//f.metricsFactory, f.logger = metricsFactory, logger
-	//logger.Info("Factory Initialize", zap.String("type", "prometheus"))
-	//logger.Info("prometheus factory", zap.String("url", f.options.url))
+	f.metricsFactory, f.logger = metricsFactory, logger
+	logger.Info("Factory Initialize", zap.String("type", "tdengine"))
+	logger.Info("TDengine factory", zap.String("url", f.options.hostName))
 
 	return nil
 }

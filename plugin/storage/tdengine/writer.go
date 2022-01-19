@@ -20,5 +20,5 @@ package tdengine
 /rest/sql,		timestamp format: "2018-10-03 14:38:05.000"
 /rest/sqlt, 	timestamp format: 1538548685000
 /rest/sqlutc, 	timestamp format: "2018-10-03T14:38:05.000+0800"
-
+https://github.com/taosdata/TDengine/blob/develop/tests/examples/go/taosdemo.go
 */
