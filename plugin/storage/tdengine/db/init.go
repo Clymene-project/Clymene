@@ -2,8 +2,7 @@ package db
 
 import (
 	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db/async"
-	"github.com/taosdata/taosadapter/config"
-	"github.com/taosdata/taosadapter/log"
+	"go.uber.org/zap"
 	"sync"
 
 	"github.com/taosdata/driver-go/v2/common"
@@ -12,15 +11,14 @@ import (
 )
 
 var once = sync.Once{}
-var logger = log.GetLogger("db")
 
-func PrepareConnection() {
-	if len(config.Conf.TaosConfigDir) != 0 {
+func PrepareConnection(taosConfigDir string, logger *zap.Logger) {
+	if len(taosConfigDir) != 0 {
 		once.Do(func() {
-			code := wrapper.TaosOptions(common.TSDB_OPTION_CONFIGDIR, config.Conf.TaosConfigDir)
+			code := wrapper.TaosOptions(common.TSDB_OPTION_CONFIGDIR, taosConfigDir)
 			err := errors.GetError(code)
 			if err != nil {
-				logger.WithError(err).Panic("set taos config file ", config.Conf.TaosConfigDir)
+				logger.Panic("config Error", zap.String("set taos config file ", taosConfigDir))
 			}
 		})
 	}

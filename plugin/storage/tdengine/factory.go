@@ -18,6 +18,7 @@ package tdengine
 
 import (
 	"flag"
+	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -37,6 +38,12 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	logger.Info("Factory Initialize", zap.String("type", "tdengine"))
 	logger.Info("TDengine factory", zap.String("url", f.options.hostName))
 
+	db.PrepareConnection(f.options.taosConfigDir, f.logger)
+
+	//conn, err := commonpool.GetConnection()
+	//if err != nil {
+	//	logger.Panic("connection Error", zap.Error(err))
+	//}
 	return nil
 }
 

@@ -38,9 +38,10 @@ const (
 	suffixNumOfThreads         = ".num-of-threads"
 	suffixStartTimestamp       = ".start-timestamp"
 
-	suffixMaxConnect  = ".max-connect"
-	suffixMaxIdle     = ".max-idle"
-	suffixIdleTimeout = ".idle-timeout"
+	suffixMaxConnect    = ".max-connect"
+	suffixMaxIdle       = ".max-idle"
+	suffixIdleTimeout   = ".idle-timeout"
+	suffixTaosConfigDir = ".taos-config-dir"
 
 	defaultHostName             = "127.0.0.1"
 	defaultServerPort           = 6030
@@ -62,6 +63,8 @@ const (
 	defaultSupTblName = "meters"
 	defaultKeep       = 365 * 20
 	defaultDays       = 30
+
+	defaultTaosConfigDir = ""
 )
 
 type Options struct {
@@ -86,6 +89,8 @@ type Options struct {
 
 	keep int
 	days int
+
+	taosConfigDir string
 }
 
 func (o *Options) AddFlags(flagSet *flag.FlagSet) {
@@ -164,6 +169,11 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultIdleTimeout,
 		"Set idle connection timeout",
 	)
+	flagSet.String(
+		configPrefix+suffixTaosConfigDir,
+		defaultTaosConfigDir,
+		"load taos client config path",
+	)
 }
 
 func (o *Options) InitFromViper(v *viper.Viper) {
@@ -193,4 +203,5 @@ func (o *Options) InitFromViper(v *viper.Viper) {
 	o.keep = defaultKeep
 	o.days = defaultDays
 
+	o.taosConfigDir = v.GetString(configPrefix + suffixTaosConfigDir)
 }

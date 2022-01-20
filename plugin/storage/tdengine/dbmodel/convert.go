@@ -39,13 +39,13 @@ import (
 type Converter struct {
 }
 
-func (c *Converter) processWrite(taosConn unsafe.Pointer, req *prompb.WriteRequest, db string) error {
+func (c *Converter) processWrite(taosConn unsafe.Pointer, metrics []prompb.TimeSeries, db string) error {
 	err := tool.SelectDB(taosConn, db)
 	if err != nil {
 		return err
 	}
 
-	sql, err := c.generateWriteSql(req.GetTimeseries())
+	sql, err := c.generateWriteSql(metrics)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *Converter) generateWriteSql(timeseries []prompb.TimeSeries) (string, er
 	return sql.String(), nil
 }
 
-// processRead, for the querier
+// TODO processRead, for the querier
 func (c *Converter) processRead(taosConn unsafe.Pointer, req *prompb.ReadRequest, db string) (resp *prompb.ReadResponse, err error) {
 	thread.Lock()
 	wrapper.TaosSelectDB(taosConn, db)

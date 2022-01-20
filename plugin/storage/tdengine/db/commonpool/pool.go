@@ -16,7 +16,6 @@ type ConnectorPool struct {
 	pool     pool.Pool
 }
 
-// TODO need custom
 func NewConnectorPool(user, password string) (*ConnectorPool, error) {
 	a := &ConnectorPool{user: user, password: password}
 	poolConfig := &pool.Config{
