@@ -19,78 +19,81 @@ package tdengine
 import (
 	"flag"
 	"github.com/spf13/viper"
-	"time"
 )
 
 const (
 	configPrefix = "tdengine"
 
-	suffixHostName             = ".hostname"
-	suffixServerPort           = ".server-port"
-	suffixUser                 = ".user"
-	suffixPassword             = ".password"
-	suffixDBName               = ".dbname"
-	suffixTablePrefix          = ".table-prefix"
-	suffixMode                 = ".mode"
-	suffixNumOftables          = ".num-of-tables"
-	suffixNumOfRecordsPerTable = ".num-of-record-per-table"
-	suffixNumOfRecordsPerReq   = ".num-of-record-per-req"
-	suffixNumOfThreads         = ".num-of-threads"
-	suffixStartTimestamp       = ".start-timestamp"
+	suffixHostName     = ".hostname"
+	suffixServerPort   = ".server-port"
+	suffixUser         = ".user"
+	suffixPassword     = ".password"
+	suffixDBName       = ".dbname"
+	suffixMaxSQLLength = ".max-sql-length"
+	//suffixTablePrefix = ".table-prefix"
+	//
+	//suffixNumOftables          = ".num-of-tables"
+	//suffixNumOfRecordsPerTable = ".num-of-record-per-table"
+	//suffixNumOfRecordsPerReq   = ".num-of-record-per-req"
+	//suffixNumOfThreads         = ".num-of-threads"
+	//suffixStartTimestamp       = ".start-timestamp"
+	//
+	//suffixMaxConnect    = ".max-connect"
+	//suffixMaxIdle       = ".max-idle"
+	//suffixIdleTimeout   = ".idle-timeout"
+	//suffixTaosConfigDir = ".taos-config-dir"
 
-	suffixMaxConnect    = ".max-connect"
-	suffixMaxIdle       = ".max-idle"
-	suffixIdleTimeout   = ".idle-timeout"
-	suffixTaosConfigDir = ".taos-config-dir"
+	defaultHostName    = "127.0.0.1"
+	defaultServerPort  = 6041
+	defaultUser        = "root"
+	defaultPassword    = "taosdata"
+	defaultDBName      = "test"
+	defaultMaxSQLLenth = 4096
 
-	defaultHostName             = "127.0.0.1"
-	defaultServerPort           = 6030
-	defaultUser                 = "root"
-	defaultPassword             = "taosdata"
-	defaultDBName               = "test"
-	defaultTablePrefix          = "d"
-	defaultMode                 = "r"
-	defaultNumOftables          = 2
-	defaultNumOfRecordsPerTable = 10
-	defaultNumOfRecordsPerReq   = 3
-	defaultNumOfThreads         = 1
-	defaultStartTimestamp       = "2020-10-01 08:00:00"
+	//defaultTablePrefix = "d"
 
-	defaultMaxConnect  = 4000
-	defaultMaxIdle     = 4000
-	defaultIdleTimeout = time.Hour
-
-	defaultSupTblName = "meters"
-	defaultKeep       = 365 * 20
-	defaultDays       = 30
-
-	defaultTaosConfigDir = ""
+	//defaultNumOftables          = 2
+	//defaultNumOfRecordsPerTable = 10
+	//defaultNumOfRecordsPerReq   = 3
+	//defaultNumOfThreads         = 1
+	//defaultStartTimestamp       = "2020-10-01 08:00:00"
+	//
+	//defaultMaxConnect  = 4000
+	//defaultMaxIdle     = 4000
+	//defaultIdleTimeout = time.Hour
+	//
+	//defaultSupTblName = "meters"
+	//defaultKeep       = 365 * 20
+	//defaultDays       = 30
+	//
+	//defaultTaosConfigDir = ""
 )
 
 type Options struct {
-	hostName             string
-	serverPort           int
-	user                 string
-	password             string
-	dbName               string
-	supTblName           string
-	tablePrefix          string
-	mode                 string
-	numOftables          int
-	numOfRecordsPerTable int
-	numOfRecordsPerReq   int
-	numOfThreads         int
-	startTimestamp       string
-	startTs              int64
-
-	maxConnect  int
-	maxIdle     int
-	idleTimeout time.Duration
-
-	keep int
-	days int
-
-	taosConfigDir string
+	hostName     string
+	serverPort   int
+	user         string
+	password     string
+	dbName       string
+	maxSQLLength int
+	//supTblName           string
+	//tablePrefix          string
+	//mode                 string
+	//numOftables          int
+	//numOfRecordsPerTable int
+	//numOfRecordsPerReq   int
+	//numOfThreads         int
+	//startTimestamp       string
+	//startTs              int64
+	//
+	//maxConnect  int
+	//maxIdle     int
+	//idleTimeout time.Duration
+	//
+	//keep int
+	//days int
+	//
+	//taosConfigDir string
 }
 
 func (o *Options) AddFlags(flagSet *flag.FlagSet) {
@@ -119,61 +122,66 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultDBName,
 		"Destination database",
 	)
-	flagSet.String(
-		configPrefix+suffixTablePrefix,
-		defaultTablePrefix,
-		"Table prefix name",
-	)
-	flagSet.String(
-		configPrefix+suffixMode,
-		defaultMode,
-		"mode,r:raw,s:stmt",
-	)
 	flagSet.Int(
-		configPrefix+suffixNumOftables,
-		defaultNumOftables,
-		"The number of tables.",
+		configPrefix+suffixMaxSQLLength,
+		defaultMaxSQLLenth,
+		"Number of SQLs that can be sent at one time",
 	)
-	flagSet.Int(
-		configPrefix+suffixNumOfRecordsPerTable,
-		defaultNumOfRecordsPerTable,
-		"The number of records per table",
-	)
-	flagSet.Int(
-		configPrefix+suffixNumOfRecordsPerReq,
-		defaultNumOfRecordsPerReq,
-		"The number of records per request",
-	)
-	flagSet.Int(
-		configPrefix+suffixNumOfThreads,
-		defaultNumOfThreads,
-		"The number of threads",
-	)
-	flagSet.String(
-		configPrefix+suffixStartTimestamp,
-		defaultStartTimestamp,
-		"The start timestamp for one table",
-	)
-	flagSet.Int(
-		configPrefix+suffixMaxConnect,
-		defaultMaxConnect,
-		"max connections to taosd",
-	)
-	flagSet.Int(
-		configPrefix+suffixMaxIdle,
-		defaultMaxIdle,
-		"max idle connections to taosd",
-	)
-	flagSet.Duration(
-		configPrefix+suffixIdleTimeout,
-		defaultIdleTimeout,
-		"Set idle connection timeout",
-	)
-	flagSet.String(
-		configPrefix+suffixTaosConfigDir,
-		defaultTaosConfigDir,
-		"load taos client config path",
-	)
+	//flagSet.String(
+	//	configPrefix+suffixTablePrefix,
+	//	defaultTablePrefix,
+	//	"Table prefix name",
+	//)
+	//flagSet.String(
+	//	configPrefix+suffixMode,
+	//	defaultMode,
+	//	"mode,r:raw,s:stmt",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixNumOftables,
+	//	defaultNumOftables,
+	//	"The number of tables.",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixNumOfRecordsPerTable,
+	//	defaultNumOfRecordsPerTable,
+	//	"The number of records per table",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixNumOfRecordsPerReq,
+	//	defaultNumOfRecordsPerReq,
+	//	"The number of records per request",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixNumOfThreads,
+	//	defaultNumOfThreads,
+	//	"The number of threads",
+	//)
+	//flagSet.String(
+	//	configPrefix+suffixStartTimestamp,
+	//	defaultStartTimestamp,
+	//	"The start timestamp for one table",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixMaxConnect,
+	//	defaultMaxConnect,
+	//	"max connections to taosd",
+	//)
+	//flagSet.Int(
+	//	configPrefix+suffixMaxIdle,
+	//	defaultMaxIdle,
+	//	"max idle connections to taosd",
+	//)
+	//flagSet.Duration(
+	//	configPrefix+suffixIdleTimeout,
+	//	defaultIdleTimeout,
+	//	"Set idle connection timeout",
+	//)
+	//flagSet.String(
+	//	configPrefix+suffixTaosConfigDir,
+	//	defaultTaosConfigDir,
+	//	"load taos client config path",
+	//)
 }
 
 func (o *Options) InitFromViper(v *viper.Viper) {
@@ -182,26 +190,27 @@ func (o *Options) InitFromViper(v *viper.Viper) {
 	o.user = v.GetString(configPrefix + suffixUser)
 	o.password = v.GetString(configPrefix + suffixPassword)
 	o.dbName = v.GetString(configPrefix + suffixDBName)
-	o.tablePrefix = v.GetString(configPrefix + suffixTablePrefix)
-	o.mode = v.GetString(configPrefix + suffixMode)
-	o.numOftables = v.GetInt(configPrefix + suffixNumOftables)
-	o.numOfRecordsPerTable = v.GetInt(configPrefix + suffixNumOfRecordsPerTable)
-	o.numOfRecordsPerReq = v.GetInt(configPrefix + suffixNumOfRecordsPerReq)
-	o.numOfThreads = v.GetInt(configPrefix + suffixNumOfThreads)
-	o.startTimestamp = v.GetString(configPrefix + suffixStartTimestamp)
-
-	startTs, err := time.ParseInLocation("2006-01-02 15:04:05", o.startTimestamp, time.Local)
-	if err == nil {
-		o.startTs = startTs.UnixNano() / 1e6
-	}
-
-	o.maxConnect = v.GetInt(configPrefix + suffixMaxConnect)
-	o.maxIdle = v.GetInt(configPrefix + suffixMaxIdle)
-	o.idleTimeout = v.GetDuration(configPrefix + suffixIdleTimeout)
-
-	o.supTblName = defaultSupTblName
-	o.keep = defaultKeep
-	o.days = defaultDays
-
-	o.taosConfigDir = v.GetString(configPrefix + suffixTaosConfigDir)
+	o.maxSQLLength = v.GetInt(configPrefix + suffixMaxSQLLength)
+	//o.tablePrefix = v.GetString(configPrefix + suffixTablePrefix)
+	//o.mode = v.GetString(configPrefix + suffixMode)
+	//o.numOftables = v.GetInt(configPrefix + suffixNumOftables)
+	//o.numOfRecordsPerTable = v.GetInt(configPrefix + suffixNumOfRecordsPerTable)
+	//o.numOfRecordsPerReq = v.GetInt(configPrefix + suffixNumOfRecordsPerReq)
+	//o.numOfThreads = v.GetInt(configPrefix + suffixNumOfThreads)
+	//o.startTimestamp = v.GetString(configPrefix + suffixStartTimestamp)
+	//
+	//startTs, err := time.ParseInLocation("2006-01-02 15:04:05", o.startTimestamp, time.Local)
+	//if err == nil {
+	//	o.startTs = startTs.UnixNano() / 1e6
+	//}
+	//
+	//o.maxConnect = v.GetInt(configPrefix + suffixMaxConnect)
+	//o.maxIdle = v.GetInt(configPrefix + suffixMaxIdle)
+	//o.idleTimeout = v.GetDuration(configPrefix + suffixIdleTimeout)
+	//
+	//o.supTblName = defaultSupTblName
+	//o.keep = defaultKeep
+	//o.days = defaultDays
+	//
+	//o.taosConfigDir = v.GetString(configPrefix + suffixTaosConfigDir)
 }

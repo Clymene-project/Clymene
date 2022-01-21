@@ -17,6 +17,7 @@
 package tdengine
 
 import (
+	"database/sql"
 	"flag"
 	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -27,10 +28,10 @@ import (
 
 // Factory implements storage.Factory
 type Factory struct {
-	options Options
-	logger  *zap.Logger
-	//marshaller     kafka.Marshaller
+	options        Options
+	logger         *zap.Logger
 	metricsFactory metrics.Factory
+	tdEngine       *sql.DB
 }
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
@@ -38,17 +39,23 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	logger.Info("Factory Initialize", zap.String("type", "tdengine"))
 	logger.Info("TDengine factory", zap.String("url", f.options.hostName))
 
-	db.PrepareConnection(f.options.taosConfigDir, f.logger)
-
-	//conn, err := commonpool.GetConnection()
-	//if err != nil {
-	//	logger.Panic("connection Error", zap.Error(err))
-	//}
+	// TDengine session
+	tdEngine, err := db.PrepareConnection(&db.TaosConnConfig{
+		User:       f.options.user,
+		Password:   f.options.password,
+		HostName:   f.options.hostName,
+		ServerPort: f.options.serverPort,
+		DbName:     f.options.dbName,
+	})
+	if err != nil {
+		logger.Panic("connection Error", zap.Error(err))
+	}
+	f.tdEngine = tdEngine
 	return nil
 }
 
 func (f *Factory) CreateWriter() (metricstore.Writer, error) {
-	return nil, nil
+	return NewMetricWriter(f.tdEngine, f.options.maxSQLLength, f.logger), nil
 }
 
 // NewFactory creates a new Factory.

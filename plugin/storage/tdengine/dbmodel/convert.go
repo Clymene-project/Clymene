@@ -18,70 +18,39 @@ package dbmodel
 
 import (
 	"crypto/md5"
-	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db/async"
-	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db/tool"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/pkg/errors"
-	"github.com/taosdata/driver-go/v2/common"
-	tErrors "github.com/taosdata/driver-go/v2/errors"
-	"github.com/taosdata/driver-go/v2/wrapper"
-	"github.com/taosdata/taosadapter/thread"
 	"github.com/taosdata/taosadapter/tools/pool"
 	"math"
+	"regexp"
 	"sort"
 	"time"
-	"unsafe"
 )
 
 type Converter struct {
 }
 
-func (c *Converter) processWrite(taosConn unsafe.Pointer, metrics []prompb.TimeSeries, db string) error {
-	err := tool.SelectDB(taosConn, db)
-	if err != nil {
-		return err
-	}
-
-	sql, err := c.generateWriteSql(metrics)
-	if err != nil {
-		return err
-	}
-	err = async.GlobalAsync.TaosExecWithoutResult(taosConn, sql)
-	if err != nil {
-		if tErr, is := err.(*tErrors.TaosError); is {
-			if tErr.Code == tErrors.MND_INVALID_TABLE_NAME {
-				err := async.GlobalAsync.TaosExecWithoutResult(taosConn, "create stable if not exists metrics(ts timestamp,value double) tags (labels json)")
-				if err != nil {
-					return err
-				}
-				// retry
-				err = async.GlobalAsync.TaosExecWithoutResult(taosConn, sql)
-				return err
-			} else {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *Converter) generateWriteSql(timeseries []prompb.TimeSeries) (string, error) {
+func (c *Converter) GenerateWriteSql(timeseries []prompb.TimeSeries) (string, string, error) {
 	sql := pool.BytesPoolGet()
 	defer pool.BytesPoolPut(sql)
 	sql.WriteString("insert into ")
 	tmp := pool.BytesPoolGet()
 	defer pool.BytesPoolPut(tmp)
+	tableName := ""
 	for _, timeSeriesData := range timeseries {
 		tagName := make([]string, len(timeSeriesData.Labels))
 		tagMap := make(map[string]string, len(timeSeriesData.Labels))
 		for i, label := range timeSeriesData.GetLabels() {
-			tagName[i] = label.Name
-			tagMap[label.Name] = label.Value
+			// The "/" character causes a syntax error
+			match, _ := regexp.MatchString("[`\"\\[\\]\\\\]", label.Value)
+			if !match {
+				if label.Value != "" {
+					tagName[i] = label.Name
+					tagMap[label.Name] = label.Value
+				}
+			}
 		}
 		sort.Strings(tagName)
 		tmp.Reset()
@@ -96,9 +65,9 @@ func (c *Converter) generateWriteSql(timeseries []prompb.TimeSeries) (string, er
 		}
 		labelsJson, err := json.Marshal(tagMap)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
-		tableName := fmt.Sprintf("t_%x", md5.Sum(tmp.Bytes()))
+		tableName = fmt.Sprintf("t_%x", md5.Sum(tmp.Bytes()))
 		sql.WriteString(tableName)
 		sql.WriteString(" using metrics tags('")
 		sql.Write(labelsJson)
@@ -115,86 +84,7 @@ func (c *Converter) generateWriteSql(timeseries []prompb.TimeSeries) (string, er
 			sql.WriteString(") ")
 		}
 	}
-	return sql.String(), nil
-}
-
-// TODO processRead, for the querier
-func (c *Converter) processRead(taosConn unsafe.Pointer, req *prompb.ReadRequest, db string) (resp *prompb.ReadResponse, err error) {
-	thread.Lock()
-	wrapper.TaosSelectDB(taosConn, db)
-	thread.Unlock()
-	resp = &prompb.ReadResponse{}
-	for i, query := range req.Queries {
-		sql, err := c.generateReadSql(query)
-		if err != nil {
-			return nil, err
-		}
-
-		data, err := async.GlobalAsync.TaosExec(taosConn, sql, func(ts int64, precision int) driver.Value {
-			switch precision {
-			case common.PrecisionMilliSecond:
-				return ts
-			case common.PrecisionMicroSecond:
-				return ts / 1e3
-			case common.PrecisionNanoSecond:
-				return ts / 1e6
-			default:
-				return 0
-			}
-		})
-		if err != nil {
-			return nil, err
-		}
-		//ts value labels time.Time float64 []byte
-		group := map[string]*prompb.TimeSeries{}
-		for _, d := range data.Data {
-			if len(d) != 4 {
-				continue
-			}
-			if d[0] == nil || d[1] == nil || d[2] == nil || d[3] == nil {
-				continue
-			}
-			ts := d[0].(int64)
-			value := d[1].(float64)
-			var tags map[string]string
-			err = json.Unmarshal(d[2].(json.RawMessage), &tags)
-			if err != nil {
-				return nil, err
-			}
-			tbName := d[3].(string)
-			timeSeries, exist := group[tbName]
-			if exist {
-				timeSeries.Samples = append(timeSeries.Samples, prompb.Sample{
-					Value:     value,
-					Timestamp: ts,
-				})
-			} else {
-				timeSeries = &prompb.TimeSeries{
-					Samples: []prompb.Sample{
-						{
-							Value:     value,
-							Timestamp: ts,
-						},
-					},
-				}
-				timeSeries.Labels = make([]prompb.Label, 0, len(tags))
-				for name, tagValue := range tags {
-					timeSeries.Labels = append(timeSeries.Labels, prompb.Label{
-						Name:  name,
-						Value: tagValue,
-					})
-				}
-				group[tbName] = timeSeries
-			}
-		}
-		if len(group) > 0 {
-			resp.Results = append(resp.Results, &prompb.QueryResult{Timeseries: make([]*prompb.TimeSeries, 0, len(group))})
-		}
-		for _, series := range group {
-			resp.Results[i].Timeseries = append(resp.Results[i].Timeseries, series)
-		}
-	}
-	return resp, err
+	return tableName, sql.String(), nil
 }
 
 func (c *Converter) generateReadSql(query *prompb.Query) (string, error) {

@@ -11,8 +11,8 @@
 The Clymene is a time series data collection platform for distributed systems inspired
 by [Prometheus](https://prometheus.io)
 and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
-different types of databases. It can be configured in a variety of architectures. Various time series data analysis
-functions will be added.
+different types of databases. It can be configured in a variety of architectures. Also, Clymene Agent's time series data collection uses fewer resources than Prometheus' remote_write. 
+Various time series data analysis functions will be added.
 
 # Architecture
 

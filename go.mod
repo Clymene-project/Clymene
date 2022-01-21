@@ -32,13 +32,12 @@ require (
 	github.com/prometheus/common v0.32.1
 	github.com/prometheus/prometheus v2.5.0+incompatible
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
-	github.com/silenceper/pool v1.0.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	github.com/taosdata/driver-go/v2 v2.0.1-0.20220113110107-e2b7f0b8b6df
 	github.com/taosdata/taosadapter v0.0.0-20220119131555-6d401bb95e11
 	github.com/uber/jaeger-lib v2.4.1+incompatible
+	github.com/wenj91/taos-driver v0.0.0-20211207130521-b61711c4da89
 	github.com/xdg-go/scram v1.0.2
 	go.uber.org/zap v1.19.1
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f

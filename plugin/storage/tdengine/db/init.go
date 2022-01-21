@@ -1,26 +1,37 @@
 package db
 
 import (
-	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/db/async"
-	"go.uber.org/zap"
-	"sync"
-
-	"github.com/taosdata/driver-go/v2/common"
-	"github.com/taosdata/driver-go/v2/errors"
-	"github.com/taosdata/driver-go/v2/wrapper"
+	"database/sql"
+	"fmt"
+	_ "github.com/wenj91/taos-driver"
 )
 
-var once = sync.Once{}
+type TaosConnConfig struct {
+	User       string
+	Password   string
+	HostName   string
+	ServerPort int
+	DbName     string
+}
 
-func PrepareConnection(taosConfigDir string, logger *zap.Logger) {
-	if len(taosConfigDir) != 0 {
-		once.Do(func() {
-			code := wrapper.TaosOptions(common.TSDB_OPTION_CONFIGDIR, taosConfigDir)
-			err := errors.GetError(code)
-			if err != nil {
-				logger.Panic("config Error", zap.String("set taos config file ", taosConfigDir))
-			}
-		})
+func PrepareConnection(config *TaosConnConfig) (*sql.DB, error) {
+	url := fmt.Sprintf("%s:%s@/http(%s:%d)/%s", config.User, config.Password, config.HostName, config.ServerPort, config.DbName)
+	db, err := sql.Open("taosSql", url)
+	if err != nil {
+		return nil, err
 	}
-	async.GlobalAsync = async.NewAsync(async.NewHandlerPool(10000))
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec("create database if not exists " + config.DbName + " precision 'ns' update 2")
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec("use " + config.DbName)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+
 }
