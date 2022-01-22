@@ -3,7 +3,7 @@
 
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5491/badge)](https://bestpractices.coreinfrastructure.org/projects/5491) ![CodeQL](https://github.com/clymene-project/clymene/workflows/CodeQL/badge.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/clymene-project/clymene) [![Go Reference](https://pkg.go.dev/badge/github.com/Clymene-project/Clymene.svg)](https://pkg.go.dev/github.com/Clymene-project/Clymene)  
-![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch) <img src="https://img.shields.io/badge/influxdb-%2322ADF6.svg?&style=for-the-badge&logo=influxdb&logoColor=white"/>  <img src="https://img.shields.io/badge/prometheus-%23E6522C.svg?&style=for-the-badge&logo=prometheus&logoColor=white" />   <img src="https://img.shields.io/badge/OpenTSDB-green?style=for-the-badge"> <img src="https://img.shields.io/badge/cortex-blue?style=for-the-badge">    
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch) <img src="https://img.shields.io/badge/influxdb-%2322ADF6.svg?&style=for-the-badge&logo=influxdb&logoColor=white"/>  <img src="https://img.shields.io/badge/prometheus-%23E6522C.svg?&style=for-the-badge&logo=prometheus&logoColor=white" />   <img src="https://img.shields.io/badge/OpenTSDB-green?style=for-the-badge"> <img src="https://img.shields.io/badge/cortex-blue?style=for-the-badge">  <img src="https://img.shields.io/badge/tdengine-gray?style=for-the-badge">     
 
 
 <img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148681479-3ddf237c-6e5d-49a1-a517-8b3bfa92f54e.png" alt="clymene_logo">
@@ -21,21 +21,21 @@ Various time series data analysis functions will be added.
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at
 once.
 
-<img src="https://user-images.githubusercontent.com/25188468/148680397-aa9ca8a8-810c-4141-aefb-7e5d8ed87d13.png" width="70%" height="70%" alt="architecture_v1.3.0">
+<img src="https://user-images.githubusercontent.com/25188468/150611946-c3f07298-03ee-42ba-8937-9da22735da45.png" width="70%" height="70%" alt="architecture_v1.4.0">
 
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
 Writers that can be stored in multiple DBs at once.
 
-<img src="https://user-images.githubusercontent.com/25188468/148680487-de5b083d-024e-4aaa-aeac-d362bbcec8de.png" width="70%" height="70%" alt="architecture_v1.3.0_ingester">  
+<img src="https://user-images.githubusercontent.com/25188468/150611879-35855d02-0753-4f90-83fd-583c1e036c71.png" width="70%" height="70%" alt="architecture_v1.4.0_ingester">  
 
 ### Use gateway
 
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
 Composite Writers that can be stored in multiple DBs at once.
 
-<img src="https://user-images.githubusercontent.com/25188468/148680473-290f098e-fab6-4e87-a958-cdd96ff12a15.png" width="70%" height="70%" alt="architecture_v1.3.0_gateway">
+<img src="https://user-images.githubusercontent.com/25188468/150611990-61dc11df-1deb-4755-bf28-3a531bd77888.png" width="70%" height="70%" alt="architecture_v1.4.0_gateway">
 
 # components
 

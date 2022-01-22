@@ -47,7 +47,7 @@ const (
 	defaultServerPort  = 6041
 	defaultUser        = "root"
 	defaultPassword    = "taosdata"
-	defaultDBName      = "test"
+	defaultDBName      = "clymene"
 	defaultMaxSQLLenth = 4096
 
 	//defaultTablePrefix = "d"
@@ -105,7 +105,7 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.Int(
 		configPrefix+suffixServerPort,
 		defaultServerPort,
-		"he TCP/IP port number to use for the connection to TDengine server",
+		"he HTTP port number to use for the connection to TDengine server",
 	)
 	flagSet.String(
 		configPrefix+suffixUser,

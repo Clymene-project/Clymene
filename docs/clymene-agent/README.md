@@ -67,6 +67,10 @@ influxdb
 ```
 TS_STORAGE_TYPE=influxdb
 ```
+tdengine
+```
+TS_STORAGE_TYPE=tdengine
+```
 Several
 ```
 TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
@@ -80,13 +84,14 @@ TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동�
 - [gateway option](./gateway/gataway-option.md)
 - [Opentsdb option](./opentsdb/opentsdb-option.md)
 - [influxdb option](./influxdb/influxdb-options.md)
+- [TDengine options](./tdengine/tdengine-options.md)
 
 ### Docker-compose Example
 ```yaml
 version: '2'
 services:
   clymene-agent:
-    image: bourbonkk/clymene-agent:main
+    image: bourbonkk/clymene-agent:latest
     ports:
       - "15691:15691"
       - "15692:15692"
@@ -120,7 +125,7 @@ spec:
     spec:
       containers:
         - name: clymene-agent
-          image: bourbonkk/clymene-agent:main
+          image: bourbonkk/clymene-agent:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 15691

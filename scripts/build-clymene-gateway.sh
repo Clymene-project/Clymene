@@ -12,9 +12,18 @@ CGO_ENABLED=0 go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA}))' -X 'ma
 
 cp ./cmd/gateway/Dockerfile ./
 
-docker build -t bourbonkk/clymene-gateway:"${BRANCH}" .
 
-docker tag bourbonkk/clymene-gateway:"${BRANCH}" quay.io/clymene/clymene-gateway:"${BRANCH}"
 
-docker push bourbonkk/clymene-gateway:"${BRANCH}"
-docker push quay.io/clymene/clymene-gateway:"${BRANCH}"
+
+if ["${BRANCH}" == "master"]
+then
+  docker build -t bourbonkk/clymene-gateway:latest .
+  docker tag bourbonkk/clymene-gateway:latest quay.io/clymene/clymene-gateway:latest
+  docker push bourbonkk/clymene-gateway:latest
+  docker push quay.io/clymene/clymene-gateway:latest
+else
+  docker build -t bourbonkk/clymene-gateway:"${BRANCH}" .
+  docker tag bourbonkk/clymene-gateway:"${BRANCH}" quay.io/clymene/clymene-gateway:"${BRANCH}"
+  docker push bourbonkk/clymene-gateway:"${BRANCH}"
+  docker push quay.io/clymene/clymene-gateway:"${BRANCH}"
+fi

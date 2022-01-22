@@ -14,7 +14,15 @@ CGO_ENABLED=0 go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA}))' -X 'ma
 
 cp ./cmd/agent/Dockerfile ./
 
-docker build -t bourbonkk/clymene-agent:"${BRANCH}" .
-docker tag bourbonkk/clymene-agent:"${BRANCH}" quay.io/clymene/clymene-agent:"${BRANCH}"
-docker push bourbonkk/clymene-agent:"${BRANCH}"
-docker push quay.io/clymene/clymene-agent:"${BRANCH}"
+if ["${BRANCH}" == "master"]
+then
+  docker build -t bourbonkk/clymene-agent:latest .
+  docker tag bourbonkk/clymene-agent:latest quay.io/clymene/clymene-agent:latest
+  docker push bourbonkk/clymene-agent:latest
+  docker push quay.io/clymene/clymene-agent:latest
+else
+  docker build -t bourbonkk/clymene-agent:"${BRANCH}" .
+  docker tag bourbonkk/clymene-agent:"${BRANCH}" quay.io/clymene/clymene-agent:"${BRANCH}"
+  docker push bourbonkk/clymene-agent:"${BRANCH}"
+  docker push quay.io/clymene/clymene-agent:"${BRANCH}"
+fi
