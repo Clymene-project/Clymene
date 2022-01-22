@@ -87,9 +87,8 @@ the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-projec
 
 ## Roadmap
 
-1. Various DB support(ElasticSearch, Prometheus, Cortex, OpenTSDB, influxdb, TDengine, kdb, druid)
+1. Various DB support(ElasticSearch, Prometheus, Cortex, OpenTSDB, influxdb, TDengine, kdb)
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
-3. Website development for clymene(https://github.com/Clymene-project/documentation)
 
 ## Get in Touch
 
@@ -98,13 +97,6 @@ Have questions, suggestions, bug reports? Reach the project community via these 
 * GitHub [issues](https://github.com/clymene-project/clymene/issues)
   and [discussions](https://github.com/Clymene-project/Clymene/discussions)
 
-[//]: # (## Contributing)
-
-[//]: # ()
-
-[//]: # ()
-
-[//]: # (Refer to [CONTRIBUTING.md]&#40;https://github.com/clymene-project/clymene/blob/main/CONTRIBUTING.md&#41;)
 
 ## Further reading
 To learn more about Clymene, consult the following talks and articles.
