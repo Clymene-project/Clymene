@@ -4,6 +4,8 @@ Changes by Version
 1.4.0 (2022-01-22)
 -----------------
 Now, You can use clymene using tdengine's http interface.
+https://www.taosdata.com/en/
+issue: #35 #31
 
 ```
 --tdengine.dbname string         Destination database (default "clymene")
