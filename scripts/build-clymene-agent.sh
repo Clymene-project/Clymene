@@ -14,7 +14,7 @@ CGO_ENABLED=0 go build -ldflags "-X 'main.Version=${BRANCH}(${GIT_SHA}))' -X 'ma
 
 cp ./cmd/agent/Dockerfile ./
 
-if [${BRANCH} == "master"]
+if [[ ${BRANCH} == "master" ]];
 then
   docker build -t bourbonkk/clymene-agent:latest .
   docker tag bourbonkk/clymene-agent:latest quay.io/clymene/clymene-agent:latest

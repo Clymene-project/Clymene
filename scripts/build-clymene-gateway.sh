@@ -15,7 +15,7 @@ cp ./cmd/gateway/Dockerfile ./
 
 
 
-if [${BRANCH} == "master"]
+if [[ ${BRANCH} == "master" ]];
 then
   docker build -t bourbonkk/clymene-gateway:latest .
   docker tag bourbonkk/clymene-gateway:latest quay.io/clymene/clymene-gateway:latest

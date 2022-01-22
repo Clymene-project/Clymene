@@ -48,7 +48,7 @@ TS_STORAGE_TYPE=tdengine
 ```
 Several
 ```
-TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write - 여러 DB에 동시 write
+TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write
 ```
 
 #### 2. Option description by storage type
