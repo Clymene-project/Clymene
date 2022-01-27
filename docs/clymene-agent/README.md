@@ -1,6 +1,5 @@
 # Clymene-agent Getting Start
 The Clymene-agent is service that collects time series data(does not use disks)  
-Clymene-agent는 시계열 데이터를 수집하는 서비스입니다(디스크 사용 안함)
 
 ## How to create a scrape target setting yaml
 1. Config file Option  
@@ -34,6 +33,15 @@ scrape_configs:
       regex: (.+)  
       target_label: __metrics_path__  
       replacement: /api/v1/nodes/${1}/proxy/metrics
+```
+
+3. config file reload
+```yaml
+curl -XGET http://clymene-agent:15692/api/reload
+
+# check clymene-agent logs
+  {"level":"info","ts":1643299385.1000407,"caller":"config/config.go:451","msg":"Loading configuration file","filename":"clymene_agent.yml"}
+  {"level":"info","ts":1643299385.1012235,"caller":"config/config.go:468","msg":"Completed loading of configuration file","filename":"clymene_agent.yml"}
 ```
 
 ## How to set up the Storage Type

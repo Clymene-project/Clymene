@@ -1,7 +1,6 @@
 # Clymene Gateway Getting Start
 
 The Clymene Gateway is an optional service that can receive metric data from the agent through gRPC communication.  
-Clymene Gateway는 Clymene Agent로 부터 gRPC 통신으로 metric 데이터를 전달 받을 수 있는 선택적 서비스입니다.
 
 1. gRPC Service
 2. Time-series data insert to Database(ElasticSearch, Prometheus, ETC) (Optional) 
