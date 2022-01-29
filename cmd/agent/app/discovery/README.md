@@ -16,7 +16,7 @@ and/or services running somewhere. When exactly an SD is popular enough to
 justify being added to Prometheus natively is an open question.
 
 Note: As part of lifting the past moratorium on new SD implementations it was
-agreed that, in addition to the existing requirements, new service discovery 
+agreed that, in addition to the existing requirements, new service discovery
 implementations will be required to have a committed maintainer with push access (i.e., on -team).
 
 It should not be a brand new SD mechanism, or a variant of an established
@@ -62,7 +62,7 @@ It is very common for initial pull requests for new SDs to include hardcoded
 assumptions that make sense for the author's setup. SD should be generic,
 any customisation should be handled via relabelling. There should be basically
 no business logic, filtering, or transformations of the data from the SD beyond
-that which is needed to fit it into the metadata data model. 
+that which is needed to fit it into the metadata data model.
 
 Arrays (e.g. a list of tags) should be converted to a single label with the
 array values joined with a comma. Also prefix and suffix the value with a
@@ -131,7 +131,7 @@ the Prometheus server will be able to see them.
 
 ### The SD interface
 
-A Service Discovery (SD) mechanism has to discover targets and provide them to Prometheus. We expect similar targets to be grouped together, in the form of a [target group](https://godoc.org/github.com/prometheus/prometheus/discovery/targetgroup#Group). The SD mechanism sends the targets down to prometheus as list of target groups.
+A Service Discovery (SD) mechanism has to discover targets and provide them to Prometheus. We expect similar targets to be grouped together, in the form of a [target group](https://pkg.go.dev/github.com/prometheus/prometheus@v1.8.2-0.20211105201321-411021ada9ab/discovery/targetgroup#Group). The SD mechanism sends the targets down to prometheus as list of target groups.
 
 An SD mechanism has to implement the `Discoverer` Interface:
 ```go
@@ -140,80 +140,128 @@ type Discoverer interface {
 }
 ```
 
-Prometheus will call the `Run()` method on a provider to initialize the discovery mechanism. The mechanism will then send *all* the target groups into the channel. 
-Now the mechanism will watch for changes. For each update it can send all target groups, or only changed and new target groups, down the channel. `Manager` will handle 
+Prometheus will call the `Run()` method on a provider to initialize the discovery mechanism. The mechanism will then send *all* the target groups into the channel.
+Now the mechanism will watch for changes. For each update it can send all target groups, or only changed and new target groups, down the channel. `Manager` will handle
 both cases.
 
 For example if we had a discovery mechanism and it retrieves the following groups:
 
-```
+```go
 []targetgroup.Group{
-  {
-    Targets: []model.LabelSet{
-       {
-          "__instance__": "10.11.150.1:7870",
-          "hostname": "demo-target-1",
-          "test": "simple-test",
-       },
-       {
-          "__instance__": "10.11.150.4:7870",
-          "hostname": "demo-target-2",
-          "test": "simple-test",
-       },
-    },
-    Labels: map[LabelName][LabelValue] {
-      "job": "mysql",
-    },
-    "Source": "file1", 
-  },
-  {
-    Targets: []model.LabelSet{
-       {
-          "__instance__": "10.11.122.11:6001",
-          "hostname": "demo-postgres-1",
-          "test": "simple-test",
-       },
-       {
-          "__instance__": "10.11.122.15:6001",
-          "hostname": "demo-postgres-2",
-          "test": "simple-test",
-       },
-    },
-    Labels: map[LabelName][LabelValue] {
-      "job": "postgres",
-    },
-    "Source": "file2", 
-  },
+	{
+		Targets: []model.LabelSet{
+			{
+				"__instance__": "10.11.150.1:7870",
+				"hostname":     "demo-target-1",
+				"test":         "simple-test",
+			},
+			{
+				"__instance__": "10.11.150.4:7870",
+				"hostname":     "demo-target-2",
+				"test":         "simple-test",
+			},
+		},
+		Labels: model.LabelSet{
+			"job": "mysql",
+		},
+		"Source": "file1",
+	},
+	{
+		Targets: []model.LabelSet{
+			{
+				"__instance__": "10.11.122.11:6001",
+				"hostname":     "demo-postgres-1",
+				"test":         "simple-test",
+			},
+			{
+				"__instance__": "10.11.122.15:6001",
+				"hostname":     "demo-postgres-2",
+				"test":         "simple-test",
+			},
+		},
+		Labels: model.LabelSet{
+			"job": "postgres",
+		},
+		"Source": "file2",
+	},
 }
 ```
 
-Here there are two target groups one group with source `file1` and another with `file2`. The grouping is implementation specific and could even be one target per group. But, one has to make sure every target group sent by an SD instance should have a `Source` which is unique across all the target groups of that SD instance. 
+Here there are two target groups one group with source `file1` and another with `file2`. The grouping is implementation specific and could even be one target per group. But, one has to make sure every target group sent by an SD instance should have a `Source` which is unique across all the target groups of that SD instance.
 
 In this case, both the target groups are sent down the channel the first time `Run()` is called. Now, for an update, we need to send the whole _changed_ target group down the channel. i.e, if the target with `hostname: demo-postgres-2` goes away, we send:
-```
+```go
 &targetgroup.Group{
-  Targets: []model.LabelSet{
-     {
-        "__instance__": "10.11.122.11:6001",
-        "hostname": "demo-postgres-1",
-        "test": "simple-test",
-     },
-  },
-  Labels: map[LabelName][LabelValue] {
-    "job": "postgres",
-  },
-  "Source": "file2", 
+	Targets: []model.LabelSet{
+		{
+			"__instance__": "10.11.122.11:6001",
+			"hostname":     "demo-postgres-1",
+			"test":         "simple-test",
+		},
+	},
+	Labels: model.LabelSet{
+		"job": "postgres",
+	},
+	"Source": "file2",
 }
 ```
 down the channel.
 
 If all the targets in a group go away, we need to send the target groups with empty `Targets` down the channel. i.e, if all targets with `job: postgres` go away, we send:
-```
+```go
 &targetgroup.Group{
-  Targets: nil,
-  "Source": "file2", 
+	Targets:  nil,
+	"Source": "file2",
 }
 ```
 down the channel.
 
+### The Config interface
+
+Now that your service discovery mechanism is ready to discover targets, you must help
+Prometheus discover it. This is done by implementing the `discovery.Config` interface
+and registering it with `discovery.RegisterConfig` in an init function of your package.
+
+```go
+type Config interface {
+	// Name returns the name of the discovery mechanism.
+	Name() string
+
+	// NewDiscoverer returns a Discoverer for the Config
+	// with the given DiscovererOptions.
+	NewDiscoverer(DiscovererOptions) (Discoverer, error)
+}
+
+type DiscovererOptions struct {
+	Logger log.Logger
+}
+```
+
+The value returned by `Name()` should be short, descriptive, lowercase, and unique.
+It's used to tag the provided `Logger` and as the part of the YAML key for your SD
+mechanism's list of configs in `scrape_config` and `alertmanager_config`
+(e.g. `${NAME}_sd_configs`).
+
+### New Service Discovery Check List
+
+Here are some non-obvious parts of adding service discoveries that need to be verified:
+
+- Validate that discovery configs can be DeepEqualled by adding them to
+  `config/testdata/conf.good.yml` and to the associated tests.
+
+- If the config contains file paths directly or indirectly (e.g. with a TLSConfig or
+  HTTPClientConfig field), then it must implement `config.DirectorySetter`.
+
+- Import your SD package from `prometheus/discovery/install`. The install package is
+  imported from `main` to register all builtin SD mechanisms.
+
+- List the service discovery in both `<scrape_config>` and
+  `<alertmanager_config>` in `docs/configuration/configuration.md`.
+
 <!-- TODO: Add best-practices -->
+
+### Examples of Service Discovery pull requests
+
+The examples given might become out of date but should give a good impression about the areas touched by a new service discovery.
+
+- [Eureka](https://github.com/prometheus/prometheus/pull/3369)

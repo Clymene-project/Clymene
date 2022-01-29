@@ -9,7 +9,6 @@ Clymene-ingester [flags]
 ### Options
 
 ```
---admin.http.host-ports string                  The host:ports (e.g. 127.0.0.1:15694 or :15694) for the admin server, including health check, /metrics, etc. (default ":15694")
 --clymene-ingester.deadlockInterval duration    Interval to check for deadlocks. If no messages gets processed in given time, clymene-ingester app will exit. Value of 0 disables deadlock check. (default 0s)
 --clymene-ingester.parallelism string           The number of messages to process in parallel (default "1000")
 --influxdb.bucket string                        influx bucket, A bucket is a named location where time series data is stored

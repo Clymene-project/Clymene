@@ -16,25 +16,24 @@ package consul
 import (
 	"context"
 	"fmt"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
 	"github.com/Clymene-project/Clymene/util/strutil"
 	"go.uber.org/zap"
 	"net"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	consul "github.com/hashicorp/consul/api"
-	conntrack "github.com/mwitkow/go-conntrack"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
-	config_util "github.com/prometheus/common/config"
+	"github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 )
 
 const (
-	watchTimeout  = 30 * time.Second
+	watchTimeout  = 2 * time.Minute
 	retryInterval = 15 * time.Second
 
 	// addressLabel is the name for the label containing a target's address.
@@ -53,10 +52,12 @@ const (
 	healthLabel = model.MetaLabelPrefix + "consul_health"
 	// serviceAddressLabel is the name of the label containing the (optional) service address.
 	serviceAddressLabel = model.MetaLabelPrefix + "consul_service_address"
-	//servicePortLabel is the name of the label containing the service port.
+	// servicePortLabel is the name of the label containing the service port.
 	servicePortLabel = model.MetaLabelPrefix + "consul_service_port"
 	// datacenterLabel is the name of the label containing the datacenter ID.
 	datacenterLabel = model.MetaLabelPrefix + "consul_dc"
+	// namespaceLabel is the name of the label containing the namespace (Consul Enterprise only).
+	namespaceLabel = model.MetaLabelPrefix + "consul_namespace"
 	// taggedAddressesLabel is the prefix for the labels mapping to a target's tagged addresses.
 	taggedAddressesLabel = model.MetaLabelPrefix + "consul_tagged_address_"
 	// serviceIDLabel is the name of the label containing the service ID.
@@ -84,28 +85,35 @@ var (
 	)
 
 	// Initialize metric vectors.
-	servicesRPCDuraion = rpcDuration.WithLabelValues("catalog", "services")
-	serviceRPCDuraion  = rpcDuration.WithLabelValues("catalog", "service")
+	servicesRPCDuration = rpcDuration.WithLabelValues("catalog", "services")
+	serviceRPCDuration  = rpcDuration.WithLabelValues("catalog", "service")
 
 	// DefaultSDConfig is the default Consul SD configuration.
 	DefaultSDConfig = SDConfig{
-		TagSeparator:    ",",
-		Scheme:          "http",
-		Server:          "localhost:8500",
-		AllowStale:      true,
-		RefreshInterval: model.Duration(watchTimeout),
+		TagSeparator:     ",",
+		Scheme:           "http",
+		Server:           "localhost:8500",
+		AllowStale:       true,
+		RefreshInterval:  model.Duration(30 * time.Second),
+		HTTPClientConfig: config.DefaultHTTPClientConfig,
 	}
 )
 
+func init() {
+	discovery.RegisterConfig(&SDConfig{})
+	prometheus.MustRegister(rpcFailuresCount, rpcDuration)
+}
+
 // SDConfig is the configuration for Consul service discovery.
 type SDConfig struct {
-	Server       string             `yaml:"server,omitempty"`
-	Token        config_util.Secret `yaml:"token,omitempty"`
-	Datacenter   string             `yaml:"datacenter,omitempty"`
-	TagSeparator string             `yaml:"tag_separator,omitempty"`
-	Scheme       string             `yaml:"scheme,omitempty"`
-	Username     string             `yaml:"username,omitempty"`
-	Password     config_util.Secret `yaml:"password,omitempty"`
+	Server       string        `yaml:"server,omitempty"`
+	Token        config.Secret `yaml:"token,omitempty"`
+	Datacenter   string        `yaml:"datacenter,omitempty"`
+	Namespace    string        `yaml:"namespace,omitempty"`
+	TagSeparator string        `yaml:"tag_separator,omitempty"`
+	Scheme       string        `yaml:"scheme,omitempty"`
+	Username     string        `yaml:"username,omitempty"`
+	Password     config.Secret `yaml:"password,omitempty"`
 
 	// See https://www.consul.io/docs/internals/consensus.html#consistency-modes,
 	// stale reads are a lot cheaper and are a necessity if you have >5k targets.
@@ -125,7 +133,20 @@ type SDConfig struct {
 	// Desired node metadata.
 	NodeMeta map[string]string `yaml:"node_meta,omitempty"`
 
-	TLSConfig config_util.TLSConfig `yaml:"tls_config,omitempty"`
+	HTTPClientConfig config.HTTPClientConfig `yaml:",inline"`
+}
+
+// Name returns the name of the Config.
+func (*SDConfig) Name() string { return "consul" }
+
+// NewDiscoverer returns a Discoverer for the Config.
+func (c *SDConfig) NewDiscoverer(opts discovery.DiscovererOptions) (discovery.Discoverer, error) {
+	return NewDiscovery(c, opts.Logger)
+}
+
+// SetDirectory joins any relative file paths with dir.
+func (c *SDConfig) SetDirectory(dir string) {
+	c.HTTPClientConfig.SetDirectory(dir)
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
@@ -139,12 +160,19 @@ func (c *SDConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if strings.TrimSpace(c.Server) == "" {
 		return errors.New("consul SD configuration requires a server address")
 	}
-	return nil
-}
-
-func init() {
-	prometheus.MustRegister(rpcFailuresCount)
-	prometheus.MustRegister(rpcDuration)
+	if c.Username != "" || c.Password != "" {
+		if c.HTTPClientConfig.BasicAuth != nil {
+			return errors.New("at most one of consul SD configuration username and password and basic auth can be configured")
+		}
+		c.HTTPClientConfig.BasicAuth = &config.BasicAuth{
+			Username: c.Username,
+			Password: c.Password,
+		}
+	}
+	if c.Token != "" && (c.HTTPClientConfig.Authorization != nil || c.HTTPClientConfig.OAuth2 != nil) {
+		return errors.New("at most one of consul SD token, authorization, or oauth2 can be configured")
+	}
+	return c.HTTPClientConfig.Validate()
 }
 
 // Discovery retrieves target information from a Consul server
@@ -152,6 +180,7 @@ func init() {
 type Discovery struct {
 	client           *consul.Client
 	clientDatacenter string
+	clientNamespace  string
 	tagSeparator     string
 	watchedServices  []string // Set of services which will be discovered.
 	watchedTags      []string // Tags used to filter instances of a service.
@@ -168,32 +197,18 @@ func NewDiscovery(conf *SDConfig, logger *zap.Logger) (*Discovery, error) {
 		logger = zap.NewNop()
 	}
 
-	tls, err := config_util.NewTLSConfig(&conf.TLSConfig)
+	wrapper, err := config.NewClientFromConfig(conf.HTTPClientConfig, "consul_sd", config.WithIdleConnTimeout(2*watchTimeout))
 	if err != nil {
 		return nil, err
 	}
-	transport := &http.Transport{
-		IdleConnTimeout: 5 * time.Duration(conf.RefreshInterval),
-		TLSClientConfig: tls,
-		DialContext: conntrack.NewDialContextFunc(
-			conntrack.DialWithTracing(),
-			conntrack.DialWithName("consul_sd"),
-		),
-	}
-	wrapper := &http.Client{
-		Transport: transport,
-		Timeout:   35 * time.Second,
-	}
+	wrapper.Timeout = watchTimeout + 15*time.Second
 
 	clientConf := &consul.Config{
 		Address:    conf.Server,
 		Scheme:     conf.Scheme,
 		Datacenter: conf.Datacenter,
+		Namespace:  conf.Namespace,
 		Token:      string(conf.Token),
-		HttpAuth: &consul.HttpBasicAuth{
-			Username: conf.Username,
-			Password: string(conf.Password),
-		},
 		HttpClient: wrapper,
 	}
 	client, err := consul.NewClient(clientConf)
@@ -209,7 +224,8 @@ func NewDiscovery(conf *SDConfig, logger *zap.Logger) (*Discovery, error) {
 		allowStale:       conf.AllowStale,
 		refreshInterval:  time.Duration(conf.RefreshInterval),
 		clientDatacenter: conf.Datacenter,
-		finalizer:        transport.CloseIdleConnections,
+		clientNamespace:  conf.Namespace,
+		finalizer:        wrapper.CloseIdleConnections,
 		logger:           logger,
 	}
 	return cd, nil
@@ -237,6 +253,7 @@ func (d *Discovery) shouldWatchFromName(name string) bool {
 
 // shouldWatch returns whether the service of the given name should be watched based on its tags.
 // This gets called when the user doesn't specify a list of services in order to avoid watching
+// *all* services. Details in https://github.com/prometheus/prometheus/pull/3814
 func (d *Discovery) shouldWatchFromTags(tags []string) bool {
 	// If there's no fixed set of watched tags, we watch everything.
 	if len(d.watchedTags) == 0 {
@@ -278,6 +295,7 @@ func (d *Discovery) getDatacenter() error {
 	}
 
 	d.clientDatacenter = dc
+	d.logger = d.logger.With(zap.String("datacenter", dc))
 	return nil
 }
 
@@ -345,16 +363,16 @@ func (d *Discovery) watchServices(ctx context.Context, ch chan<- []*targetgroup.
 	catalog := d.client.Catalog()
 	d.logger.Debug("Watching services", zap.String("tags", strings.Join(d.watchedTags, ",")))
 
-	t0 := time.Now()
 	opts := &consul.QueryOptions{
 		WaitIndex:  *lastIndex,
 		WaitTime:   watchTimeout,
 		AllowStale: d.allowStale,
 		NodeMeta:   d.watchedNodeMeta,
 	}
+	t0 := time.Now()
 	srvs, meta, err := catalog.Services(opts.WithContext(ctx))
 	elapsed := time.Since(t0)
-	servicesRPCDuraion.Observe(elapsed.Seconds())
+	servicesRPCDuration.Observe(elapsed.Seconds())
 
 	// Check the context before in order to exit early.
 	select {
@@ -408,6 +426,15 @@ func (d *Discovery) watchServices(ctx context.Context, ch chan<- []*targetgroup.
 			}
 		}
 	}
+
+	// Send targetgroup with no targets if nothing was discovered.
+	if len(services) == 0 {
+		select {
+		case <-ctx.Done():
+			return
+		case ch <- []*targetgroup.Group{{}}:
+		}
+	}
 }
 
 // consulService contains data belonging to the same service.
@@ -438,18 +465,19 @@ func (d *Discovery) watchService(ctx context.Context, ch chan<- []*targetgroup.G
 
 	go func() {
 		ticker := time.NewTicker(d.refreshInterval)
+		defer ticker.Stop()
 		var lastIndex uint64
 		health := srv.client.Health()
 		for {
 			select {
 			case <-ctx.Done():
-				ticker.Stop()
 				return
 			default:
 				srv.watch(ctx, ch, health, &lastIndex)
 				select {
 				case <-ticker.C:
 				case <-ctx.Done():
+					return
 				}
 			}
 		}
@@ -460,7 +488,6 @@ func (d *Discovery) watchService(ctx context.Context, ch chan<- []*targetgroup.G
 func (srv *consulService) watch(ctx context.Context, ch chan<- []*targetgroup.Group, health *consul.Health, lastIndex *uint64) {
 	srv.logger.Debug("Watching service", zap.String("service", srv.name), zap.String("tags", strings.Join(srv.tags, ",")))
 
-	t0 := time.Now()
 	opts := &consul.QueryOptions{
 		WaitIndex:  *lastIndex,
 		WaitTime:   watchTimeout,
@@ -468,9 +495,10 @@ func (srv *consulService) watch(ctx context.Context, ch chan<- []*targetgroup.Gr
 		NodeMeta:   srv.discovery.watchedNodeMeta,
 	}
 
+	t0 := time.Now()
 	serviceNodes, meta, err := health.ServiceMultipleTags(srv.name, srv.tags, false, opts.WithContext(ctx))
 	elapsed := time.Since(t0)
-	serviceRPCDuraion.Observe(elapsed.Seconds())
+	serviceRPCDuration.Observe(elapsed.Seconds())
 
 	// Check the context before in order to exit early.
 	select {
@@ -501,7 +529,7 @@ func (srv *consulService) watch(ctx context.Context, ch chan<- []*targetgroup.Gr
 	for _, serviceNode := range serviceNodes {
 		// We surround the separated list with the separator as well. This way regular expressions
 		// in relabeling rules don't have to consider tag positions.
-		var tags = srv.tagSeparator + strings.Join(serviceNode.Service.Tags, srv.tagSeparator) + srv.tagSeparator
+		tags := srv.tagSeparator + strings.Join(serviceNode.Service.Tags, srv.tagSeparator) + srv.tagSeparator
 
 		// If the service address is not empty it should be used instead of the node address
 		// since the service may be registered remotely through a different node.
@@ -516,6 +544,7 @@ func (srv *consulService) watch(ctx context.Context, ch chan<- []*targetgroup.Gr
 			model.AddressLabel:  model.LabelValue(addr),
 			addressLabel:        model.LabelValue(serviceNode.Node.Address),
 			nodeLabel:           model.LabelValue(serviceNode.Node.Node),
+			namespaceLabel:      model.LabelValue(serviceNode.Service.Namespace),
 			tagsLabel:           model.LabelValue(tags),
 			serviceAddressLabel: model.LabelValue(serviceNode.Service.Address),
 			servicePortLabel:    model.LabelValue(strconv.Itoa(serviceNode.Service.Port)),

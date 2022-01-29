@@ -20,7 +20,9 @@ import (
 	"context"
 	agent_config "github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
-	sd_config "github.com/Clymene-project/Clymene/cmd/agent/app/discovery/config"
+	_ "github.com/Clymene-project/Clymene/cmd/agent/app/discovery/install"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/legacymanager"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/scrape"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/server"
 	"github.com/Clymene-project/Clymene/ports"
@@ -54,6 +56,7 @@ type AgentConfig struct {
 	Logger        *zap.Logger
 	HttpPort      int
 	MetricFactory metrics.Factory
+	NewSDManager  bool
 }
 
 // New constructs a new agent component
@@ -75,18 +78,24 @@ func New(config *AgentConfig) *Agent {
 			close(reloadReady.C)
 		})
 	}
-
+	var discoveryManagerScrape discoveryManager
 	ctxScrape, cancelScrape := context.WithCancel(context.Background())
-	discoveryManagerScrape := discovery.NewManager(ctxScrape, config.Logger.With(zap.String("component", "discovery manager scrape")), discovery.Name("scrape"))
+	if config.NewSDManager {
+		discovery.RegisterMetrics()
+		discoveryManagerScrape = discovery.NewManager(ctxScrape, config.Logger.With(zap.String("component", "discovery manager scrape")), discovery.Name("scrape"))
+	} else {
+		legacymanager.RegisterMetrics()
+		discoveryManagerScrape = legacymanager.NewManager(ctxScrape, config.Logger.With(zap.String("component", "discovery manager scrape")), legacymanager.Name("scrape"))
+	}
 
 	scrapeManager = scrape.NewManager(config.Logger.With(zap.String("component", "scrape manager")), config.MetricWriter)
 
 	reloaders := []func(cfg *agent_config.Config) error{
 		scrapeManager.ApplyConfig,
 		func(cfg *agent_config.Config) error {
-			c := make(map[string]sd_config.ServiceDiscoveryConfig)
+			c := make(map[string]discovery.Configs)
 			for _, v := range cfg.ScrapeConfigs {
-				c[v.JobName] = v.ServiceDiscoveryConfig
+				c[v.JobName] = v.ServiceDiscoveryConfigs
 			}
 			return discoveryManagerScrape.ApplyConfig(c)
 		},
@@ -185,4 +194,13 @@ func (a *Agent) Close() {
 	if err := a.hServer.Close(); err != nil {
 		a.l.Error("agent httpserver close error", zap.Error(err))
 	}
+}
+
+// discoveryManager interfaces the discovery manager. This is used to keep using
+// the manager that restarts SD's on reload for a few releases until we feel
+// the new manager can be enabled for all users.
+type discoveryManager interface {
+	ApplyConfig(cfg map[string]discovery.Configs) error
+	Run() error
+	SyncCh() <-chan map[string][]*targetgroup.Group
 }

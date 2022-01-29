@@ -49,6 +49,7 @@ const (
 func main() {
 	svc := flags.NewService(ports.IngesterAdminHTTP)
 	svc.NoStorage = true
+	version.Set(Version, BuildTime)
 
 	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Stderr))
 	if err != nil {

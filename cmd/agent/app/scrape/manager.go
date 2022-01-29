@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"go.uber.org/zap"
 	"hash/fnv"
@@ -15,8 +16,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
-	"github.com/prometheus/prometheus/pkg/labels"
 )
 
 // NewManager is the Manager constructor

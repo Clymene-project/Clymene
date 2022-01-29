@@ -9,7 +9,6 @@ Clymene-ingester [flags]
 ### Options
 
 ```
---admin.http.host-ports string                  The host:ports (e.g. 127.0.0.1:15694 or :15694) for the admin server, including health check, /metrics, etc. (default ":15694")
 --clymene-ingester.deadlockInterval duration    Interval to check for deadlocks. If no messages gets processed in given time, clymene-ingester app will exit. Value of 0 disables deadlock check. (default 0s)
 --clymene-ingester.parallelism string           The number of messages to process in parallel (default "1000")
 --kafka.consumer.authentication string          Authentication type used to authenticate with kafka cluster. e.g. none, kerberos, tls, plaintext (default "none")
@@ -35,7 +34,6 @@ Clymene-ingester [flags]
 --kafka.consumer.tls.server-name string         Override the TLS server name we expect in the certificate of the remote server(s)
 --kafka.consumer.tls.skip-host-verify           (insecure) Skip server's certificate chain and host name verification
 --kafka.consumer.topic string                   The name of the kafka topic to consume from (default "clymene")
---log-level string                              Minimal allowed log Level. For more levels see https://github.com/uber-go/zap (default "info")
 --prometheus.remote.kafka.encoding string       Encoding of metric ("json" or "protobuf") sent to kafka. (default "protobuf")
 --prometheus.remote.max.err.msg.len int         Maximum length of error message (default 256)
 --prometheus.remote.timeout duration            Time out when doing remote write(sec, default 10 sec) (default 10s)

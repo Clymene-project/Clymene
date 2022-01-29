@@ -24,7 +24,7 @@ func NewAPIHandler(p *HttpServerParams) *APIHandler {
 }
 
 func (aH *APIHandler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/api/reload", aH.Reload).Methods(http.MethodGet)
+	router.HandleFunc("/api/reload", aH.Reload).Methods(http.MethodPost)
 }
 
 func (aH *APIHandler) Reload(w http.ResponseWriter, r *http.Request) {

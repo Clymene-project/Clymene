@@ -13,10 +13,6 @@ clymene-agent [flags]
 ### Options
 
 ```
---admin.http.host-ports string              The host:ports (e.g. 127.0.0.1:15691 or :15691) for the admin server, including health check, /metrics, etc. (default ":15691")
---config.file string                        configuration file path. (default "/etc/clymene/clymene.yml")
---http.port int                             http port (default 15692)
---log-level string                          Minimal allowed log Level. For more levels see https://github.com/uber-go/zap (default "info")
 --prometheus.remote.kafka.encoding string   Encoding of metric ("json" or "protobuf") sent to kafka. (default "protobuf")
 --prometheus.remote.max.err.msg.len int     Maximum length of error message (default 256)
 --prometheus.remote.timeout duration        Time out when doing remote write(sec, default 10 sec) (default 10s)

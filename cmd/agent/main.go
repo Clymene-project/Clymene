@@ -49,6 +49,7 @@ const (
 func main() {
 	svc := flags.NewService(ports.AgentAdminHTTP)
 	svc.NoStorage = true
+	version.Set(Version, BuildTime)
 
 	storageFactory, err := storage.NewFactory(storage.FactoryConfigFromEnvAndCLI(os.Stderr))
 	if err != nil {
@@ -89,6 +90,7 @@ func main() {
 			agent := app.New(&app.AgentConfig{
 				ConfigFile:    scrapeConfig.ConfigFile,
 				HttpPort:      scrapeConfig.HostPort,
+				NewSDManager:  scrapeConfig.NewSDManager,
 				MetricFactory: metricsFactory,
 				Logger:        logger,
 				MetricWriter:  metricWriter,

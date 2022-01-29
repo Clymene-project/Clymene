@@ -8,9 +8,16 @@ require (
 	github.com/Azure/go-autorest/autorest/adal v0.9.15
 	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/Shopify/sarama v1.30.0
+	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15
 	github.com/aws/aws-sdk-go v1.38.69
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
+	github.com/cespare/xxhash/v2 v2.1.1
+	github.com/digitalocean/godo v1.42.1
+	github.com/docker/docker v20.10.6+incompatible
+	github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021
+	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/fsnotify/fsnotify v1.5.1
+	github.com/go-zookeeper/zk v1.0.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4
@@ -20,8 +27,11 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/consul/api v1.10.1
+	github.com/hetznercloud/hcloud-go v1.21.1
 	github.com/influxdata/influxdb-client-go/v2 v2.6.0
 	github.com/jaegertracing/jaeger v1.29.0
+	github.com/kolo/xmlrpc v0.0.0-20201022064351-38db28db192b
+	github.com/linode/linodego v1.2.1
 	github.com/miekg/dns v1.1.43
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
 	github.com/oklog/run v1.1.0
@@ -30,8 +40,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.32.1
-	github.com/prometheus/prometheus v2.5.0+incompatible
-	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
@@ -45,8 +54,8 @@ require (
 	google.golang.org/genproto v0.0.0-20210921142501-181ce0d877f6
 	google.golang.org/grpc v1.41.0
 	google.golang.org/protobuf v1.27.1
-	gopkg.in/fsnotify/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/api v0.21.0
 	k8s.io/apimachinery v0.21.1
 	k8s.io/client-go v0.21.0

@@ -16,6 +16,7 @@ package kubernetes
 import (
 	"context"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/util/strutil"
 	"go.uber.org/zap"
 	"net"
 	"strconv"
@@ -172,7 +173,7 @@ func (e *Endpoints) process(ctx context.Context, ch chan<- []*targetgroup.Group)
 	}
 	eps, err := convertToEndpoints(o)
 	if err != nil {
-		e.logger.Error("converting to Endpoints object failed", zap.Error(err))
+		e.logger.Error("converting to Endpoints object failed", zap.String("key", key))
 		return true
 	}
 	send(ctx, ch, e.buildEndpoints(eps))
@@ -197,6 +198,8 @@ func endpointsSourceFromNamespaceAndName(namespace, name string) string {
 }
 
 const (
+	endpointsLabelPrefix           = metaLabelPrefix + "endpoints_label_"
+	endpointsLabelPresentPrefix    = metaLabelPrefix + "endpoints_labelpresent_"
 	endpointsNameLabel             = metaLabelPrefix + "endpoints_name"
 	endpointNodeName               = metaLabelPrefix + "endpoint_node_name"
 	endpointHostname               = metaLabelPrefix + "endpoint_hostname"
@@ -216,6 +219,12 @@ func (e *Endpoints) buildEndpoints(eps *apiv1.Endpoints) *targetgroup.Group {
 		endpointsNameLabel: lv(eps.Name),
 	}
 	e.addServiceLabels(eps.Namespace, eps.Name, tg)
+	// Add endpoints labels metadata.
+	for k, v := range eps.Labels {
+		ln := strutil.SanitizeLabelName(k)
+		tg.Labels[model.LabelName(endpointsLabelPrefix+ln)] = lv(v)
+		tg.Labels[model.LabelName(endpointsLabelPresentPrefix+ln)] = presentValue
+	}
 
 	type podEntry struct {
 		pod          *apiv1.Pod
@@ -294,6 +303,14 @@ func (e *Endpoints) buildEndpoints(eps *apiv1.Endpoints) *targetgroup.Group {
 				add(addr, port, "false")
 			}
 		}
+	}
+
+	v := eps.Labels[apiv1.EndpointsOverCapacity]
+	if v == "truncated" {
+		e.logger.Warn("Number of endpoints in one Endpoints object exceeds 1000 and has been truncated, please use \"role: endpointslice\" instead", zap.String("endpoint", eps.Name))
+	}
+	if v == "warning" {
+		e.logger.Warn("Number of endpoints in one Endpoints object exceeds 1000, please use \\\"role: endpointslice\\\" instead\", \"endpoint", zap.String("endpoint", eps.Name))
 	}
 
 	// For all seen pods, check all container ports. If they were not covered

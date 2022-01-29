@@ -13,9 +13,6 @@ clymene-agent [flags]
 ### Options
 
 ```
---admin.http.host-ports string    The host:ports (e.g. 127.0.0.1:15691 or :15691) for the admin server, including health check, /metrics, etc. (default ":15691")
---config.file string              configuration file path. (default "/etc/clymene/clymene.yml")
---http.port int                   http port (default 15692)
 --opentsdb.dry-run                Don't actually send anything to the TSD, just print the datapoints.
 --opentsdb.host string            Hostname to use to connect to the TSD. (default "localhost")
 --opentsdb.hosts string           List of host:port to connect to tsd's (comma separated)

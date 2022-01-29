@@ -60,7 +60,7 @@ func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	)
 	flagSet.String(
 		configPrefix+suffixUserAgent,
-		fmt.Sprintf("Prometheus/%s", version.Get().GitVersion),
+		fmt.Sprintf("Clymene/%s", version.Get().Version),
 		"User-Agent in request header",
 	)
 	flagSet.Int(

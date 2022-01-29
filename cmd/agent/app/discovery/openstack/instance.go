@@ -46,22 +46,25 @@ const (
 
 // InstanceDiscovery discovers OpenStack instances.
 type InstanceDiscovery struct {
-	provider   *gophercloud.ProviderClient
-	authOpts   *gophercloud.AuthOptions
-	region     string
-	logger     *zap.Logger
-	port       int
-	allTenants bool
+	provider     *gophercloud.ProviderClient
+	authOpts     *gophercloud.AuthOptions
+	region       string
+	logger       *zap.Logger
+	port         int
+	allTenants   bool
+	availability gophercloud.Availability
 }
 
 // NewInstanceDiscovery returns a new instance discovery.
 func newInstanceDiscovery(provider *gophercloud.ProviderClient, opts *gophercloud.AuthOptions,
-	port int, region string, allTenants bool, l *zap.Logger) *InstanceDiscovery {
+	port int, region string, allTenants bool, availability gophercloud.Availability, l *zap.Logger) *InstanceDiscovery {
 	if l == nil {
 		l = zap.NewNop()
 	}
-	return &InstanceDiscovery{provider: provider, authOpts: opts,
-		region: region, port: port, allTenants: allTenants, logger: l}
+	return &InstanceDiscovery{
+		provider: provider, authOpts: opts,
+		region: region, port: port, allTenants: allTenants, availability: availability, logger: l,
+	}
 }
 
 type floatingIPKey struct {
@@ -75,8 +78,9 @@ func (i *InstanceDiscovery) refresh(ctx context.Context) ([]*targetgroup.Group, 
 	if err != nil {
 		return nil, errors.Wrap(err, "could not authenticate to OpenStack")
 	}
+
 	client, err := openstack.NewComputeV2(i.provider, gophercloud.EndpointOpts{
-		Region: i.region,
+		Region: i.region, Availability: i.availability,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create OpenStack compute session")
@@ -155,7 +159,7 @@ func (i *InstanceDiscovery) refresh(ctx context.Context) ([]*targetgroup.Group, 
 					continue
 				}
 				if len(md) == 0 {
-					i.logger.Debug("Got no IP address", zap.String("instance", s.ID))
+					i.logger.Warn("Got no IP address", zap.String("instance", s.ID))
 					continue
 				}
 				for _, address := range md {

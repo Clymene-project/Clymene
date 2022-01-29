@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
-	"github.com/Clymene-project/Clymene/pkg/relabel"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/textparse"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/relabel"
 	"hash/fnv"
 	"net"
 	"net/url"
@@ -14,9 +16,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/model"
-
-	"github.com/prometheus/prometheus/pkg/labels"
-	"github.com/prometheus/prometheus/pkg/textparse"
 )
 
 // TargetHealth describes the health state of a target.

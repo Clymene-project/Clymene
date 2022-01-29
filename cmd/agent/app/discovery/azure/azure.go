@@ -16,8 +16,7 @@ package azure
 import (
 	"context"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-10-01/compute"
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-10-01/network"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/refresh"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
 	"github.com/Clymene-project/Clymene/util/strutil"
@@ -28,9 +27,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-10-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-10-01/network"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
+
 	"github.com/pkg/errors"
 	config_util "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
@@ -43,6 +45,7 @@ const (
 	azureLabelMachineID            = azureLabel + "machine_id"
 	azureLabelMachineResourceGroup = azureLabel + "machine_resource_group"
 	azureLabelMachineName          = azureLabel + "machine_name"
+	azureLabelMachineComputerName  = azureLabel + "machine_computer_name"
 	azureLabelMachineOSType        = azureLabel + "machine_os_type"
 	azureLabelMachineLocation      = azureLabel + "machine_location"
 	azureLabelMachinePrivateIP     = azureLabel + "machine_private_ip"
@@ -60,6 +63,11 @@ var DefaultSDConfig = SDConfig{
 	RefreshInterval:      model.Duration(5 * time.Minute),
 	Environment:          azure.PublicCloud.Name,
 	AuthenticationMethod: authMethodOAuth,
+	HTTPClientConfig:     config_util.DefaultHTTPClientConfig,
+}
+
+func init() {
+	discovery.RegisterConfig(&SDConfig{})
 }
 
 // SDConfig is the configuration for Azure based service discovery.
@@ -72,6 +80,16 @@ type SDConfig struct {
 	ClientSecret         config_util.Secret `yaml:"client_secret,omitempty"`
 	RefreshInterval      model.Duration     `yaml:"refresh_interval,omitempty"`
 	AuthenticationMethod string             `yaml:"authentication_method,omitempty"`
+
+	HTTPClientConfig config_util.HTTPClientConfig `yaml:",inline"`
+}
+
+// Name returns the name of the Config.
+func (*SDConfig) Name() string { return "azure" }
+
+// NewDiscoverer returns a Discoverer for the Config.
+func (c *SDConfig) NewDiscoverer(opts discovery.DiscovererOptions) (discovery.Discoverer, error) {
+	return NewDiscovery(c, opts.Logger), nil
 }
 
 func validateAuthParam(param, name string) error {
@@ -184,19 +202,29 @@ func createAzureClient(cfg SDConfig) (azureClient, error) {
 		}
 	}
 
+	client, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, "azure_sd")
+	if err != nil {
+		return azureClient{}, err
+	}
+	sender := autorest.DecorateSender(client)
+
 	bearerAuthorizer := autorest.NewBearerAuthorizer(spt)
 
 	c.vm = compute.NewVirtualMachinesClientWithBaseURI(resourceManagerEndpoint, cfg.SubscriptionID)
 	c.vm.Authorizer = bearerAuthorizer
+	c.vm.Sender = sender
 
 	c.nic = network.NewInterfacesClientWithBaseURI(resourceManagerEndpoint, cfg.SubscriptionID)
 	c.nic.Authorizer = bearerAuthorizer
+	c.nic.Sender = sender
 
 	c.vmss = compute.NewVirtualMachineScaleSetsClientWithBaseURI(resourceManagerEndpoint, cfg.SubscriptionID)
 	c.vmss.Authorizer = bearerAuthorizer
+	c.vm.Sender = sender
 
 	c.vmssvm = compute.NewVirtualMachineScaleSetVMsClientWithBaseURI(resourceManagerEndpoint, cfg.SubscriptionID)
 	c.vmssvm.Authorizer = bearerAuthorizer
+	c.vmssvm.Sender = sender
 
 	return c, nil
 }
@@ -211,6 +239,7 @@ type azureResource struct {
 type virtualMachine struct {
 	ID                string
 	Name              string
+	ComputerName      string
 	Type              string
 	Location          string
 	OsType            string
@@ -228,7 +257,7 @@ func newAzureResourceFromID(id string, logger *zap.Logger) (azureResource, error
 	s := strings.Split(id, "/")
 	if len(s) != 9 && len(s) != 11 {
 		err := errors.Errorf("invalid ID '%s'. Refusing to create azureResource", id)
-		logger.Error("", zap.Error(err))
+		logger.Error("msg", zap.Error(err))
 		return azureResource{}, err
 	}
 
@@ -239,7 +268,7 @@ func newAzureResourceFromID(id string, logger *zap.Logger) (azureResource, error
 }
 
 func (d *Discovery) refresh(ctx context.Context) ([]*targetgroup.Group, error) {
-	defer d.logger.Debug("Azure discovery completed")
+	defer d.logger.Debug("msg", zap.String("", "Azure discovery completed"))
 
 	client, err := createAzureClient(*d.cfg)
 	if err != nil {
@@ -251,7 +280,7 @@ func (d *Discovery) refresh(ctx context.Context) ([]*targetgroup.Group, error) {
 		return nil, errors.Wrap(err, "could not get virtual machines")
 	}
 
-	d.logger.Debug("Found virtual machines during Azure discovery.", zap.Int("count", len(machines)))
+	d.logger.Debug("msg Found virtual machines during Azure discovery.", zap.Int("count", len(machines)))
 
 	// Load the vms managed by scale sets.
 	scaleSets, err := client.getScaleSets(ctx)
@@ -291,6 +320,7 @@ func (d *Discovery) refresh(ctx context.Context) ([]*targetgroup.Group, error) {
 				azureLabelTenantID:             model.LabelValue(d.cfg.TenantID),
 				azureLabelMachineID:            model.LabelValue(vm.ID),
 				azureLabelMachineName:          model.LabelValue(vm.Name),
+				azureLabelMachineComputerName:  model.LabelValue(vm.ComputerName),
 				azureLabelMachineOSType:        model.LabelValue(vm.OsType),
 				azureLabelMachineLocation:      model.LabelValue(vm.Location),
 				azureLabelMachineResourceGroup: model.LabelValue(r.ResourceGroup),
@@ -300,17 +330,14 @@ func (d *Discovery) refresh(ctx context.Context) ([]*targetgroup.Group, error) {
 				labels[azureLabelMachineScaleSet] = model.LabelValue(vm.ScaleSet)
 			}
 
-			if vm.Tags != nil {
-				for k, v := range vm.Tags {
-					name := strutil.SanitizeLabelName(k)
-					labels[azureLabelMachineTag+model.LabelName(name)] = model.LabelValue(*v)
-				}
+			for k, v := range vm.Tags {
+				name := strutil.SanitizeLabelName(k)
+				labels[azureLabelMachineTag+model.LabelName(name)] = model.LabelValue(*v)
 			}
 
 			// Get the IP address information via separate call to the network provider.
 			for _, nicID := range vm.NetworkInterfaces {
 				networkInterface, err := client.getNetworkInterfaceByID(ctx, nicID)
-
 				if err != nil {
 					d.logger.Error("Unable to get network interface", zap.String("name", nicID), zap.Error(err))
 					ch <- target{labelSet: nil, err: err}
@@ -360,7 +387,7 @@ func (d *Discovery) refresh(ctx context.Context) ([]*targetgroup.Group, error) {
 	var tg targetgroup.Group
 	for tgt := range ch {
 		if tgt.err != nil {
-			return nil, errors.Wrap(err, "unable to complete Azure service discovery")
+			return nil, errors.Wrap(tgt.err, "unable to complete Azure service discovery")
 		}
 		if tgt.labelSet != nil {
 			tg.Targets = append(tg.Targets, tgt.labelSet)
@@ -408,9 +435,8 @@ func (client *azureClient) getScaleSets(ctx context.Context) ([]compute.VirtualM
 
 func (client *azureClient) getScaleSetVMs(ctx context.Context, scaleSet compute.VirtualMachineScaleSet) ([]virtualMachine, error) {
 	var vms []virtualMachine
-	//TODO do we really need to fetch the resourcegroup this way?
+	// TODO do we really need to fetch the resourcegroup this way?
 	r, err := newAzureResourceFromID(*scaleSet.ID, nil)
-
 	if err != nil {
 		return nil, errors.Wrap(err, "could not parse scale set ID")
 	}
@@ -436,6 +462,7 @@ func mapFromVM(vm compute.VirtualMachine) virtualMachine {
 	osType := string(vm.StorageProfile.OsDisk.OsType)
 	tags := map[string]*string{}
 	networkInterfaces := []string{}
+	var computerName string
 
 	if vm.Tags != nil {
 		tags = vm.Tags
@@ -447,9 +474,16 @@ func mapFromVM(vm compute.VirtualMachine) virtualMachine {
 		}
 	}
 
+	if vm.VirtualMachineProperties != nil &&
+		vm.VirtualMachineProperties.OsProfile != nil &&
+		vm.VirtualMachineProperties.OsProfile.ComputerName != nil {
+		computerName = *(vm.VirtualMachineProperties.OsProfile.ComputerName)
+	}
+
 	return virtualMachine{
 		ID:                *(vm.ID),
 		Name:              *(vm.Name),
+		ComputerName:      computerName,
 		Type:              *(vm.Type),
 		Location:          *(vm.Location),
 		OsType:            osType,
@@ -463,6 +497,7 @@ func mapFromVMScaleSetVM(vm compute.VirtualMachineScaleSetVM, scaleSetName strin
 	osType := string(vm.StorageProfile.OsDisk.OsType)
 	tags := map[string]*string{}
 	networkInterfaces := []string{}
+	var computerName string
 
 	if vm.Tags != nil {
 		tags = vm.Tags
@@ -474,9 +509,14 @@ func mapFromVMScaleSetVM(vm compute.VirtualMachineScaleSetVM, scaleSetName strin
 		}
 	}
 
+	if vm.VirtualMachineScaleSetVMProperties != nil && vm.VirtualMachineScaleSetVMProperties.OsProfile != nil {
+		computerName = *(vm.VirtualMachineScaleSetVMProperties.OsProfile.ComputerName)
+	}
+
 	return virtualMachine{
 		ID:                *(vm.ID),
 		Name:              *(vm.Name),
+		ComputerName:      computerName,
 		Type:              *(vm.Type),
 		Location:          *(vm.Location),
 		OsType:            osType,

@@ -6,7 +6,7 @@ The Clymene-agent is service that collects time series data(does not use disks)
 ```bash
 clymene-agent --config.file=/etc/clymene/clymene.yml
 ```
-2. How to write yaml - [See Prometheus Configuration for more information](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)  
+2. How to write yaml - [See Clymene Configuration for more information](https://clymene-project.github.io/docs/service-discovery/)  
 ```yaml
 global:
    scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.  
@@ -37,7 +37,7 @@ scrape_configs:
 
 3. config file reload
 ```yaml
-curl -XGET http://clymene-agent:15692/api/reload
+curl -XPOST http://clymene-agent:15692/api/reload
 
 # check clymene-agent logs
   {"level":"info","ts":1643299385.1000407,"caller":"config/config.go:451","msg":"Loading configuration file","filename":"clymene_agent.yml"}

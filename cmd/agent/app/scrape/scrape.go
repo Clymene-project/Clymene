@@ -7,8 +7,11 @@ import (
 	"context"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/textparse"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/timestamp"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/relabel"
 	"github.com/Clymene-project/Clymene/pkg/pool"
-	"github.com/Clymene-project/Clymene/pkg/relabel"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -27,10 +30,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	config_util "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
-
-	"github.com/prometheus/prometheus/pkg/labels"
-	"github.com/prometheus/prometheus/pkg/textparse"
-	"github.com/prometheus/prometheus/pkg/timestamp"
 )
 
 var errNameLabelMandatory = fmt.Errorf("missing metric name (%s label)", labels.MetricName)
@@ -510,7 +509,7 @@ type targetScraper struct {
 
 const acceptHeader = `application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`
 
-var userAgentHeader = fmt.Sprintf("Prometheus/%s", version.Get())
+var userAgentHeader = fmt.Sprintf("Clymene/%s", version.Get())
 
 func (s *targetScraper) scrape(ctx context.Context, w io.Writer) (string, error) {
 	if s.req == nil {

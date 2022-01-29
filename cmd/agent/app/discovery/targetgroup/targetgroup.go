@@ -16,7 +16,6 @@ package targetgroup
 import (
 	"bytes"
 	"encoding/json"
-
 	"github.com/prometheus/common/model"
 )
 

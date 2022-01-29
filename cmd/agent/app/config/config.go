@@ -1,20 +1,35 @@
+// Copyright 2015 The Prometheus Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package config
 
 import (
 	"fmt"
-	sd_config "github.com/Clymene-project/Clymene/cmd/agent/app/discovery/config"
-	"github.com/Clymene-project/Clymene/pkg/relabel"
-	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	"github.com/Clymene-project/Clymene/cmd/agent/app/relabel"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/alecthomas/units"
 	"github.com/pkg/errors"
-	config_util "github.com/prometheus/common/config"
+	"github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -24,7 +39,7 @@ var (
 )
 
 // Load parses the YAML input s into a Config.
-func Load(s string) (*Config, error) {
+func Load(s string, logger *zap.Logger) (*Config, error) {
 	cfg := &Config{}
 	// If the entire config body is empty the UnmarshalYAML method is
 	// never called. We thus have to set the DefaultConfig at the entry
@@ -35,21 +50,39 @@ func Load(s string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.original = s
+
+	for i, v := range cfg.GlobalConfig.ExternalLabels {
+		newV := os.Expand(v.Value, func(s string) string {
+			if s == "$" {
+				return "$"
+			}
+			if v := os.Getenv(s); v != "" {
+				return v
+			}
+			logger.Warn("msg Empty environment variable", zap.String("name", s))
+			return ""
+		})
+		if newV != v.Value {
+			logger.Debug("msg External label replaced", zap.String("label", v.Name), zap.String("input", v.Value), zap.String("output", newV))
+			v.Value = newV
+			cfg.GlobalConfig.ExternalLabels[i] = v
+		}
+	}
 	return cfg, nil
 }
 
 // LoadFile parses the given YAML file into a Config.
-func LoadFile(filename string) (*Config, error) {
+func LoadFile(filename string, logger *zap.Logger) (*Config, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := Load(string(content))
+	cfg, err := Load(string(content), logger)
 	if err != nil {
 		return nil, errors.Wrapf(err, "parsing YAML file %s", filename)
 	}
-	resolveFilepaths(filepath.Dir(filename), cfg)
+
+	cfg.SetDirectory(filepath.Dir(filename))
 	return cfg, nil
 }
 
@@ -71,15 +104,11 @@ var (
 	DefaultScrapeConfig = ScrapeConfig{
 		// ScrapeTimeout and ScrapeInterval default to the
 		// configured globals.
-		MetricsPath:     "/metrics",
-		Scheme:          "http",
-		HonorLabels:     false,
-		HonorTimestamps: true,
-	}
-
-	// DefaultRemoteReadConfig is the default remote read configuration.
-	DefaultRemoteReadConfig = RemoteReadConfig{
-		RemoteTimeout: model.Duration(1 * time.Minute),
+		MetricsPath:      "/metrics",
+		Scheme:           "http",
+		HonorLabels:      false,
+		HonorTimestamps:  true,
+		HTTPClientConfig: config.DefaultHTTPClientConfig,
 	}
 )
 
@@ -88,72 +117,17 @@ type Config struct {
 	GlobalConfig  GlobalConfig    `yaml:"global"`
 	RuleFiles     []string        `yaml:"rule_files,omitempty"`
 	ScrapeConfigs []*ScrapeConfig `yaml:"scrape_configs,omitempty"`
-
-	RemoteReadConfigs []*RemoteReadConfig `yaml:"remote_read,omitempty"`
-
-	// original is the input from which the config was parsed.
-	original string
 }
 
-// resolveFilepaths joins all relative paths in a configuration
-// with a given base directory.
-func resolveFilepaths(baseDir string, cfg *Config) {
-	join := func(fp string) string {
-		if len(fp) > 0 && !filepath.IsAbs(fp) {
-			fp = filepath.Join(baseDir, fp)
-		}
-		return fp
+// SetDirectory joins any relative file paths with dir.
+func (c *Config) SetDirectory(dir string) {
+	c.GlobalConfig.SetDirectory(dir)
+	for i, file := range c.RuleFiles {
+		c.RuleFiles[i] = config.JoinDir(dir, file)
 	}
-
-	for i, rf := range cfg.RuleFiles {
-		cfg.RuleFiles[i] = join(rf)
+	for _, c := range c.ScrapeConfigs {
+		c.SetDirectory(dir)
 	}
-
-	tlsPaths := func(cfg *config_util.TLSConfig) {
-		cfg.CAFile = join(cfg.CAFile)
-		cfg.CertFile = join(cfg.CertFile)
-		cfg.KeyFile = join(cfg.KeyFile)
-	}
-	clientPaths := func(scfg *config_util.HTTPClientConfig) {
-		if scfg.BasicAuth != nil {
-			scfg.BasicAuth.PasswordFile = join(scfg.BasicAuth.PasswordFile)
-		}
-		scfg.BearerTokenFile = join(scfg.BearerTokenFile)
-		tlsPaths(&scfg.TLSConfig)
-	}
-	sdPaths := func(cfg *sd_config.ServiceDiscoveryConfig) {
-		for _, kcfg := range cfg.KubernetesSDConfigs {
-			clientPaths(&kcfg.HTTPClientConfig)
-		}
-		for _, mcfg := range cfg.MarathonSDConfigs {
-			mcfg.AuthTokenFile = join(mcfg.AuthTokenFile)
-			clientPaths(&mcfg.HTTPClientConfig)
-		}
-		for _, consulcfg := range cfg.ConsulSDConfigs {
-			tlsPaths(&consulcfg.TLSConfig)
-		}
-		for _, cfg := range cfg.OpenstackSDConfigs {
-			tlsPaths(&cfg.TLSConfig)
-		}
-		for _, cfg := range cfg.TritonSDConfigs {
-			tlsPaths(&cfg.TLSConfig)
-		}
-		for _, filecfg := range cfg.FileSDConfigs {
-			for i, fn := range filecfg.Files {
-				filecfg.Files[i] = join(fn)
-			}
-		}
-	}
-
-	for _, cfg := range cfg.ScrapeConfigs {
-		clientPaths(&cfg.HTTPClientConfig)
-		sdPaths(&cfg.ServiceDiscoveryConfig)
-	}
-
-	for _, cfg := range cfg.RemoteReadConfigs {
-		clientPaths(&cfg.HTTPClientConfig)
-	}
-
 }
 
 func (c Config) String() string {
@@ -214,17 +188,6 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		jobNames[scfg.JobName] = struct{}{}
 	}
 
-	rrNames := map[string]struct{}{}
-	for _, rrcfg := range c.RemoteReadConfigs {
-		if rrcfg == nil {
-			return errors.New("empty or null remote read config section")
-		}
-		// Skip empty names, we fill their name with their config hash in remote read code.
-		if _, ok := rrNames[rrcfg.Name]; ok && rrcfg.Name != "" {
-			return errors.Errorf("found multiple remote read configs with job name %q", rrcfg.Name)
-		}
-		rrNames[rrcfg.Name] = struct{}{}
-	}
 	return nil
 }
 
@@ -241,10 +204,11 @@ type GlobalConfig struct {
 	QueryLogFile string `yaml:"query_log_file,omitempty"`
 	// The labels to add to any timeseries that this Prometheus instance scrapes.
 	ExternalLabels labels.Labels `yaml:"external_labels,omitempty"`
+}
 
-	// kafka remote 시 디스크 write를 컨트롤 하기 위함
-	// local write global option
-	NoLocalDiskWrite bool `yaml:"no_local_disk_write"`
+// SetDirectory joins any relative file paths with dir.
+func (c *GlobalConfig) SetDirectory(dir string) {
+	c.QueryLogFile = config.JoinDir(dir, c.QueryLogFile)
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
@@ -315,11 +279,30 @@ type ScrapeConfig struct {
 	MetricsPath string `yaml:"metrics_path,omitempty"`
 	// The URL scheme with which to fetch metrics from targets.
 	Scheme string `yaml:"scheme,omitempty"`
-	// More than this many samples post metric-relabelling will cause the scrape to fail.
+	// An uncompressed response body larger than this many bytes will cause the
+	// scrape to fail. 0 means no limit.
+	BodySizeLimit units.Base2Bytes `yaml:"body_size_limit,omitempty"`
+	// More than this many samples post metric-relabeling will cause the scrape to
+	// fail.
 	SampleLimit uint `yaml:"sample_limit,omitempty"`
+	// More than this many targets after the target relabeling will cause the
+	// scrapes to fail.
+	TargetLimit uint `yaml:"target_limit,omitempty"`
+	// More than this many labels post metric-relabeling will cause the scrape to
+	// fail.
+	LabelLimit uint `yaml:"label_limit,omitempty"`
+	// More than this label name length post metric-relabeling will cause the
+	// scrape to fail.
+	LabelNameLengthLimit uint `yaml:"label_name_length_limit,omitempty"`
+	// More than this label value length post metric-relabeling will cause the
+	// scrape to fail.
+	LabelValueLengthLimit uint `yaml:"label_value_length_limit,omitempty"`
 
-	ServiceDiscoveryConfig sd_config.ServiceDiscoveryConfig `yaml:",inline"`
-	HTTPClientConfig       config_util.HTTPClientConfig     `yaml:",inline"`
+	// We cannot do proper Go type embedding below as the parser will then parse
+	// values arbitrarily into the overflow maps of further-down types.
+
+	ServiceDiscoveryConfigs discovery.Configs       `yaml:"-"`
+	HTTPClientConfig        config.HTTPClientConfig `yaml:",inline"`
 
 	// List of target relabel configurations.
 	RelabelConfigs []*relabel.Config `yaml:"relabel_configs,omitempty"`
@@ -327,12 +310,16 @@ type ScrapeConfig struct {
 	MetricRelabelConfigs []*relabel.Config `yaml:"metric_relabel_configs,omitempty"`
 }
 
+// SetDirectory joins any relative file paths with dir.
+func (c *ScrapeConfig) SetDirectory(dir string) {
+	c.ServiceDiscoveryConfigs.SetDirectory(dir)
+	c.HTTPClientConfig.SetDirectory(dir)
+}
+
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
 func (c *ScrapeConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	*c = DefaultScrapeConfig
-	type plain ScrapeConfig
-	err := unmarshal((*plain)(c))
-	if err != nil {
+	if err := discovery.UnmarshalYAMLWithInlineConfigs(c, unmarshal); err != nil {
 		return err
 	}
 	if len(c.JobName) == 0 {
@@ -346,21 +333,10 @@ func (c *ScrapeConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	// The UnmarshalYAML method of ServiceDiscoveryConfig is not being called because it's not a pointer.
-	// We cannot make it a pointer as the parser panics for inlined pointer structs.
-	// Thus we just do its validation here.
-	if err := c.ServiceDiscoveryConfig.Validate(); err != nil {
-		return err
-	}
-
 	// Check for users putting URLs in target groups.
 	if len(c.RelabelConfigs) == 0 {
-		for _, tg := range c.ServiceDiscoveryConfig.StaticConfigs {
-			for _, t := range tg.Targets {
-				if err := CheckTargetAddress(t[model.AddressLabel]); err != nil {
-					return err
-				}
-			}
+		if err := checkStaticTargets(c.ServiceDiscoveryConfigs); err != nil {
+			return err
 		}
 	}
 
@@ -375,12 +351,93 @@ func (c *ScrapeConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		}
 	}
 
-	// Add index to the static config target groups for unique identification
-	// within scrape pool.
-	for i, tg := range c.ServiceDiscoveryConfig.StaticConfigs {
-		tg.Source = fmt.Sprintf("%d", i)
+	return nil
+}
+
+// MarshalYAML implements the yaml.Marshaler interface.
+func (c *ScrapeConfig) MarshalYAML() (interface{}, error) {
+	return discovery.MarshalYAMLWithInlineConfigs(c)
+}
+
+// StorageConfig configures runtime reloadable configuration options.
+type StorageConfig struct {
+	ExemplarsConfig *ExemplarsConfig `yaml:"exemplars,omitempty"`
+}
+
+type TracingClientType string
+
+const (
+	TracingClientHTTP TracingClientType = "http"
+	TracingClientGRPC TracingClientType = "grpc"
+)
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (t *TracingClientType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	*t = TracingClientType("")
+	type plain TracingClientType
+	if err := unmarshal((*plain)(t)); err != nil {
+		return err
 	}
 
+	if *t != TracingClientHTTP && *t != TracingClientGRPC {
+		return fmt.Errorf("expected tracing client type to be to be %s or %s, but got %s",
+			TracingClientHTTP, TracingClientGRPC, *t,
+		)
+	}
+
+	return nil
+}
+
+// TracingConfig configures the tracing options.
+type TracingConfig struct {
+	ClientType       TracingClientType `yaml:"client_type,omitempty"`
+	Endpoint         string            `yaml:"endpoint,omitempty"`
+	SamplingFraction float64           `yaml:"sampling_fraction,omitempty"`
+	WithSecure       bool              `yaml:"with_secure,omitempty"`
+	TLSConfig        config.TLSConfig  `yaml:"tls_config,omitempty"`
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (t *TracingConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	*t = TracingConfig{}
+	type plain TracingConfig
+	if err := unmarshal((*plain)(t)); err != nil {
+		return err
+	}
+
+	if t.Endpoint == "" {
+		return errors.New("tracing endpoint must be set")
+	}
+
+	// Fill in gRPC client as default if none is set.
+	if t.ClientType == "" {
+		t.ClientType = TracingClientGRPC
+	}
+
+	return nil
+}
+
+// ExemplarsConfig configures runtime reloadable configuration options.
+type ExemplarsConfig struct {
+	// MaxExemplars sets the size, in # of exemplars stored, of the single circular buffer used to store exemplars in memory.
+	// Use a value of 0 or less than 0 to disable the storage without having to restart Prometheus.
+	MaxExemplars int64 `yaml:"max_exemplars,omitempty"`
+}
+
+func checkStaticTargets(configs discovery.Configs) error {
+	for _, cfg := range configs {
+		sc, ok := cfg.(discovery.StaticConfig)
+		if !ok {
+			continue
+		}
+		for _, tg := range sc {
+			for _, t := range tg.Targets {
+				if err := CheckTargetAddress(t[model.AddressLabel]); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 
@@ -393,53 +450,10 @@ func CheckTargetAddress(address model.LabelValue) error {
 	return nil
 }
 
-// ClientCert contains client cert credentials.
-type ClientCert struct {
-	Cert string             `yaml:"cert"`
-	Key  config_util.Secret `yaml:"key"`
-}
-
-// FileSDConfig is the configuration for file based discovery.
-type FileSDConfig struct {
-	Files           []string       `yaml:"files"`
-	RefreshInterval model.Duration `yaml:"refresh_interval,omitempty"`
-}
-
-// RemoteReadConfig is the configuration for reading from remote storage.
-type RemoteReadConfig struct {
-	URL           *config_util.URL `yaml:"url"`
-	RemoteTimeout model.Duration   `yaml:"remote_timeout,omitempty"`
-	ReadRecent    bool             `yaml:"read_recent,omitempty"`
-	Name          string           `yaml:"name,omitempty"`
-
-	// We cannot do proper Go type embedding below as the parser will then parse
-	// values arbitrarily into the overflow maps of further-down types.
-	HTTPClientConfig config_util.HTTPClientConfig `yaml:",inline"`
-
-	// RequiredMatchers is an optional list of equality matchers which have to
-	// be present in a selector to query the remote read endpoint.
-	RequiredMatchers model.LabelSet `yaml:"required_matchers,omitempty"`
-}
-
-// UnmarshalYAML implements the yaml.Unmarshaler interface.
-func (c *RemoteReadConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	*c = DefaultRemoteReadConfig
-	type plain RemoteReadConfig
-	if err := unmarshal((*plain)(c)); err != nil {
-		return err
-	}
-	if c.URL == nil {
-		return errors.New("url for remote_read is empty")
-	}
-	// The UnmarshalYAML method of HTTPClientConfig is not being called because it's not a pointer.
-	// We cannot make it a pointer as the parser panics for inlined pointer structs.
-	// Thus we just do its validation here.
-	return c.HTTPClientConfig.Validate()
-}
-
 type Builder struct {
-	ConfigFile string
-	HostPort   int
+	ConfigFile   string
+	HostPort     int
+	NewSDManager bool
 }
 
 // NewConfigBuilder creates a new configfile builder.
@@ -449,7 +463,7 @@ func NewConfigBuilder() *Builder {
 
 func ReloadConfig(filename string, logger *zap.Logger, rls ...func(*Config) error) (err error) {
 	logger.Info("Loading configuration file", zap.String("filename", filename))
-	conf, err := LoadFile(filename)
+	conf, err := LoadFile(filename, logger)
 	if err != nil {
 		return errors.Wrapf(err, "couldn't load configuration (--config.file=%q)", filename)
 	}

@@ -122,12 +122,12 @@ func (p *Pod) process(ctx context.Context, ch chan<- []*targetgroup.Group) bool 
 		send(ctx, ch, &targetgroup.Group{Source: podSourceFromNamespaceAndName(namespace, name)})
 		return true
 	}
-	eps, err := convertToPod(o)
+	pod, err := convertToPod(o)
 	if err != nil {
 		p.logger.Error("converting to Pod object failed", zap.Error(err))
 		return true
 	}
-	send(ctx, ch, p.buildPod(eps))
+	send(ctx, ch, p.buildPod(pod))
 	return true
 }
 

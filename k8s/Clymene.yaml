@@ -1,36 +1,36 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: clymene-ingester
-  namespace: clymene
-  labels:
-    app: clymene-ingester
-spec:
-  selector:
-    matchLabels:
-      app: clymene-ingester
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: clymene-ingester
-    spec:
-      containers:
-        - name: clymene-agent
-          image: bourbonkk/clymene-ingester:main
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 15694
-          args:
-            - --prometheus.remote.url=http://prometheus:9090/api/v1/write
-            - --log-level=info
-            - --kafka.consumer.brokers=clymene-kafka-broker:9092
-          env:
-            - name: TS_STORAGE_TYPE
-              value: prometheus
-      securityContext:
-        runAsUser: 1000
----
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: clymene-ingester
+#  namespace: clymene
+#  labels:
+#    app: clymene-ingester
+#spec:
+#  selector:
+#    matchLabels:
+#      app: clymene-ingester
+#  replicas: 1
+#  template:
+#    metadata:
+#      labels:
+#        app: clymene-ingester
+#    spec:
+#      containers:
+#        - name: clymene-agent
+#          image: bourbonkk/clymene-ingester:main
+#          imagePullPolicy: Always
+#          ports:
+#            - containerPort: 15694
+#          args:
+#            - --prometheus.remote.url=http://prometheus:9090/api/v1/write
+#            - --log-level=info
+#            - --kafka.consumer.brokers=clymene-kafka-broker:9092
+#          env:
+#            - name: TS_STORAGE_TYPE
+#              value: prometheus
+#      securityContext:
+#        runAsUser: 1000
+#---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -50,8 +50,8 @@ spec:
     spec:
       containers:
         - name: clymene-agent
-          image: bourbonkk/clymene-agent:main
-          imagePullPolicy: Always
+          image: bourbonkk/clymene-agent:latest
+#          imagePullPolicy: Always
           ports:
             - containerPort: 15691
             - containerPort: 15692
@@ -81,13 +81,16 @@ metadata:
   labels:
     app: clymene-agent
 spec:
+  type: NodePort
   ports:
     - name: metric
       port: 15691
       targetPort: 15691
+      nodePort: 31691
     - name: admin
       port: 15692
       targetPort: 15692
+      nodePort: 31692
   selector:
     app: clymene-agent
 ---
