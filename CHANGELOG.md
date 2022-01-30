@@ -1,6 +1,18 @@
 Changes by Version
 ==================
 
+1.5.0 (2022-01-30)
+-----------------
+Updated Clymene's service discovery feature. For details, please check the clymene official docs(https://clymene-project.github.io/docs/service-discovery/configuration/)
+1. kuma(https://kuma.io/)
+2. uyuni(https://www.uyuni-project.org/)
+3. scaleway(https://www.scaleway.com/en/virtual-instances/)
+4. puppetdb(https://puppet.com/docs/puppetdb/7/overview.html)
+5. linode(https://www.linode.com/)
+6. hetzner(https://www.hetzner.com/)
+7. eureka(https://github.com/Netflix/eureka)
+8. digitalocean(https://www.digitalocean.com/)
+
 1.4.0 (2022-01-22)
 -----------------
 Now, You can use clymene using tdengine's http interface.
