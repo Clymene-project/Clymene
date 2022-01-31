@@ -23,6 +23,7 @@ import (
 
 const (
 	GatewayGRPC = 15610
+	GatewayHTTP = 15611
 
 	// GatewayAdminHTTP gateway metrics
 	GatewayAdminHTTP = 15690

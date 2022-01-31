@@ -18,7 +18,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/Clymene-project/Clymene/cmd/gateway/app/metric"
+	"github.com/Clymene-project/Clymene/cmd/gateway/app/handler"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
 	"github.com/Clymene-project/Clymene/prompb"
 	"go.uber.org/zap"
@@ -27,11 +27,11 @@ import (
 	"net"
 )
 
-// GRPCServerParams to construct a new Jaeger Collector gRPC Server
+// GRPCServerParams to construct a new Clymene Gateway gRPC Server
 type GRPCServerParams struct {
 	TLSConfig     tlscfg.Options
 	HostPort      string
-	MetricHandler *metric.GRPCHandler
+	MetricHandler *handler.GRPCHandler
 	Logger        *zap.Logger
 	OnError       func(error)
 }

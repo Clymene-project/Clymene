@@ -17,14 +17,17 @@
 package app
 
 import (
+	"context"
 	"fmt"
-	"github.com/Clymene-project/Clymene/cmd/gateway/app/metric"
+	"github.com/Clymene-project/Clymene/cmd/gateway/app/handler"
 	"github.com/Clymene-project/Clymene/cmd/gateway/app/server"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
+	"net/http"
+	"time"
 )
 
 type Gateway struct {
@@ -32,10 +35,12 @@ type Gateway struct {
 	metricsFactory metrics.Factory
 	metricWriter   metricstore.Writer
 
-	metricsHandler *metric.GRPCHandler
+	metricsHandler *handler.GRPCHandler
 
 	grpcServer               *grpc.Server
 	tlsGRPCCertWatcherCloser io.Closer
+	httpServer               *http.Server
+	tlsHTTPCertWatcherCloser io.Closer
 }
 
 type GatewayParams struct {
@@ -55,16 +60,27 @@ func New(params *GatewayParams) *Gateway {
 func (g *Gateway) Start(opt *GatewayOptions) error {
 	grpcServer, err := server.StartGRPCServer(&server.GRPCServerParams{
 		HostPort:      opt.gatewayGRPCHostPort,
-		MetricHandler: metric.NewGRPCHandler(g.logger, g.metricWriter),
+		MetricHandler: handler.NewGRPCHandler(g.logger, g.metricWriter),
 		TLSConfig:     opt.TLSGRPC,
 		Logger:        g.logger,
 	})
 	if err != nil {
 		return fmt.Errorf("could not start gRPC gateway %w", err)
 	}
+	httpServer, err := server.StartHTTPServer(&server.HTTPServerParams{
+		HostPort:      opt.gatewayHTTPHostPort,
+		MetricHandler: handler.NewHTTPHandler(g.logger, g.metricWriter),
+		TLSConfig:     opt.TLSHTTP,
+		Logger:        g.logger,
+	})
+	if err != nil {
+		return fmt.Errorf("could not start HTTP gateway %w", err)
+	}
 	g.grpcServer = grpcServer
+	g.httpServer = httpServer
 
 	g.tlsGRPCCertWatcherCloser = &opt.TLSGRPC
+	g.tlsHTTPCertWatcherCloser = &opt.TLSHTTP
 
 	return nil
 }
@@ -74,7 +90,18 @@ func (g *Gateway) Close() error {
 	if g.grpcServer != nil {
 		g.grpcServer.GracefulStop()
 	}
+	// HTTP server
+	if g.httpServer != nil {
+
+		timeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := g.httpServer.Shutdown(timeout); err != nil {
+			g.logger.Fatal("failed to stop the main HTTP server", zap.Error(err))
+		}
+		defer cancel()
+	}
+
 	// watchers actually never return errors from Close
 	_ = g.tlsGRPCCertWatcherCloser.Close()
+	_ = g.tlsHTTPCertWatcherCloser.Close()
 	return nil
 }
