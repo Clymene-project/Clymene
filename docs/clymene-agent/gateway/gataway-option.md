@@ -22,6 +22,11 @@ clymene-agent [flags]
 --gateway.grpc.tls.key string            Path to a TLS Private Key file, used to identify this process to the remote server(s)
 --gateway.grpc.tls.server-name string    Override the TLS server name we expect in the certificate of the remote server(s)
 --gateway.grpc.tls.skip-host-verify      (insecure) Skip server's certificate chain and host name verification
+--gateway.http.max-err-msg-len int       Maximum length of error message (default 256)
+--gateway.http.timeout duration          Time out when doing remote write(sec, default 10 sec) (default 10s)
+--gateway.http.url string                the clymene-gateway remote write HTTP receiver endpoint(/api/metrics) (default "http://localhost:15611/api/metrics")
+--gateway.http.user.agent string         User-Agent in request header (default "Clymene/")
+--gateway.service-type string            gateway service type(grpc or http) (default "grpc")
 ```
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cortex
+package http
 
 import (
 	"bufio"
@@ -55,8 +55,8 @@ func NewMetricWriter(
 	marshaller Marshaller,
 ) *Writer {
 	writeMetrics := WriterMetrics{
-		WrittenSuccess: factory.Counter(metrics.Options{Name: "cortex_metrics_written", Tags: map[string]string{"status": "success"}}),
-		WrittenFailure: factory.Counter(metrics.Options{Name: "cortex_metrics_written", Tags: map[string]string{"status": "failure"}}),
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "gateway_metrics_written", Tags: map[string]string{"status": "failure"}}),
 	}
 	return &Writer{
 		metrics:      writeMetrics,
@@ -142,7 +142,7 @@ func (l *latencyTransport) RoundTrip(request *http.Request) (*http.Response, err
 }
 
 func newLatencyTransport(t http.RoundTripper, f metrics.Factory) http.RoundTripper {
-	m := f.Namespace(metrics.NSOptions{Name: "cortex", Tags: nil})
+	m := f.Namespace(metrics.NSOptions{Name: "prometheus", Tags: nil})
 	return &latencyTransport{
 		transport: t,
 		latency:   m.Timer(metrics.TimerOptions{Name: "latency", Tags: nil}),

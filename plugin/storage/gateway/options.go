@@ -16,12 +16,37 @@
 
 package gateway
 
-import "github.com/Clymene-project/Clymene/plugin/storage/gateway/grpc"
+import (
+	"flag"
+	"github.com/Clymene-project/Clymene/plugin/storage/gateway/grpc"
+	"github.com/Clymene-project/Clymene/plugin/storage/gateway/http"
+	"github.com/spf13/viper"
+)
 
 type Options struct {
-	grpc.ConnBuilder
+	ServiceType string
+	grpcOptions grpc.Options
+	httpOptions http.Options
 }
 
-func NewOptions() *Options {
-	return &Options{grpc.NewConnBuilder()}
+const (
+	configPrefix      = "gateway"
+	suffixServiceType = ".service-type"
+
+	defsultServiceType = "grpc"
+)
+
+func (o *Options) AddFlags(flagSet *flag.FlagSet) {
+	flagSet.String(
+		configPrefix+suffixServiceType,
+		defsultServiceType,
+		"gateway service type(grpc or http)",
+	)
+	grpc.AddFlags(flagSet)
+	http.AddFlags(flagSet)
+}
+func (o *Options) InitFromViper(v *viper.Viper) {
+	o.ServiceType = v.GetString(configPrefix + suffixServiceType)
+	o.grpcOptions.InitFromViper(v)
+	o.httpOptions.InitFromViper(v)
 }

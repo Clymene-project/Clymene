@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package gateway
+package grpc
 
 import (
 	"context"
@@ -39,13 +39,13 @@ func (m *MetricWriter) WriteMetric(metric []prompb.TimeSeries) error {
 }
 
 type MetricWriterParams struct {
+	Conn   *grpc.ClientConn
 	Logger *zap.Logger
-	conn   *grpc.ClientConn
 }
 
 func NewMetricWriter(p *MetricWriterParams) (*MetricWriter, error) {
 	return &MetricWriter{
-		reporter: prompb.NewClymeneServiceClient(p.conn),
+		reporter: prompb.NewClymeneServiceClient(p.Conn),
 		logger:   p.Logger,
 	}, nil
 }

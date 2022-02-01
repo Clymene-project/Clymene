@@ -17,7 +17,6 @@
 package prometheus
 
 import (
-	"errors"
 	"flag"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
@@ -38,14 +37,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	f.metricsFactory, f.logger = metricsFactory, logger
 	logger.Info("Factory Initialize", zap.String("type", "prometheus"))
 	logger.Info("prometheus factory", zap.String("url", f.options.url))
-	switch f.options.Encoding {
-	case kafka.EncodingProto:
-		f.marshaller = newProtobufMarshaller()
-	case kafka.EncodingJSON:
-		f.marshaller = newJSONMarshaller()
-	default:
-		return errors.New("kafka encoding is not one of '" + kafka.EncodingJSON + "' or '" + kafka.EncodingProto + "'")
-	}
+	f.marshaller = newProtobufMarshaller()
 	return nil
 }
 

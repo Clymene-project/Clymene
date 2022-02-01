@@ -1,4 +1,4 @@
-package prometheus
+package http
 
 import (
 	"github.com/Clymene-project/Clymene/prompb"

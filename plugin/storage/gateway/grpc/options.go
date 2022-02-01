@@ -18,11 +18,14 @@ package grpc
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
 	"github.com/Clymene-project/Clymene/pkg/discovery"
 	"github.com/Clymene-project/Clymene/pkg/discovery/grpcresolver"
+	"github.com/Clymene-project/Clymene/ports"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -33,8 +36,22 @@ import (
 	"time"
 )
 
-// ConnBuilder Struct to hold configurations
-type ConnBuilder struct {
+const (
+	gRPCPrefix        = "gateway.grpc"
+	gatewayHostPort   = gRPCPrefix + ".host-port"
+	retry             = gRPCPrefix + ".retry.max"
+	defaultMaxRetry   = 3
+	discoveryMinPeers = gRPCPrefix + ".discovery.min-peers"
+)
+
+var tlsFlagsConfig = tlscfg.ClientFlagsConfig{
+	Prefix:         gRPCPrefix,
+	ShowEnabled:    true,
+	ShowServerName: true,
+}
+
+// Options Struct to hold configurations
+type Options struct {
 	// GatewayHostPorts is list of host:port Clymene Gates.
 	GatewayHostPorts []string `yaml:"gatewayHostPorts"`
 
@@ -46,13 +63,8 @@ type ConnBuilder struct {
 	Discoverer        discovery.Discoverer
 }
 
-// NewConnBuilder creates a new grpc connection builder.
-func NewConnBuilder() ConnBuilder {
-	return ConnBuilder{}
-}
-
 // CreateConnection creates the gRPC connection
-func (b *ConnBuilder) CreateConnection(logger *zap.Logger) (*grpc.ClientConn, error) {
+func (b *Options) CreateConnection(logger *zap.Logger) (*grpc.ClientConn, error) {
 	var dialOptions []grpc.DialOption
 	var dialTarget string
 	if b.TLS.Enabled { // user requested a secure connection
@@ -100,4 +112,24 @@ func (b *ConnBuilder) CreateConnection(logger *zap.Logger) (*grpc.ClientConn, er
 	}
 
 	return conn, nil
+}
+
+// AddFlags adds flags for Options.
+func AddFlags(flags *flag.FlagSet) {
+	flags.Uint(retry, defaultMaxRetry, "Sets the maximum number of retries for a call")
+	flags.Int(discoveryMinPeers, 3, "Max number of collectors to which the agent will try to connect at any given time")
+	flags.String(gatewayHostPort, "localhost"+ports.PortToHostPort(ports.GatewayGRPC), "Comma-separated string representing host:port of a static list of gateways to connect to directly")
+	tlsFlagsConfig.AddFlags(flags)
+}
+
+// InitFromViper initializes Options with properties retrieved from Viper.
+func (b *Options) InitFromViper(v *viper.Viper) *Options {
+	hostPorts := v.GetString(gatewayHostPort)
+	if hostPorts != "" {
+		b.GatewayHostPorts = strings.Split(hostPorts, ",")
+	}
+	b.MaxRetry = uint(v.GetInt(retry))
+	b.TLS = tlsFlagsConfig.InitFromViper(v)
+	b.DiscoveryMinPeers = v.GetInt(discoveryMinPeers)
+	return b
 }

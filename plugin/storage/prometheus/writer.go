@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/pkg/errors"
 	"github.com/uber/jaeger-lib/metrics"
@@ -86,7 +87,7 @@ func (w *Writer) WriteMetric(metric []prompb.TimeSeries) error {
 	httpReq.Header.Add("Content-Encoding", "snappy")
 	httpReq.Header.Set("Content-Type", "application/x-protobuf")
 	httpReq.Header.Set("User-Agent", w.userAgent)
-	httpReq.Header.Set("X-Prometheus-Remote-Write-Version", "0.1.0")
+	httpReq.Header.Set("Clymene-Version", version.Get().Version)
 
 	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
 	defer cancel()

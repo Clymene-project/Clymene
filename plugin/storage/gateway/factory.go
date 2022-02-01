@@ -20,49 +20,62 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Clymene-project/Clymene/plugin/storage/gateway/grpc"
+	"github.com/Clymene-project/Clymene/plugin/storage/gateway/http"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
-	grpc_conn "google.golang.org/grpc"
 )
 
 type Factory struct {
-	Options *Options
+	client  Client
+	Options Options
 
 	metricsFactory metrics.Factory
 	logger         *zap.Logger
-	conn           *grpc_conn.ClientConn
 }
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
 	logger.Info("Factory Initialize", zap.String("type", "gateway"))
-
-	conn, err := f.Options.ConnBuilder.CreateConnection(logger)
-	if err != nil {
-		return fmt.Errorf("failed to create gRPC connect: %w", err)
+	//var client Client
+	if f.Options.ServiceType == "grpc" {
+		client, err := grpc.NewClient(f.Options.grpcOptions, f.metricsFactory, logger)
+		if err != nil {
+			return fmt.Errorf("failed to create gRPC connect: %w", err)
+		}
+		f.client = client
+	} else {
+		client, err := http.NewClient(f.Options.httpOptions, f.metricsFactory, logger)
+		if err != nil {
+			return fmt.Errorf("failed to create http connect: %w", err)
+		}
+		f.client = client
 	}
-	f.conn = conn
 	return nil
 }
 
 func (f *Factory) CreateWriter() (metricstore.Writer, error) {
-	return createMetricWriter(f.logger, f.conn)
+	return createMetricWriter(f.client)
 }
 
 func NewFactory() *Factory {
-	return &Factory{Options: NewOptions()}
+	return &Factory{}
 }
 
-func createMetricWriter(logger *zap.Logger, conn *grpc_conn.ClientConn) (metricstore.Writer, error) {
-	return NewMetricWriter(&MetricWriterParams{Logger: logger, conn: conn})
+func createMetricWriter(client Client) (metricstore.Writer, error) {
+	return client.CreateWriter()
 }
 
 func (f *Factory) AddFlags(flagSet *flag.FlagSet) {
-	grpc.AddFlags(flagSet)
+	f.Options.AddFlags(flagSet)
 }
 
 func (f *Factory) InitFromViper(v *viper.Viper) {
 	f.Options.InitFromViper(v)
+}
+
+// InitFromOptions initializes factory from options.
+func (f *Factory) InitFromOptions(o Options) {
+	f.Options = o
 }

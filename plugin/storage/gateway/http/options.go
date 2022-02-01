@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package prometheus
+package http
 
 import (
 	"flag"
@@ -29,46 +29,52 @@ type Options struct {
 	userAgent    string
 	timeout      time.Duration
 	maxErrMsgLen int64
+	Encoding     string
+	//TLS          tlscfg.Options
 }
 
 const (
-	configPrefix       = "prometheus.remote"
+	hTTPPrefix         = "gateway.http"
 	suffixUrl          = ".url"
 	suffixUserAgent    = ".user.agent"
 	suffixTimeout      = ".timeout"
-	suffixmaxErrMsgLen = ".max.err.msg.len"
+	suffixMaxErrMsgLen = ".max-err-msg-len"
 
-	defaultPrometheusUrl = "http://localhost:9090/api/v1/write"
-	defaultTimeout       = 10 * time.Second
-	defaultMaxErrMsgLen  = 256
+	defaultClymeneGatewayUrl = "http://localhost:15611/api/metrics"
+	defaultTimeout           = 10 * time.Second
+	defaultMaxErrMsgLen      = 256
 )
 
-func (o *Options) AddFlags(flagSet *flag.FlagSet) {
+// AddFlags adds flags for Options.
+func AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
-		configPrefix+suffixUrl,
-		defaultPrometheusUrl,
-		"the prometheus remote write receiver endpoint(/api/v1/write)",
+		hTTPPrefix+suffixUrl,
+		defaultClymeneGatewayUrl,
+		"the clymene-gateway remote write HTTP receiver endpoint(/api/metrics)",
 	)
 	flagSet.Duration(
-		configPrefix+suffixTimeout,
+		hTTPPrefix+suffixTimeout,
 		defaultTimeout,
 		"Time out when doing remote write(sec, default 10 sec)",
 	)
 	flagSet.String(
-		configPrefix+suffixUserAgent,
+		hTTPPrefix+suffixUserAgent,
 		fmt.Sprintf("Clymene/%s", version.Get().Version),
 		"User-Agent in request header",
 	)
 	flagSet.Int(
-		configPrefix+suffixmaxErrMsgLen,
+		hTTPPrefix+suffixMaxErrMsgLen,
 		defaultMaxErrMsgLen,
 		"Maximum length of error message",
 	)
+	//tlsFlagsConfig.AddFlags(flagSet)
 }
 
+// InitFromViper initializes Options with properties retrieved from Viper.
 func (o *Options) InitFromViper(v *viper.Viper) {
-	o.url = v.GetString(configPrefix + suffixUrl)
-	o.maxErrMsgLen = v.GetInt64(configPrefix + suffixmaxErrMsgLen)
-	o.timeout = v.GetDuration(configPrefix + suffixTimeout)
-	o.userAgent = v.GetString(configPrefix + suffixUserAgent)
+	o.url = v.GetString(hTTPPrefix + suffixUrl)
+	o.maxErrMsgLen = v.GetInt64(hTTPPrefix + suffixMaxErrMsgLen)
+	o.timeout = v.GetDuration(hTTPPrefix + suffixTimeout)
+	o.userAgent = v.GetString(hTTPPrefix + suffixUserAgent)
+	//o.TLS = tlsFlagsConfig.InitFromViper(v)
 }
