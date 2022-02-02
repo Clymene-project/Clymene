@@ -21,21 +21,21 @@ Various time series data analysis functions will be added.
 Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at
 once.
 
-<img src="https://user-images.githubusercontent.com/25188468/150611946-c3f07298-03ee-42ba-8937-9da22735da45.png" width="70%" height="70%" alt="architecture_v1.4.0">
+<img src="https://user-images.githubusercontent.com/25188468/152248922-8b86e107-ed16-4ec1-a68a-48e1016a7521.png" width="70%" height="70%" alt="architecture_v1.4.0">
 
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
 Writers that can be stored in multiple DBs at once.
 
-<img src="https://user-images.githubusercontent.com/25188468/150611879-35855d02-0753-4f90-83fd-583c1e036c71.png" width="70%" height="70%" alt="architecture_v1.4.0_ingester">  
+<img src="https://user-images.githubusercontent.com/25188468/152248986-a2835944-4aba-4acc-a1b5-3d430197da1b.png" width="70%" height="70%" alt="architecture_v1.4.0_ingester">  
 
 ### Use gateway
 
 Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
 Composite Writers that can be stored in multiple DBs at once.
 
-<img src="https://user-images.githubusercontent.com/25188468/151970074-e54d8494-2247-404f-b4cb-35e523e225f7.png" width="70%" height="70%" alt="architecture_v1.4.0_gateway">
+<img src="https://user-images.githubusercontent.com/25188468/152249028-701c3372-dee8-49dd-b284-dd04e9da0597.png" width="70%" height="70%" alt="architecture_v1.4.0_gateway">
 
 # components
 

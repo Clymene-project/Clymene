@@ -22,6 +22,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// https://code.kx.com/q/
+
 type Factory struct {
 }
 
