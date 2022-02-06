@@ -23,6 +23,12 @@ once.
 
 <img src="https://user-images.githubusercontent.com/25188468/152248922-8b86e107-ed16-4ec1-a68a-48e1016a7521.png" width="70%" height="70%" alt="architecture_v1.4.0">
 
+### Use Log collection agent
+Clymene Promtail(Comming Soon!)  
+Clymene-promtail is Loki's log collection agent. It will be developed for use in Clymene's HA architecture.  
+<img src="https://user-images.githubusercontent.com/25188468/152685257-5c78fa76-f24d-4200-8c3b-58addedd6e59.png" width="70%" height="70%" alt="architecture_v2.0.0">
+
+
 ### Including kafka and ingester
 
 Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
