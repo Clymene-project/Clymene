@@ -89,6 +89,7 @@ the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-projec
 
 1. Various DB support(ElasticSearch, Prometheus, Cortex, OpenTSDB, influxdb, TDengine, kdb)
 2. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
+3. Add log management collection feature(https://github.com/grafana/loki)
 
 ## Get in Touch
 
