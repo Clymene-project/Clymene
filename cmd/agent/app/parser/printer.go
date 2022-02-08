@@ -15,7 +15,7 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	labels2 "github.com/Clymene-project/Clymene/model/labels"
 	"sort"
 	"strings"
 	"time"
@@ -187,7 +187,7 @@ func (node *VectorSelector) String() string {
 	}
 	for _, matcher := range node.LabelMatchers {
 		// Only include the __name__ label if its equality matching and matches the name.
-		if matcher.Name == labels.MetricName && matcher.Type == labels.MatchEqual && matcher.Value == node.Name {
+		if matcher.Name == labels2.MetricName && matcher.Type == labels2.MatchEqual && matcher.Value == node.Name {
 			continue
 		}
 		labelStrings = append(labelStrings, matcher.String())

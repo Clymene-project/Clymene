@@ -15,8 +15,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/timestamp"
+	labels2 "github.com/Clymene-project/Clymene/model/labels"
+	"github.com/Clymene-project/Clymene/model/timestamp"
 	"github.com/Clymene-project/Clymene/util/strutil"
 	"math"
 	"os"
@@ -127,14 +127,14 @@ func ParseExpr(input string) (expr Expr, err error) {
 }
 
 // ParseMetric parses the input into a metric
-func ParseMetric(input string) (m labels.Labels, err error) {
+func ParseMetric(input string) (m labels2.Labels, err error) {
 	p := newParser(input)
 	defer parserPool.Put(p)
 	defer p.recover(&err)
 
 	parseResult := p.parseGenerated(START_METRIC)
 	if parseResult != nil {
-		m = parseResult.(labels.Labels)
+		m = parseResult.(labels2.Labels)
 	}
 
 	if len(p.parseErrors) != 0 {
@@ -146,7 +146,7 @@ func ParseMetric(input string) (m labels.Labels, err error) {
 
 // ParseMetricSelector parses the provided textual metric selector into a list of
 // label matchers.
-func ParseMetricSelector(input string) (m []*labels.Matcher, err error) {
+func ParseMetricSelector(input string) (m []*labels2.Matcher, err error) {
 	p := newParser(input)
 	defer parserPool.Put(p)
 	defer p.recover(&err)
@@ -193,12 +193,12 @@ func (v SequenceValue) String() string {
 }
 
 type seriesDescription struct {
-	labels labels.Labels
+	labels labels2.Labels
 	values []SequenceValue
 }
 
 // ParseSeriesDesc parses the description of a time series.
-func ParseSeriesDesc(input string) (labels labels.Labels, values []SequenceValue, err error) {
+func ParseSeriesDesc(input string) (labels labels2.Labels, values []SequenceValue, err error) {
 	p := newParser(input)
 	p.lex.seriesDesc = true
 
@@ -366,7 +366,7 @@ func (p *parser) newBinaryExpression(lhs Node, op Item, modifiers, rhs Node) *Bi
 
 func (p *parser) assembleVectorSelector(vs *VectorSelector) {
 	if vs.Name != "" {
-		nameMatcher, err := labels.NewMatcher(labels.MatchEqual, labels.MetricName, vs.Name)
+		nameMatcher, err := labels2.NewMatcher(labels2.MatchEqual, labels2.MetricName, vs.Name)
 		if err != nil {
 			panic(err) // Must not happen with labels.MatchEqual
 		}
@@ -590,7 +590,7 @@ func (p *parser) checkAST(node Node) (typ ValueType) {
 			// set outside the braces. This checks if the name has already been set
 			// previously.
 			for _, m := range n.LabelMatchers[0 : len(n.LabelMatchers)-1] {
-				if m != nil && m.Name == labels.MetricName {
+				if m != nil && m.Name == labels2.MetricName {
 					p.addParseErrf(n.PositionRange(), "metric name must not be set twice: %q or %q", n.Name, m.Value)
 				}
 			}
@@ -652,28 +652,28 @@ func (p *parser) parseGenerated(startSymbol ItemType) interface{} {
 	return p.generatedParserResult
 }
 
-func (p *parser) newLabelMatcher(label, operator, value Item) *labels.Matcher {
+func (p *parser) newLabelMatcher(label, operator, value Item) *labels2.Matcher {
 	op := operator.Typ
 	val := p.unquoteString(value.Val)
 
 	// Map the Item to the respective match type.
-	var matchType labels.MatchType
+	var matchType labels2.MatchType
 	switch op {
 	case EQL:
-		matchType = labels.MatchEqual
+		matchType = labels2.MatchEqual
 	case NEQ:
-		matchType = labels.MatchNotEqual
+		matchType = labels2.MatchNotEqual
 	case EQL_REGEX:
-		matchType = labels.MatchRegexp
+		matchType = labels2.MatchRegexp
 	case NEQ_REGEX:
-		matchType = labels.MatchNotRegexp
+		matchType = labels2.MatchNotRegexp
 	default:
 		// This should never happen, since the error should have been caught
 		// by the generated parser.
 		panic("invalid operator")
 	}
 
-	m, err := labels.NewMatcher(matchType, label.Val, val)
+	m, err := labels2.NewMatcher(matchType, label.Val, val)
 	if err != nil {
 		p.addParseErr(mergeRanges(&label, &value), err)
 	}
@@ -789,8 +789,8 @@ func (p *parser) getAtModifierVars(e Node) (**int64, *ItemType, *Pos, bool) {
 	return timestampp, preprocp, endPosp, true
 }
 
-func MustLabelMatcher(mt labels.MatchType, name, val string) *labels.Matcher {
-	m, err := labels.NewMatcher(mt, name, val)
+func MustLabelMatcher(mt labels2.MatchType, name, val string) *labels2.Matcher {
+	m, err := labels2.NewMatcher(mt, name, val)
 	if err != nil {
 		panic(err)
 	}

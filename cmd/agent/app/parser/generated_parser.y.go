@@ -5,7 +5,7 @@ package parser
 
 import (
 	__yyfmt__ "fmt"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	labels2 "github.com/Clymene-project/Clymene/model/labels"
 )
 
 //line promql/parser/generated_parser.y:15
@@ -22,10 +22,10 @@ type yySymType struct {
 	yys      int
 	node     Node
 	item     Item
-	matchers []*labels.Matcher
-	matcher  *labels.Matcher
-	label    labels.Label
-	labels   labels.Labels
+	matchers []*labels2.Matcher
+	matcher  *labels2.Matcher
+	label    labels2.Label
+	labels   labels2.Labels
 	strings  []string
 	series   []SequenceValue
 	uint     uint64
@@ -1397,7 +1397,7 @@ yydefault:
 		{
 			vs := &VectorSelector{
 				Name:          yyDollar[1].item.Val,
-				LabelMatchers: []*labels.Matcher{},
+				LabelMatchers: []*labels2.Matcher{},
 				PosRange:      yyDollar[1].item.PositionRange(),
 			}
 			yylex.(*parser).assembleVectorSelector(vs)
@@ -1434,7 +1434,7 @@ yydefault:
 //line promql/parser/generated_parser.y:533
 		{
 			yyVAL.node = &VectorSelector{
-				LabelMatchers: []*labels.Matcher{},
+				LabelMatchers: []*labels2.Matcher{},
 				PosRange:      mergeRanges(&yyDollar[1].item, &yyDollar[2].item),
 			}
 		}
@@ -1452,7 +1452,7 @@ yydefault:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line promql/parser/generated_parser.y:550
 		{
-			yyVAL.matchers = []*labels.Matcher{yyDollar[1].matcher}
+			yyVAL.matchers = []*labels2.Matcher{yyDollar[1].matcher}
 		}
 	case 90:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -1492,7 +1492,7 @@ yydefault:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line promql/parser/generated_parser.y:570
 		{
-			yyVAL.labels = append(yyDollar[2].labels, labels.Label{Name: labels.MetricName, Value: yyDollar[1].item.Val})
+			yyVAL.labels = append(yyDollar[2].labels, labels2.Label{Name: labels2.MetricName, Value: yyDollar[1].item.Val})
 			sort.Sort(yyVAL.labels)
 		}
 	case 96:
@@ -1505,25 +1505,25 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 //line promql/parser/generated_parser.y:579
 		{
-			yyVAL.labels = labels.New(yyDollar[2].labels...)
+			yyVAL.labels = labels2.New(yyDollar[2].labels...)
 		}
 	case 120:
 		yyDollar = yyS[yypt-4 : yypt+1]
 //line promql/parser/generated_parser.y:581
 		{
-			yyVAL.labels = labels.New(yyDollar[2].labels...)
+			yyVAL.labels = labels2.New(yyDollar[2].labels...)
 		}
 	case 121:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line promql/parser/generated_parser.y:583
 		{
-			yyVAL.labels = labels.New()
+			yyVAL.labels = labels2.New()
 		}
 	case 122:
 		yyDollar = yyS[yypt-0 : yypt+1]
 //line promql/parser/generated_parser.y:585
 		{
-			yyVAL.labels = labels.New()
+			yyVAL.labels = labels2.New()
 		}
 	case 123:
 		yyDollar = yyS[yypt-3 : yypt+1]
@@ -1535,7 +1535,7 @@ yydefault:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line promql/parser/generated_parser.y:591
 		{
-			yyVAL.labels = []labels.Label{yyDollar[1].label}
+			yyVAL.labels = []labels2.Label{yyDollar[1].label}
 		}
 	case 125:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -1548,28 +1548,28 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 //line promql/parser/generated_parser.y:598
 		{
-			yyVAL.label = labels.Label{Name: yyDollar[1].item.Val, Value: yylex.(*parser).unquoteString(yyDollar[3].item.Val)}
+			yyVAL.label = labels2.Label{Name: yyDollar[1].item.Val, Value: yylex.(*parser).unquoteString(yyDollar[3].item.Val)}
 		}
 	case 127:
 		yyDollar = yyS[yypt-3 : yypt+1]
 //line promql/parser/generated_parser.y:600
 		{
 			yylex.(*parser).unexpected("label set", "string")
-			yyVAL.label = labels.Label{}
+			yyVAL.label = labels2.Label{}
 		}
 	case 128:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line promql/parser/generated_parser.y:602
 		{
 			yylex.(*parser).unexpected("label set", "\"=\"")
-			yyVAL.label = labels.Label{}
+			yyVAL.label = labels2.Label{}
 		}
 	case 129:
 		yyDollar = yyS[yypt-1 : yypt+1]
 //line promql/parser/generated_parser.y:604
 		{
 			yylex.(*parser).unexpected("label set", "identifier or \"}\"")
-			yyVAL.label = labels.Label{}
+			yyVAL.label = labels2.Label{}
 		}
 	case 130:
 		yyDollar = yyS[yypt-2 : yypt+1]

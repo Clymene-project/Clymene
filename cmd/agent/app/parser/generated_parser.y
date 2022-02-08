@@ -20,7 +20,7 @@ import (
         "strconv"
         "time"
 
-        "github.com/prometheus/prometheus/model/labels"
+        "github.com/Clymene-project/Clymene/model/labels"
         "github.com/prometheus/prometheus/model/value"
 )
 %}

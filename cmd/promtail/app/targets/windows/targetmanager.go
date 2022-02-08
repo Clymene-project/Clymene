@@ -1,0 +1,38 @@
+//go:build !windows
+// +build !windows
+
+package windows
+
+import (
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/api"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/scrapeconfig"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/targets/target"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
+)
+
+// TargetManager manages a series of windows event targets.
+type TargetManager struct{}
+
+// NewTargetManager creates a new Windows managers.
+func NewTargetManager(
+	reg prometheus.Registerer,
+	logger *zap.Logger,
+	client api.EntryHandler,
+	scrapeConfigs []scrapeconfig.Config,
+) (*TargetManager, error) {
+	logger.Warn("WARNING!!! Windows target was configured but support for reading the windows event is not compiled into this build of promtail!")
+	return &TargetManager{}, nil
+}
+
+// Ready returns true if at least one Windows target is also ready.
+func (tm *TargetManager) Ready() bool { return false }
+
+// Stop stops the Windows target manager and all of its targets.
+func (tm *TargetManager) Stop() {}
+
+// ActiveTargets returns the list of active Windows targets.
+func (tm *TargetManager) ActiveTargets() map[string][]target.Target { return nil }
+
+// AllTargets returns the list of all targets.
+func (tm *TargetManager) AllTargets() map[string][]target.Target { return nil }

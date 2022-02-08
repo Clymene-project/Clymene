@@ -16,8 +16,8 @@ package config
 import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/relabel"
+	"github.com/Clymene-project/Clymene/model/labels"
+	"github.com/Clymene-project/Clymene/model/relabel"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/url"

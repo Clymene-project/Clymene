@@ -18,7 +18,7 @@ package parser
 
 import (
 	"context"
-	"github.com/Clymene-project/Clymene/cmd/agent/app/model/labels"
+	"github.com/Clymene-project/Clymene/model/labels"
 	"time"
 
 	"github.com/pkg/errors"
