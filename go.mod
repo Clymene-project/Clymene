@@ -99,7 +99,7 @@ require (
 )
 
 require (
-	github.com/containerd/containerd v1.5.7 // indirect
+	github.com/containerd/containerd v1.5.9 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
