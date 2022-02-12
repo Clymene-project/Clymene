@@ -22,29 +22,13 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/logentry/stages"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/server"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/targets"
+	"github.com/Clymene-project/Clymene/storage/logstore"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-// Option is a function that can be passed to the New method of Promtail and
-// customize the Promtail that is created.
-type Option func(p *Promtail)
-
-// WithLogger overrides the default logger for Promtail.
-func WithLogger(log *zap.Logger) Option {
-	return func(p *Promtail) {
-		p.logger = log
-	}
-}
-
-// WithRegisterer overrides the default registerer for Promtail.
-func WithRegisterer(reg prometheus.Registerer) Option {
-	return func(p *Promtail) {
-		p.reg = reg
-	}
-}
 
 // Promtail is the root struct for Promtail.
 type Promtail struct {
@@ -58,32 +42,36 @@ type Promtail struct {
 	mtx     sync.Mutex
 }
 
-// New makes a new Promtail.
-func New(cfg config.Config, dryRun bool, reg prometheus.Registerer, logger *zap.Logger, opts ...Option) (*Promtail, error) {
-	// Initialize promtail with some defaults and allow the options to override
-	// them.
-	promtail := &Promtail{
-		logger: logger,
-		reg:    prometheus.DefaultRegisterer,
-	}
-	for _, o := range opts {
-		o(promtail)
-	}
+type PromtailConfig struct {
+	Options
+	Reg            prometheus.Registerer
+	Logger         *zap.Logger
+	MetricsFactory metrics.Factory
+	LogWriter      logstore.Writer
+}
 
-	cfg.Setup()
+// New makes a new Promtail.
+func New(pc *PromtailConfig) (*Promtail, error) {
+	promtail := &Promtail{
+		logger: pc.Logger,
+		reg:    pc.Reg,
+	}
+	cfg, err := config.LoadFile(pc.configFile, pc.Logger)
+	if err != nil {
+		pc.Logger.Panic("Unable to parse config")
+	}
 
 	if cfg.LimitConfig.ReadlineRateEnabled {
 		stages.SetReadLineRateLimiter(cfg.LimitConfig.ReadlineRate, cfg.LimitConfig.ReadlineBurst, cfg.LimitConfig.ReadlineRateDrop)
 	}
-	var err error
-	if dryRun {
-		promtail.client, err = client.NewLogger(prometheus.DefaultRegisterer, promtail.logger, cfg.ClientConfigs...)
+	if pc.dryRun {
+		promtail.client, err = client.NewLogger(pc.Reg, promtail.logger, cfg.ClientConfigs...)
 		if err != nil {
 			return nil, err
 		}
 		cfg.PositionsConfig.ReadOnly = true
 	} else {
-		promtail.client, err = client.NewMulti(prometheus.DefaultRegisterer, promtail.logger, cfg.ClientConfigs...)
+		promtail.client, err = client.NewMulti(pc.Reg, promtail.logger, cfg.ClientConfigs...)
 		if err != nil {
 			return nil, err
 		}

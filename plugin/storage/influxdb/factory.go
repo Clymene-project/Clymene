@@ -18,6 +18,7 @@ package influxdb
 
 import (
 	"flag"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/spf13/viper"
@@ -31,6 +32,11 @@ type Factory struct {
 	metricsFactory metrics.Factory
 	logger         *zap.Logger
 	client         influxdb2.Client
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("not supported")
 }
 
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
@@ -52,7 +58,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	return nil
 }
 
-func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	return NewMetricWriter(f.logger, f.client, f.options.org, f.options.bucket), nil
 }
 

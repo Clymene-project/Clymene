@@ -14,28 +14,11 @@
  * limitations under the License.
  */
 
-package http
+package loki
 
-import (
-	"github.com/Clymene-project/Clymene/storage/metricstore"
-	"github.com/uber/jaeger-lib/metrics"
-	"go.uber.org/zap"
-)
-
-type Client struct {
-	options        Options
-	logger         *zap.Logger
-	metricsFactory metrics.Factory
+type LogWriter struct {
 }
 
-func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(c.logger, c.metricsFactory, c.options, newProtobufMarshaller()), nil
-}
-
-func NewClient(options Options, factory metrics.Factory, logger *zap.Logger) (*Client, error) {
-	return &Client{
-		options:        options,
-		metricsFactory: factory,
-		logger:         logger,
-	}, nil
+func NewLogWriter() *LogWriter {
+	return &LogWriter{}
 }

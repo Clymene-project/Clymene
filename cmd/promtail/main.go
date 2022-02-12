@@ -20,11 +20,12 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
-	"github.com/Clymene-project/Clymene/cmd/ingester/app"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app"
 	"github.com/Clymene-project/Clymene/pkg/config"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/plugin/storage"
 	"github.com/Clymene-project/Clymene/ports"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -45,7 +46,7 @@ const (
 )
 
 func main() {
-	svc := flags.NewService(ports.IngesterAdminHTTP)
+	svc := flags.NewService(ports.PromtailAdminHTTP)
 	svc.NoStorage = true
 	version.Set(Version, BuildTime)
 
@@ -68,47 +69,36 @@ func main() {
 			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
-			_ = baseFactory.Namespace(metrics.NSOptions{Name: "promtail"})
+			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "promtail"})
 
 			storageFactory.InitFromViper(v)
 			if err := storageFactory.Initialize(baseFactory, logger); err != nil {
 				logger.Fatal("Failed to init storage factory", zap.Error(err))
 			}
 
-			//metricWriter, err := storageFactory.CreateWriter()
-			//if err != nil {
-			//	logger.Fatal("Failed to create metric writer", zap.Error(err))
-			//}
+			logWriter, err := storageFactory.CreateLogWriter()
+			if err != nil {
+				logger.Fatal("Failed to create log writer", zap.Error(err))
+			}
 
 			options := app.Options{}
-			options.InitFromViper(v) // default encode is protobuf
-			//consumer, err := builder.CreateConsumer(
-			//	logger.With(zap.String("component", "consumer")),
-			//	metricsFactory,
-			//	metricWriter,
-			//	options,
-			//)
-			//if err != nil {
-			//	logger.Fatal("Unable to create consumer", zap.Error(err))
-			//}
-			//consumer.Start()
+			options.InitFromViper(v)
+			promtail, err := app.New(&app.PromtailConfig{
+				Options:        options,
+				Reg:            prometheus.DefaultRegisterer,
+				MetricsFactory: metricsFactory,
+				LogWriter:      logWriter,
+				Logger:         logger.With(zap.String("component", "promtail")),
+			})
+			if err != nil {
+				logger.Fatal("Unable to create promtail", zap.Error(err))
+			}
 
+			if err := promtail.Run(); err != nil {
+				logger.Error("error starting promtail", zap.Error(err))
+			}
 			svc.RunAndThen(func() {
-				//if err := options.TLS.Close(); err != nil {
-				//	logger.Error("Failed to close TLS certificates watcher", zap.Error(err))
-				//}
-				//if err = consumer.Close(); err != nil {
-				//	logger.Error("Failed to close consumer", zap.Error(err))
-				//}
-				//if closer, ok := metricWriter.(io.Closer); ok {
-				//	err := closer.Close()
-				//	if err != nil {
-				//		logger.Error("Failed to close metrics writer", zap.Error(err))
-				//	}
-				//}
-				//if err := storageFactory.Close(); err != nil {
-				//	logger.Error("Failed to close storage factory", zap.Error(err))
-				//}
+				promtail.Shutdown()
 			})
 			return nil
 		},

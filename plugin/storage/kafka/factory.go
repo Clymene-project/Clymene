@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"github.com/Clymene-project/Clymene/pkg/kafka/producer"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
@@ -22,6 +23,11 @@ type Factory struct {
 	producer   sarama.AsyncProducer
 	marshaller Marshaller
 	producer.Builder
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("not supported")
 }
 
 // NewFactory creates a new Factory.
@@ -70,7 +76,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	return nil
 }
 
-func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	return NewMetricWriter(f.producer, f.marshaller, f.options.Topic, f.metricsFactory, f.logger), nil
 }
 

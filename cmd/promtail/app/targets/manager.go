@@ -62,11 +62,11 @@ func NewTargetManagers(
 ) (*TargetManagers, error) {
 	if targetConfig.Stdin {
 		logger.Debug("configured to read from stdin")
-		stdin, err := stdin.NewStdinTargetManager(reg, logger, app, client, scrapeConfigs)
+		stdinTM, err := stdin.NewStdinTargetManager(reg, logger, app, client, scrapeConfigs)
 		if err != nil {
 			return nil, err
 		}
-		return &TargetManagers{targetManagers: []targetManager{stdin}}, nil
+		return &TargetManagers{targetManagers: []targetManager{stdinTM}}, nil
 	}
 
 	var targetManagers []targetManager

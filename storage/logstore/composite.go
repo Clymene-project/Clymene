@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-package http
+package logstore
 
 import (
-	"github.com/Clymene-project/Clymene/storage/metricstore"
-	"github.com/uber/jaeger-lib/metrics"
-	"go.uber.org/zap"
+	"github.com/Clymene-project/Clymene/pkg/multierror"
 )
 
-type Client struct {
-	options        Options
-	logger         *zap.Logger
-	metricsFactory metrics.Factory
+type CompositeWriter struct {
+	logWriters []Writer
 }
 
-func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(c.logger, c.metricsFactory, c.options, newProtobufMarshaller()), nil
+// NewCompositeWriter creates a CompositeWriter
+func NewCompositeWriter(logWriters ...Writer) *CompositeWriter {
+	return &CompositeWriter{
+		logWriters: logWriters,
+	}
 }
 
-func NewClient(options Options, factory metrics.Factory, logger *zap.Logger) (*Client, error) {
-	return &Client{
-		options:        options,
-		metricsFactory: factory,
-		logger:         logger,
-	}, nil
+// Writelog calls WriteMetric on each metric writer. It will sum up failures, it is not transactional
+func (c *CompositeWriter) Writelog() error {
+	var errors []error
+	for _, writer := range c.logWriters {
+		if err := writer.Writelog(); err != nil {
+			errors = append(errors, err)
+		}
+	}
+	return multierror.Wrap(errors)
 }

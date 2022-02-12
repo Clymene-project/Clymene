@@ -26,10 +26,12 @@ import (
 	"github.com/Clymene-project/Clymene/plugin/storage/influxdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/plugin/storage/kdb"
+	"github.com/Clymene-project/Clymene/plugin/storage/loki"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/prometheus"
 	"github.com/Clymene-project/Clymene/plugin/storage/tdengine"
 	"github.com/Clymene-project/Clymene/storage"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"io"
 
@@ -48,13 +50,14 @@ const (
 	kdbStorageType           = "kdb"
 	opentsdbStorageType      = "opentsdb"
 	tdengineStorageType      = "tdengine"
+	lokiStorageType          = "loki"
 
 	tsStorageType = "ts-storage-type"
 )
 
 // AllStorageTypes defines all available storage backends
 var AllStorageTypes = []string{influxDbStorageType, elasticsearchStorageType, prometheusStorageType, kafkaStorageType,
-	gatewayStorageType, cortexStorageType, kdbStorageType, opentsdbStorageType}
+	gatewayStorageType, cortexStorageType, kdbStorageType, opentsdbStorageType, tdengineStorageType, lokiStorageType}
 
 // Factory implements storage.Factory interface as a meta-factory for storage components.
 type Factory struct {
@@ -104,6 +107,8 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 		return kdb.NewFactory(), nil
 	case tdengineStorageType:
 		return tdengine.NewFactory(), nil
+	case lokiStorageType:
+		return loki.NewFactory(), nil
 	default:
 		return nil, fmt.Errorf("unknown storage type %s. Valid types are %v", factoryType, AllStorageTypes)
 	}
@@ -168,14 +173,14 @@ func (f *Factory) publishOpts() {
 		Update(1)
 }
 
-func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	var writers []metricstore.Writer
 	for _, storageType := range f.WriterTypes {
 		factory, ok := f.factories[storageType]
 		if !ok {
 			return nil, fmt.Errorf("no %s backend registered for metric store", storageType)
 		}
-		writer, err := factory.CreateWriter()
+		writer, err := factory.CreateMetricWriter()
 		if err != nil {
 			return nil, err
 		}
@@ -186,6 +191,28 @@ func (f *Factory) CreateWriter() (metricstore.Writer, error) {
 		Writer = writers[0]
 	} else {
 		Writer = metricstore.NewCompositeWriter(writers...)
+	}
+	return Writer, nil
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	var writers []logstore.Writer
+	for _, storageType := range f.WriterTypes {
+		factory, ok := f.factories[storageType]
+		if !ok {
+			return nil, fmt.Errorf("no %s backend registered for metric store", storageType)
+		}
+		writer, err := factory.CreateLogWriter()
+		if err != nil {
+			return nil, err
+		}
+		writers = append(writers, writer)
+	}
+	var Writer logstore.Writer
+	if len(f.WriterTypes) == 1 {
+		Writer = writers[0]
+	} else {
+		Writer = logstore.NewCompositeWriter(writers...)
 	}
 	return Writer, nil
 }

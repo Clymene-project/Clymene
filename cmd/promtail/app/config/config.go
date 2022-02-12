@@ -9,16 +9,15 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/server"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/targets/file"
-	"github.com/Clymene-project/Clymene/pkg/lokiutil/flagext"
-
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	yaml "gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 // Config for promtail, describing what files to watch.
 type Config struct {
-	ServerConfig server.Config `yaml:"server,omitempty"`
-	// deprecated use ClientConfigs instead
-	ClientConfig    client.Config         `yaml:"client,omitempty"`
+	ServerConfig    server.Config         `yaml:"server,omitempty"`
 	ClientConfigs   []client.Config       `yaml:"clients,omitempty"`
 	PositionsConfig positions.Config      `yaml:"positions,omitempty"`
 	ScrapeConfig    []scrapeconfig.Config `yaml:"scrape_configs,omitempty"`
@@ -26,19 +25,19 @@ type Config struct {
 	LimitConfig     limit.Config          `yaml:"limit_config,omitempty"`
 }
 
-// RegisterFlags with prefix registers flags where every name is prefixed by
+// RegisterFlagsWithPrefix with prefix registers flags where every name is prefixed by
 // prefix. If prefix is a non-empty string, prefix should end with a period.
 func (c *Config) RegisterFlagsWithPrefix(prefix string, f *flag.FlagSet) {
-	//c.ServerConfig.RegisterFlagsWithPrefix(prefix, f)
-	c.ClientConfig.RegisterFlagsWithPrefix(prefix, f)
+	c.ServerConfig.RegisterFlagsWithPrefix(prefix, f)
+	//c.ClientConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.PositionsConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.TargetConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.LimitConfig.RegisterFlagsWithPrefix(prefix, f)
 }
 
 // RegisterFlags registers flags.
-func (c *Config) RegisterFlags(f *flag.FlagSet) {
-	c.RegisterFlagsWithPrefix("", f)
+func (c *Config) RegisterFlags(prefix string, f *flag.FlagSet) {
+	c.RegisterFlagsWithPrefix(prefix, f)
 }
 
 func (c Config) String() string {
@@ -49,30 +48,29 @@ func (c Config) String() string {
 	return string(b)
 }
 
-func (c *Config) Setup() {
-	if c.ClientConfig.URL.URL != nil {
-		// if a single client config is used we add it to the multiple client config for backward compatibility
-		c.ClientConfigs = append(c.ClientConfigs, c.ClientConfig)
+// LoadFile parses the given YAML file into a Config.
+func LoadFile(filename string, logger *zap.Logger) (*Config, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := Load(string(content))
+	if err != nil {
+		return nil, errors.Wrapf(err, "parsing YAML file %s", filename)
 	}
 
-	// This is a bit crude but if the Loki Push API target is specified,
-	// force the log level to match the promtail log level
-	for i := range c.ScrapeConfig {
-		if c.ScrapeConfig[i].PushConfig != nil {
-			c.ScrapeConfig[i].PushConfig.Server.LogLevel = c.ServerConfig.LogLevel
-			c.ScrapeConfig[i].PushConfig.Server.LogFormat = c.ServerConfig.LogFormat
-		}
+	return cfg, nil
+}
+
+// Load parses the YAML input s into a Config.
+func Load(s string) (*Config, error) {
+	cfg := &Config{}
+	cfg.RegisterFlags("", flag.CommandLine)
+
+	err := yaml.UnmarshalStrict([]byte(s), cfg)
+	if err != nil {
+		return nil, err
 	}
 
-	// Merge the provided external labels from the single client config/command line with each client config from
-	// `clients`. This is done to allow --client.external-labels=key=value passed at command line to apply to all clients
-	// The order here is specified to allow the yaml to override the command line flag if there are any labels
-	// which exist in both the command line arguments as well as the yaml, and while this is
-	// not typically the order of precedence, the assumption here is someone providing a specific config in
-	// yaml is doing so explicitly to make a key specific to a client.
-	if len(c.ClientConfig.ExternalLabels.LabelSet) > 0 {
-		for i := range c.ClientConfigs {
-			c.ClientConfigs[i].ExternalLabels = flagext.LabelSet{LabelSet: c.ClientConfig.ExternalLabels.LabelSet.Merge(c.ClientConfigs[i].ExternalLabels.LabelSet)}
-		}
-	}
+	return cfg, nil
 }

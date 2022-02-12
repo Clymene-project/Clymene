@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package gateway
+package loki
 
-import "github.com/Clymene-project/Clymene/storage/metricstore"
-
-type Client interface {
-	CreateMetricWriter() (metricstore.Writer, error)
+type Options struct {
 }

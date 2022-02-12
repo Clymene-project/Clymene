@@ -136,13 +136,13 @@ func (t *tailer) readLines() {
 	for {
 		line, ok := <-t.tail.Lines
 		if !ok {
-			t.logger.Info("tail routine: tail channel closed, stopping tailer", zap.String("path", t.path), zap.String("reason", t.tail.Tomb.Err()))
+			t.logger.Info("tail routine: tail channel closed, stopping tailer", zap.String("path", t.path), zap.String("reason", t.tail.Tomb.Err().Error()))
 			return
 		}
 
 		// Note currently the tail implementation hardcodes Err to nil, this should never hit.
 		if line.Err != nil {
-			t.logger.Error("tail routine: error reading line", zap.String("path", t.path), zap.String("error", line.Err))
+			t.logger.Error("tail routine: error reading line", zap.String("path", t.path), zap.Error(line.Err))
 			continue
 		}
 

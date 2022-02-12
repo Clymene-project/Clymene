@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/pkg/es"
 	"github.com/Clymene-project/Clymene/pkg/es/config"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -43,6 +44,11 @@ type Factory struct {
 	primaryClient es.Client
 	archiveConfig config.ClientBuilder
 	archiveClient es.Client
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("not supported")
 }
 
 // NewFactory creates a new Factory.
@@ -92,7 +98,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	return nil
 }
 
-func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	return createMetricWriter(f.logger, f.primaryClient, f.primaryConfig, false)
 }
 

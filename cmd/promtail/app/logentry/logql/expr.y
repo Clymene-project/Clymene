@@ -3,6 +3,7 @@ package logql
 
 import (
   "github.com/Clymene-project/Clymene/model/labels"
+  "github.com/Clymene-project/Clymene/model/value"
 )
 %}
 

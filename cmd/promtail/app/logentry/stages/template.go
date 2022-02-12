@@ -5,15 +5,15 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/Masterminds/sprig/v3"
+	"github.com/mitchellh/mapstructure"
+	"github.com/prometheus/common/model"
 	"go.uber.org/zap"
 	"reflect"
 	"regexp"
 	"strings"
 	"text/template"
 	"time"
-
-	"github.com/mitchellh/mapstructure"
-	"github.com/prometheus/common/model"
 
 	"golang.org/x/crypto/sha3"
 )

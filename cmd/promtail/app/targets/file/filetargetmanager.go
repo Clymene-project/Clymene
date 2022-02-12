@@ -14,8 +14,8 @@ import (
 	"github.com/Clymene-project/Clymene/model/labels"
 	"github.com/Clymene-project/Clymene/model/relabel"
 	util "github.com/Clymene-project/Clymene/pkg/lokiutil"
-	"github.com/fsnotify/fsnotify"
 	"go.uber.org/zap"
+	"gopkg.in/fsnotify.v1"
 	"os"
 	"strings"
 	"sync"
@@ -135,7 +135,7 @@ func NewFileTargetManager(
 	go tm.watchTargetEvents(ctx)
 	go tm.watchFsEvents(ctx)
 
-	go util.LogError("running target manager", tm.manager.Run)
+	go util.LogError("running target manager", logger, tm.manager.Run)
 
 	return tm, tm.manager.ApplyConfig(configs)
 }
@@ -216,7 +216,7 @@ func (tm *FileTargetManager) Stop() {
 	for _, s := range tm.syncers {
 		s.stop()
 	}
-	util.LogError("closing watcher", tm.watcher.Close)
+	util.LogError("closing watcher", tm.log, tm.watcher.Close)
 	close(tm.targetEventHandler)
 }
 

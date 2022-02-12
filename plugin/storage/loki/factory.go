@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kdb
+package loki
 
 import (
 	"github.com/Clymene-project/Clymene/storage/logstore"
@@ -23,22 +23,20 @@ import (
 	"go.uber.org/zap"
 )
 
-// https://code.kx.com/q/
-
 type Factory struct {
 }
 
-func (f Factory) CreateLogWriter() (logstore.Writer, error) {
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
 	//TODO implement me
 	panic("not supported")
 }
 
-func (f Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
+func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	//TODO implement me
 	panic("not supported")
 }
 
-func (f Factory) CreateMetricWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	//TODO implement me
 	panic("not supported")
 }

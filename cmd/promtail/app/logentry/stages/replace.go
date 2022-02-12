@@ -3,13 +3,12 @@ package stages
 import (
 	"bytes"
 	"fmt"
+	"go.uber.org/zap"
 	"reflect"
 	"regexp"
 	"text/template"
 	"time"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/model"
@@ -53,11 +52,11 @@ func validateReplaceConfig(c *ReplaceConfig) (*regexp.Regexp, error) {
 type replaceStage struct {
 	cfg        *ReplaceConfig
 	expression *regexp.Regexp
-	logger     log.Logger
+	logger     *zap.Logger
 }
 
 // newReplaceStage creates a newReplaceStage
-func newReplaceStage(logger log.Logger, config interface{}) (Stage, error) {
+func newReplaceStage(logger *zap.Logger, config interface{}) (Stage, error) {
 	cfg, err := parseReplaceConfig(config)
 	if err != nil {
 		return nil, err
@@ -70,7 +69,7 @@ func newReplaceStage(logger log.Logger, config interface{}) (Stage, error) {
 	return toStage(&replaceStage{
 		cfg:        cfg,
 		expression: expression,
-		logger:     log.With(logger, "component", "stage", "type", "replace"),
+		logger:     logger.With(zap.String("component", "stage"), zap.String("type", "replace")),
 	}), nil
 }
 
@@ -93,7 +92,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 	if r.cfg.Source != nil {
 		if _, ok := extracted[*r.cfg.Source]; !ok {
 			if Debug {
-				level.Debug(r.logger).Log("msg", "source does not exist in the set of extracted values", "source", *r.cfg.Source)
+				r.logger.Debug("source does not exist in the set of extracted values", zap.String("source", *r.cfg.Source))
 			}
 			return
 		}
@@ -101,7 +100,8 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 		value, err := getString(extracted[*r.cfg.Source])
 		if err != nil {
 			if Debug {
-				level.Debug(r.logger).Log("msg", "failed to convert source value to string", "source", *r.cfg.Source, "err", err, "type", reflect.TypeOf(extracted[*r.cfg.Source]))
+				r.logger.Debug("failed to convert source value to string", zap.String("source", *r.cfg.Source), zap.Error(err),
+					zap.String("type", reflect.TypeOf(extracted[*r.cfg.Source]).String()))
 			}
 			return
 		}
@@ -111,7 +111,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 
 	if input == nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "cannot parse a nil entry")
+			r.logger.Debug("cannot parse a nil entry")
 		}
 		return
 	}
@@ -122,7 +122,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 
 	if matchAllIndex == nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "regex did not match", "input", *input, "regex", r.expression)
+			r.logger.Debug("regex did not match", zap.String("input", *input), zap.String("regex", r.expression.String()))
 		}
 		return
 	}
@@ -134,7 +134,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 	templ, err := template.New("pipeline_template").Funcs(functionMap).Parse(r.cfg.Replace)
 	if err != nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "template initialization error", "err", err)
+			r.logger.Debug("template initialization error", zap.Error(err))
 		}
 		return
 	}
@@ -142,7 +142,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 	result, capturedMap, err := r.getReplacedEntry(matchAllIndex, *input, td, templ)
 	if err != nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "failed to execute template on extracted value", "err", err)
+			r.logger.Debug("failed to execute template on extracted value", zap.Error(err))
 		}
 		return
 	}
@@ -162,7 +162,7 @@ func (r *replaceStage) Process(labels model.LabelSet, extracted map[string]inter
 		}
 	}
 	if Debug {
-		level.Debug(r.logger).Log("msg", "extracted data debug in replace stage", "extracted data", fmt.Sprintf("%v", extracted))
+		r.logger.Debug("extracted data debug in replace stage", zap.String("extracted data", fmt.Sprintf("%v", extracted)))
 	}
 }
 
@@ -206,7 +206,7 @@ func (r *replaceStage) getTemplateData(extracted map[string]interface{}) map[str
 		s, err := getString(v)
 		if err != nil {
 			if Debug {
-				level.Debug(r.logger).Log("msg", "extracted template could not be converted to a string", "err", err, "type", reflect.TypeOf(v))
+				r.logger.Debug("extracted template could not be converted to a string", zap.Error(err), zap.String("type", reflect.TypeOf(v).String()))
 			}
 			continue
 		}

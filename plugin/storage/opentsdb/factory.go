@@ -22,6 +22,7 @@ import (
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/http"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/socket"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -39,6 +40,11 @@ type Factory struct {
 	logger         *zap.Logger
 
 	client Client
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("not supported")
 }
 
 func NewFactory() *Factory {
@@ -117,6 +123,6 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	return nil
 }
 
-func (f Factory) CreateWriter() (metricstore.Writer, error) {
+func (f Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	return NewMetricWriter(f.logger, f.client), nil
 }

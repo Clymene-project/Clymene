@@ -34,6 +34,8 @@ const (
 
 	// IngesterAdminHTTP ingester metrics
 	IngesterAdminHTTP = 15694
+
+	PromtailAdminHTTP = 15698
 )
 
 // PortToHostPort converts the port into a host:port address string

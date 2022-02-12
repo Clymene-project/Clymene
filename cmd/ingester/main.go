@@ -77,7 +77,7 @@ func main() {
 				logger.Fatal("Failed to init storage factory", zap.Error(err))
 			}
 
-			metricWriter, err := storageFactory.CreateWriter()
+			metricWriter, err := storageFactory.CreateMetricWriter()
 			if err != nil {
 				logger.Fatal("Failed to create metric writer", zap.Error(err))
 			}

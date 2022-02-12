@@ -8,6 +8,7 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/targets/target"
 	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/cloudflare/cloudflare-go"
 	"go.uber.org/zap"
 	"strings"
 	"sync"
@@ -105,11 +106,11 @@ func (t *Target) start() {
 				end = maxEnd
 			}
 			start := end.Add(-time.Duration(t.config.PullRange))
-
+			requests := splitRequests(start, end, t.config.Workers)
 			// Use background context for workers as we don't want to cancel half way through.
 			// In case of errors we stop the target, each worker has it's own retry logic.
-			if err := concurrency.ForEach(context.Background(), splitRequests(start, end, t.config.Workers), t.config.Workers, func(ctx context.Context, job interface{}) error {
-				request := job.(pullRequest)
+			if err := concurrency.ForEachJob(context.Background(), len(requests), t.config.Workers, func(ctx context.Context, idx int) error {
+				request := requests[idx]
 				return t.pull(ctx, request.start, request.end)
 			}); err != nil {
 				t.logger.Error("failed to pull logs", zap.Error(err), zap.Time("start", start), zap.Time("end", end))
@@ -172,7 +173,7 @@ func (t *Target) pull(ctx context.Context, start, end time.Time) error {
 				t.metrics.Entries.Inc()
 			}
 			if it.Err() != nil {
-				t.logger.Warn("failed iterating over logs", zap.Error(it.Err()), zap.Time("start", start), zap.Time("end", end), "retries", backoff.NumRetries(), zap.Int64("lineRead", lineRead))
+				t.logger.Warn("failed iterating over logs", zap.Error(it.Err()), zap.Time("start", start), zap.Time("end", end), zap.Int("retries", backoff.NumRetries()), zap.Int64("lineRead", lineRead))
 				return it.Err()
 			}
 			return nil
@@ -225,9 +226,9 @@ type pullRequest struct {
 	end   time.Time
 }
 
-func splitRequests(start, end time.Time, workers int) []interface{} {
+func splitRequests(start, end time.Time, workers int) []pullRequest {
 	perWorker := end.Sub(start) / time.Duration(workers)
-	var requests []interface{}
+	var requests []pullRequest
 	for i := 0; i < workers; i++ {
 		r := pullRequest{
 			start: start.Add(time.Duration(i) * perWorker),

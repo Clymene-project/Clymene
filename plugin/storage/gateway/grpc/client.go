@@ -29,7 +29,7 @@ type Client struct {
 	logger *zap.Logger
 }
 
-func (c *Client) CreateWriter() (metricstore.Writer, error) {
+func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {
 	return NewMetricWriter(&MetricWriterParams{Conn: c.conn, Logger: c.logger})
 }
 

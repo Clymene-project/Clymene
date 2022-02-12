@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package gateway
+package logstore
 
-import "github.com/Clymene-project/Clymene/storage/metricstore"
-
-type Client interface {
-	CreateMetricWriter() (metricstore.Writer, error)
+type Writer interface {
+	Writelog() error
 }

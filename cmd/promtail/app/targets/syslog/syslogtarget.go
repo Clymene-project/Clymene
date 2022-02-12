@@ -13,6 +13,7 @@ import (
 	"github.com/Clymene-project/Clymene/model/labels"
 	"github.com/Clymene-project/Clymene/model/relabel"
 	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/influxdata/go-syslog/v3"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net"
@@ -155,7 +156,7 @@ func (t *SyslogTarget) acceptConnections() {
 		c, err := t.listener.Accept()
 		if err != nil {
 			if t.ctx.Err() != nil {
-				l.Info(l).Log("msg", "syslog server shutting down")
+				l.Info("syslog server shutting down")
 				return
 			}
 

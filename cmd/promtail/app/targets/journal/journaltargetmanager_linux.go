@@ -5,6 +5,7 @@ package journal
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/api"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/logentry/stages"

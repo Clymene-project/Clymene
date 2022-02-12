@@ -33,7 +33,7 @@ require (
 	github.com/gophercloud/gophercloud v0.24.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/grafana/dskit v0.0.0-20220105080720-01ce9286d7d5
+	github.com/grafana/dskit v0.0.0-20220209070952-ea22a8f662d0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/consul/api v1.12.0
@@ -60,7 +60,6 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.32.1
-	github.com/prometheus/prometheus v2.5.0+incompatible // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7.0.20210223165440-c65ae3540d44
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/afero v1.6.0
@@ -83,14 +82,14 @@ require (
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11
 	google.golang.org/api v0.63.0
 	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb
-	google.golang.org/grpc v1.41.0
+	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/api v0.22.4
 	k8s.io/apimachinery v0.22.4
-	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/client-go v0.22.4
 )
 
 require (
@@ -109,10 +108,10 @@ require (
 )
 
 require (
-	github.com/cloudflare/cloudflare-go v0.27.0
+	github.com/Masterminds/sprig/v3 v3.2.2
+	github.com/cloudflare/cloudflare-go v0.0.0-00010101000000-000000000000
 	github.com/dnaeon/go-vcr v1.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.0
-	github.com/grafana/loki v1.6.1
 	github.com/onsi/gomega v1.16.0 // indirect
 )
 
@@ -121,28 +120,7 @@ replace github.com/sercand/kuberesolver => github.com/sercand/kuberesolver v2.4.
 
 replace github.com/hpcloud/tail => github.com/grafana/tail v0.0.0-20201004203643-7aa4e4a91f03
 
-replace github.com/Azure/azure-sdk-for-go/sdk/storage/azblob => github.com/MasslessParticle/azure-sdk-for-go/sdk/storage/azblob v0.2.1-0.20220131200443-9793e6f0cc65
-
-replace k8s.io/client-go => k8s.io/client-go v0.21.0
-
-replace k8s.io/api => k8s.io/api v0.21.0
-
-replace k8s.io/apimachinery => k8s.io/apimachinery v0.21.0
-
-replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
-
-// Use fork of gocql that has gokit logs and Prometheus metrics.
-replace github.com/gocql/gocql => github.com/grafana/gocql v0.0.0-20200605141915-ba5dc39ece85
-
-// Same as Cortex
-// Using a 3rd-party branch for custom dialer - see https://github.com/bradfitz/gomemcache/pull/86
-replace github.com/bradfitz/gomemcache => github.com/themihai/gomemcache v0.0.0-20180902122335-24332e2d58ab
-
-// We only pin this version to avoid problems with running go get: github.com/thanos-io/thanos@main. That
-// currently fails because Thanos isn't merging release branches to main branch, and Go modules system is then
-// confused about which version is the latest one. v0.22.0 was released in July, but latest tag reachable from main
-// is v0.19.1. We pin version from late september here. Feel free to remove when updating to later version.
-replace github.com/thanos-io/thanos v0.22.0 => github.com/thanos-io/thanos v0.19.1-0.20211126105533-c5505f5eaa7d
+replace k8s.io/client-go => k8s.io/client-go v0.22.4
 
 // We use a fork of Graylog to avoid leaking goroutine when closing the Promtail target.
 replace gopkg.in/Graylog2/go-gelf.v2 => github.com/grafana/go-gelf v0.0.0-20211112153804-126646b86de8

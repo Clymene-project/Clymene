@@ -6,6 +6,7 @@ package parser
 import (
 	__yyfmt__ "fmt"
 	labels2 "github.com/Clymene-project/Clymene/model/labels"
+	"github.com/Clymene-project/Clymene/model/value"
 )
 
 //line promql/parser/generated_parser.y:15

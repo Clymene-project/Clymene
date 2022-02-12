@@ -19,6 +19,7 @@ package prometheus
 import (
 	"flag"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/spf13/viper"
 	"github.com/uber/jaeger-lib/metrics"
@@ -33,6 +34,11 @@ type Factory struct {
 	metricsFactory metrics.Factory
 }
 
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("not supported")
+}
+
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
 	logger.Info("Factory Initialize", zap.String("type", "prometheus"))
@@ -41,7 +47,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	return nil
 }
 
-func (f *Factory) CreateWriter() (metricstore.Writer, error) {
+func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
 	return NewMetricWriter(f.logger, f.metricsFactory, f.options, f.marshaller), nil
 }
 

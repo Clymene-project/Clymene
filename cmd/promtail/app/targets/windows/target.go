@@ -110,7 +110,7 @@ func (t *Target) loop() {
 			if err != nil {
 				if err != win_eventlog.ERROR_NO_MORE_ITEMS {
 					t.err = err
-					level.Error(util_log.Logger).Log("msg", "error fetching events", "err", err)
+					t.logger.Error("error fetching events", zap.Error(err))
 				}
 				break loop
 			}
@@ -120,7 +120,7 @@ func (t *Target) loop() {
 				t.handler.Chan() <- entry
 				if err := t.bm.save(handles[i]); err != nil {
 					t.err = err
-					level.Error(util_log.Logger).Log("msg", "error saving bookmark", "err", err)
+					t.logger.Error("error saving bookmark", zap.Error(err))
 				}
 			}
 			win_eventlog.Close(handles)

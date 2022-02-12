@@ -5,6 +5,8 @@ package journal
 
 import (
 	"fmt"
+	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -14,8 +16,6 @@ import (
 	"github.com/Clymene-project/Clymene/model/labels"
 	"github.com/Clymene-project/Clymene/model/relabel"
 	"github.com/coreos/go-systemd/sdjournal"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/model"
@@ -24,8 +24,6 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/positions"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/scrapeconfig"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/targets/target"
-
-	"github.com/grafana/loki/pkg/logproto"
 )
 
 const (
@@ -90,7 +88,7 @@ var defaultJournalEntryFunc = func(c sdjournal.JournalReaderConfig, cursor strin
 // JournalTarget tails systemd journal entries.
 // nolint
 type JournalTarget struct {
-	logger        log.Logger
+	logger        *zap.Logger
 	handler       api.EntryHandler
 	positions     positions.Positions
 	positionPath  string
@@ -104,7 +102,7 @@ type JournalTarget struct {
 
 // NewJournalTarget configures a new JournalTarget.
 func NewJournalTarget(
-	logger log.Logger,
+	logger *zap.Logger,
 	handler api.EntryHandler,
 	positions positions.Positions,
 	jobName string,
@@ -125,7 +123,7 @@ func NewJournalTarget(
 }
 
 func journalTargetWithReader(
-	logger log.Logger,
+	logger *zap.Logger,
 	handler api.EntryHandler,
 	pos positions.Positions,
 	jobName string,
@@ -184,10 +182,10 @@ func journalTargetWithReader(
 		for {
 			err := t.r.Follow(until, ioutil.Discard)
 			if err != nil {
-				level.Error(t.logger).Log("msg", "received error during sdjournal follow", "err", err.Error())
+				t.logger.Error("received error during sdjournal follow", zap.Error(err))
 
 				if err == sdjournal.ErrExpired || err == syscall.EBADMSG || err == io.EOF {
-					level.Error(t.logger).Log("msg", "unable to follow journal", "err", err.Error())
+					t.logger.Error("unable to follow journal", zap.Error(err))
 					return
 				}
 			}
@@ -238,7 +236,7 @@ func (t *JournalTarget) generateJournalConfig(
 	// rather than cfg.Cursor.
 	entry, err := cb.EntryFunc(cfg, cb.Position)
 	if err != nil {
-		level.Error(t.logger).Log("msg", "received error reading saved journal position", "err", err.Error())
+		t.logger.Error("received error reading saved journal position", zap.Error(err))
 		cfg.Since = -1 * cb.MaxAge
 		return cfg
 	}
@@ -263,7 +261,7 @@ func (t *JournalTarget) formatter(entry *sdjournal.JournalEntry) (string, error)
 
 		bb, err := json.Marshal(entry.Fields)
 		if err != nil {
-			level.Error(t.logger).Log("msg", "could not marshal journal fields to JSON", "err", err)
+			t.logger.Error("could not marshal journal fields to JSON", zap.Error(err))
 			return journalEmptyStr, nil
 		}
 		msg = string(bb)
@@ -271,7 +269,7 @@ func (t *JournalTarget) formatter(entry *sdjournal.JournalEntry) (string, error)
 		var ok bool
 		msg, ok = entry.Fields["MESSAGE"]
 		if !ok {
-			level.Debug(t.logger).Log("msg", "received journal entry with no MESSAGE field")
+			t.logger.Debug("received journal entry with no MESSAGE field")
 			return journalEmptyStr, nil
 		}
 	}

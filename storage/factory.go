@@ -16,6 +16,7 @@
 package storage
 
 import (
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 
 	"github.com/uber/jaeger-lib/metrics"
@@ -33,5 +34,7 @@ type Factory interface {
 	// It is called after all configuration of the factory itself has been done.
 	Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error
 
-	CreateWriter() (metricstore.Writer, error)
+	CreateMetricWriter() (metricstore.Writer, error)
+
+	CreateLogWriter() (logstore.Writer, error)
 }

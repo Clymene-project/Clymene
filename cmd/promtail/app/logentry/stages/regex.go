@@ -2,12 +2,11 @@ package stages
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"reflect"
 	"regexp"
 	"time"
 
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/model"
@@ -53,11 +52,11 @@ func validateRegexConfig(c *RegexConfig) (*regexp.Regexp, error) {
 type regexStage struct {
 	cfg        *RegexConfig
 	expression *regexp.Regexp
-	logger     log.Logger
+	logger     *zap.Logger
 }
 
 // newRegexStage creates a newRegexStage
-func newRegexStage(logger log.Logger, config interface{}) (Stage, error) {
+func newRegexStage(logger *zap.Logger, config interface{}) (Stage, error) {
 	cfg, err := parseRegexConfig(config)
 	if err != nil {
 		return nil, err
@@ -69,7 +68,7 @@ func newRegexStage(logger log.Logger, config interface{}) (Stage, error) {
 	return toStage(&regexStage{
 		cfg:        cfg,
 		expression: expression,
-		logger:     log.With(logger, "component", "stage", "type", "regex"),
+		logger:     logger.With(zap.String("component", "stage"), zap.String("type", "regex")),
 	}), nil
 }
 
@@ -92,7 +91,7 @@ func (r *regexStage) Process(labels model.LabelSet, extracted map[string]interfa
 	if r.cfg.Source != nil {
 		if _, ok := extracted[*r.cfg.Source]; !ok {
 			if Debug {
-				level.Debug(r.logger).Log("msg", "source does not exist in the set of extracted values", "source", *r.cfg.Source)
+				r.logger.Debug("source does not exist in the set of extracted values", zap.String("source", *r.cfg.Source))
 			}
 			return
 		}
@@ -100,7 +99,8 @@ func (r *regexStage) Process(labels model.LabelSet, extracted map[string]interfa
 		value, err := getString(extracted[*r.cfg.Source])
 		if err != nil {
 			if Debug {
-				level.Debug(r.logger).Log("msg", "failed to convert source value to string", "source", *r.cfg.Source, "err", err, "type", reflect.TypeOf(extracted[*r.cfg.Source]))
+				r.logger.Debug("failed to convert source value to string", zap.String("source", *r.cfg.Source), zap.Error(err),
+					zap.String("type", reflect.TypeOf(extracted[*r.cfg.Source]).String()))
 			}
 			return
 		}
@@ -110,7 +110,7 @@ func (r *regexStage) Process(labels model.LabelSet, extracted map[string]interfa
 
 	if input == nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "cannot parse a nil entry")
+			r.logger.Debug("cannot parse a nil entry")
 		}
 		return
 	}
@@ -118,7 +118,7 @@ func (r *regexStage) Process(labels model.LabelSet, extracted map[string]interfa
 	match := r.expression.FindStringSubmatch(*input)
 	if match == nil {
 		if Debug {
-			level.Debug(r.logger).Log("msg", "regex did not match", "input", *input, "regex", r.expression)
+			r.logger.Debug("regex did not match", zap.String("input", *input), zap.String("regex", r.expression.String()))
 		}
 		return
 	}
@@ -129,7 +129,7 @@ func (r *regexStage) Process(labels model.LabelSet, extracted map[string]interfa
 		}
 	}
 	if Debug {
-		level.Debug(r.logger).Log("msg", "extracted data debug in regex stage", "extracted data", fmt.Sprintf("%v", extracted))
+		r.logger.Debug("extracted data debug in regex stage", zap.String("extracted data", fmt.Sprintf("%v", extracted)))
 	}
 }
 
