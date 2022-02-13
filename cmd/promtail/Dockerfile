@@ -13,4 +13,4 @@ ADD ./out/clymene-promtail /clymene-promtail
 EXPOSE 15698
 
 ENTRYPOINT ["/clymene-promtail"]
-CMD        [ "-config.file=/etc/promtail/config.yml"]
+CMD        [ "--config.file=/etc/promtail/config.yml"]
