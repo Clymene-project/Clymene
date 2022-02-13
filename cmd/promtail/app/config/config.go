@@ -29,7 +29,6 @@ type Config struct {
 // prefix. If prefix is a non-empty string, prefix should end with a period.
 func (c *Config) RegisterFlagsWithPrefix(prefix string, f *flag.FlagSet) {
 	c.ServerConfig.RegisterFlagsWithPrefix(prefix, f)
-	//c.ClientConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.PositionsConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.TargetConfig.RegisterFlagsWithPrefix(prefix, f)
 	c.LimitConfig.RegisterFlagsWithPrefix(prefix, f)

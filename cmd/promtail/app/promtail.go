@@ -82,11 +82,11 @@ func New(pc *PromtailConfig) (*Promtail, error) {
 		return nil, err
 	}
 	promtail.targetManagers = tms
-	//server, err := server.New(cfg.ServerConfig, promtail.logger, tms, cfg.String())
+	server, err := server.New(cfg.ServerConfig, promtail.logger, tms, cfg.String())
 	if err != nil {
 		return nil, err
 	}
-	promtail.server = nil
+	promtail.server = server
 	return promtail, nil
 }
 

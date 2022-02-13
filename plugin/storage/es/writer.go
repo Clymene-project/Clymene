@@ -26,17 +26,25 @@ import (
 const (
 	clymeneIndex = "clymene-metrics"
 	metricType   = "metric"
+
+	clymeneLogIndex = "clymene-logs"
+	logType         = "log"
 )
 
-type MetricWriter struct {
-	logger      *zap.Logger
-	client      es.Client
-	metricIndex string
-	converter   dbmodel.Converter
+type Writer struct {
+	logger    *zap.Logger
+	client    es.Client
+	index     string
+	converter dbmodel.Converter
 }
 
-// MetricWriterParams holds constructor parameters for NewMetricWriter
-type MetricWriterParams struct {
+func (s *Writer) Writelog() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+// WriterParams holds constructor parameters for NewMetricWriter
+type WriterParams struct {
 	Logger      *zap.Logger
 	Client      es.Client
 	IndexPrefix string
@@ -44,20 +52,20 @@ type MetricWriterParams struct {
 }
 
 // NewMetricWriter creates a new MetricWriter for use
-func NewMetricWriter(p MetricWriterParams) *MetricWriter {
+func NewMetricWriter(p WriterParams) *Writer {
 	prefix := ""
 	if p.IndexPrefix != "" {
 		prefix = p.IndexPrefix + "-"
 	}
-	return &MetricWriter{
-		client:      p.Client,
-		logger:      p.Logger,
-		metricIndex: prefix + clymeneIndex,
-		converter:   dbmodel.Converter{},
+	return &Writer{
+		client:    p.Client,
+		logger:    p.Logger,
+		index:     prefix + clymeneIndex,
+		converter: dbmodel.Converter{},
 	}
 }
 
-func (s *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
+func (s *Writer) WriteMetric(metrics []prompb.TimeSeries) error {
 	for _, metric := range metrics {
 		jsonTimeSeries := s.converter.ConvertTsToJSON(metric)
 		s.writeMetric(&jsonTimeSeries)
@@ -66,6 +74,20 @@ func (s *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
 }
 
 // bulk insert
-func (s *MetricWriter) writeMetric(metric *map[string]interface{}) {
-	s.client.Index().Index(s.metricIndex).Type(metricType).BodyJson(&metric).Add()
+func (s *Writer) writeMetric(metric *map[string]interface{}) {
+	s.client.Index().Index(s.index).Type(metricType).BodyJson(&metric).Add()
+}
+
+// NewLogWriter creates a new MetricWriter for use
+func NewLogWriter(p WriterParams) *Writer {
+	prefix := ""
+	if p.IndexPrefix != "" {
+		prefix = p.IndexPrefix + "-"
+	}
+	return &Writer{
+		client:    p.Client,
+		logger:    p.Logger,
+		index:     prefix + clymeneLogIndex,
+		converter: dbmodel.Converter{},
+	}
 }

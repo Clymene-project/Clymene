@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	// TypeEnvVar is the name of the env var that defines the type of backend used for time series storage.
-	TypeEnvVar = "TS_STORAGE_TYPE"
+	// TypeEnvVar is the name of the env var that defines the type of backend used for time series, log storage.
+	TypeEnvVar = "STORAGE_TYPE"
 
 	// DependencyStorageTypeEnvVar is the name of the env var that defines the type of backend used for dependencies storage.
 	DependencyStorageTypeEnvVar = "DEPENDENCY_STORAGE_TYPE"

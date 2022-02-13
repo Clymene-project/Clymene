@@ -46,11 +46,6 @@ type Factory struct {
 	archiveClient es.Client
 }
 
-func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	//TODO implement me
-	panic("not supported")
-}
-
 // NewFactory creates a new Factory.
 func NewFactory() *Factory {
 	return &Factory{
@@ -108,12 +103,31 @@ func createMetricWriter(
 	cfg config.ClientBuilder,
 	archive bool,
 ) (metricstore.Writer, error) {
-	writer := NewMetricWriter(MetricWriterParams{
+	writer := NewMetricWriter(WriterParams{
 		Client:      client,
 		Logger:      logger,
 		IndexPrefix: cfg.GetIndexPrefix(),
 		Archive:     archive,
 	})
 
+	return writer, nil
+}
+
+func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
+	return createLogWriter(f.logger, f.primaryClient, f.primaryConfig, false)
+}
+
+func createLogWriter(
+	logger *zap.Logger,
+	client es.Client,
+	cfg config.ClientBuilder,
+	archive bool,
+) (logstore.Writer, error) {
+	writer := NewLogWriter(WriterParams{
+		Client:      client,
+		Logger:      logger,
+		IndexPrefix: cfg.GetIndexPrefix(),
+		Archive:     archive,
+	})
 	return writer, nil
 }
