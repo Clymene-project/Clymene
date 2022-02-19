@@ -1,17 +1,16 @@
 package client
 
 import (
-	"errors"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/api"
+	"github.com/Clymene-project/Clymene/storage/logstore"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"sync"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 // MultiClient is client pushing to one or more loki instances.
 type MultiClient struct {
-	clients []Client
+	client  Client
 	entries chan api.Entry
 	wg      sync.WaitGroup
 
@@ -19,21 +18,13 @@ type MultiClient struct {
 }
 
 // NewMulti creates a new client
-func NewMulti(reg prometheus.Registerer, logger *zap.Logger, cfgs ...Config) (Client, error) {
-	if len(cfgs) == 0 {
-		return nil, errors.New("at least one client config should be provided")
-	}
-
-	clients := make([]Client, 0, len(cfgs))
-	for _, cfg := range cfgs {
-		client, err := New(reg, cfg, logger)
-		if err != nil {
-			return nil, err
-		}
-		clients = append(clients, client)
+func NewMulti(options Options, logWriter logstore.Writer, factory metrics.Factory, log *zap.Logger) (Client, error) {
+	client, err := New(options, logWriter, factory, log)
+	if err != nil {
+		return nil, err
 	}
 	multi := &MultiClient{
-		clients: clients,
+		client:  client,
 		entries: make(chan api.Entry),
 	}
 	multi.start()
@@ -45,9 +36,7 @@ func (m *MultiClient) start() {
 	go func() {
 		defer m.wg.Done()
 		for e := range m.entries {
-			for _, c := range m.clients {
-				c.Chan() <- e
-			}
+			m.client.Chan() <- e
 		}
 	}()
 }
@@ -60,14 +49,10 @@ func (m *MultiClient) Chan() chan<- api.Entry {
 func (m *MultiClient) Stop() {
 	m.once.Do(func() { close(m.entries) })
 	m.wg.Wait()
-	for _, c := range m.clients {
-		c.Stop()
-	}
+	m.client.Stop()
 }
 
 // StopNow implements Client
 func (m *MultiClient) StopNow() {
-	for _, c := range m.clients {
-		c.StopNow()
-	}
+	m.client.StopNow()
 }

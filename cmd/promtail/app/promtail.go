@@ -43,11 +43,11 @@ type Promtail struct {
 }
 
 type PromtailConfig struct {
-	Options
+	client.Options
 	Reg            prometheus.Registerer
 	Logger         *zap.Logger
-	MetricsFactory metrics.Factory
 	LogWriter      logstore.Writer
+	MetricsFactory metrics.Factory
 }
 
 // New makes a new Promtail.
@@ -56,22 +56,21 @@ func New(pc *PromtailConfig) (*Promtail, error) {
 		logger: pc.Logger,
 		reg:    pc.Reg,
 	}
-	cfg, err := config.LoadFile(pc.configFile, pc.Logger)
+	cfg, err := config.LoadFile(pc.ConfigFile, pc.Logger)
 	if err != nil {
 		pc.Logger.Panic("Unable to parse config")
 	}
-
 	if cfg.LimitConfig.ReadlineRateEnabled {
 		stages.SetReadLineRateLimiter(cfg.LimitConfig.ReadlineRate, cfg.LimitConfig.ReadlineBurst, cfg.LimitConfig.ReadlineRateDrop)
 	}
-	if pc.dryRun {
-		promtail.client, err = client.NewLogger(pc.Reg, promtail.logger, cfg.ClientConfigs...)
+	if pc.DryRun {
+		promtail.client, err = client.NewLogger(pc.Options, pc.LogWriter, pc.MetricsFactory, promtail.logger)
 		if err != nil {
 			return nil, err
 		}
 		cfg.PositionsConfig.ReadOnly = true
 	} else {
-		promtail.client, err = client.NewMulti(pc.Reg, promtail.logger, cfg.ClientConfigs...)
+		promtail.client, err = client.NewMulti(pc.Options, pc.LogWriter, pc.MetricsFactory, promtail.logger)
 		if err != nil {
 			return nil, err
 		}
@@ -82,11 +81,11 @@ func New(pc *PromtailConfig) (*Promtail, error) {
 		return nil, err
 	}
 	promtail.targetManagers = tms
-	server, err := server.New(cfg.ServerConfig, promtail.logger, tms, cfg.String())
+	promtailServer, err := server.New(cfg.ServerConfig, promtail.logger, tms, cfg.String())
 	if err != nil {
 		return nil, err
 	}
-	promtail.server = server
+	promtail.server = promtailServer
 	return promtail, nil
 }
 

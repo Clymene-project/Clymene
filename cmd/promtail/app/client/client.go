@@ -1,26 +1,19 @@
 package client
 
 import (
-	"bufio"
-	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/parser"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/api"
-	"github.com/Clymene-project/Clymene/cmd/promtail/app/logentry/metric"
-	"github.com/Clymene-project/Clymene/pkg/lokiutil"
 	"github.com/Clymene-project/Clymene/pkg/version"
+	"github.com/Clymene-project/Clymene/storage/logstore"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
-	"io"
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/grafana/dskit/backoff"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 )
 
@@ -38,180 +31,110 @@ const (
 
 var UserAgent = fmt.Sprintf("promtail/%s", version.Get().Version)
 
-type metrics struct {
-	encodedBytes     *prometheus.CounterVec
-	sentBytes        *prometheus.CounterVec
-	droppedBytes     *prometheus.CounterVec
-	sentEntries      *prometheus.CounterVec
-	droppedEntries   *prometheus.CounterVec
-	requestDuration  *prometheus.HistogramVec
-	batchRetries     *prometheus.CounterVec
-	streamLag        *metric.Gauges
-	countersWithHost []*prometheus.CounterVec
-}
-
-func newMetrics(reg prometheus.Registerer) *metrics {
-	var m metrics
-
-	m.encodedBytes = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "encoded_bytes_total",
-		Help:      "Number of bytes encoded and ready to send.",
-	}, []string{HostLabel})
-	m.sentBytes = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "sent_bytes_total",
-		Help:      "Number of bytes sent.",
-	}, []string{HostLabel})
-	m.droppedBytes = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "dropped_bytes_total",
-		Help:      "Number of bytes dropped because failed to be sent to the ingester after all retries.",
-	}, []string{HostLabel})
-	m.sentEntries = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "sent_entries_total",
-		Help:      "Number of log entries sent to the ingester.",
-	}, []string{HostLabel})
-	m.droppedEntries = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "dropped_entries_total",
-		Help:      "Number of log entries dropped because failed to be sent to the ingester after all retries.",
-	}, []string{HostLabel})
-	m.requestDuration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "promtail",
-		Name:      "request_duration_seconds",
-		Help:      "Duration of send requests.",
-	}, []string{"status_code", HostLabel})
-	m.batchRetries = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "promtail",
-		Name:      "batch_retries_total",
-		Help:      "Number of times batches has had to be retried.",
-	}, []string{HostLabel})
-
-	var err error
-	m.streamLag, err = metric.NewGauges("promtail_stream_lag_seconds",
-		"Difference between current time and last batch timestamp for successful sends",
-		metric.GaugeConfig{Action: "set"},
-		int64(1*time.Minute.Seconds()), // This strips out files which update slowly and reduces noise in this metric.
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	m.countersWithHost = []*prometheus.CounterVec{
-		m.encodedBytes, m.sentBytes, m.droppedBytes, m.sentEntries, m.droppedEntries,
-	}
-
-	if reg != nil {
-		m.encodedBytes = mustRegisterOrGet(reg, m.encodedBytes).(*prometheus.CounterVec)
-		m.sentBytes = mustRegisterOrGet(reg, m.sentBytes).(*prometheus.CounterVec)
-		m.droppedBytes = mustRegisterOrGet(reg, m.droppedBytes).(*prometheus.CounterVec)
-		m.sentEntries = mustRegisterOrGet(reg, m.sentEntries).(*prometheus.CounterVec)
-		m.droppedEntries = mustRegisterOrGet(reg, m.droppedEntries).(*prometheus.CounterVec)
-		m.requestDuration = mustRegisterOrGet(reg, m.requestDuration).(*prometheus.HistogramVec)
-		m.batchRetries = mustRegisterOrGet(reg, m.batchRetries).(*prometheus.CounterVec)
-		m.streamLag = mustRegisterOrGet(reg, m.streamLag).(*metric.Gauges)
-	}
-
-	return &m
-}
-
-func mustRegisterOrGet(reg prometheus.Registerer, c prometheus.Collector) prometheus.Collector {
-	if err := reg.Register(c); err != nil {
-		if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
-			return are.ExistingCollector
-		}
-		panic(err)
-	}
-	return c
-}
-
 // Client pushes entries to Loki and can be stopped
 type Client interface {
 	api.EntryHandler
-	// Stop goroutine sending batch of entries without retries.
+	// StopNow Stop goroutine sending batch of entries without retries.
 	StopNow()
 }
 
 // Client for pushing logs in snappy-compressed protos over HTTP.
 type client struct {
-	metrics *metrics
-	logger  *zap.Logger
-	cfg     Config
-	client  *http.Client
+	logger *zap.Logger
+
 	entries chan api.Entry
 
 	once sync.Once
 	wg   sync.WaitGroup
 
-	externalLabels model.LabelSet
-
 	// ctx is used in any upstream calls from the `client`.
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctx       context.Context
+	cancel    context.CancelFunc
+	logWriter logstore.Writer
+	options   Options
+
+	externalLabels model.LabelSet
+	writerMetrics  WriterMetrics
 }
 
 // Tripperware can wrap a roundtripper.
 type Tripperware func(http.RoundTripper) http.RoundTripper
 
-// New makes a new Client.
-func New(reg prometheus.Registerer, cfg Config, logger *zap.Logger) (Client, error) {
-	return newClient(reg, cfg, logger)
+type WriterMetrics struct {
+	EncodedBytes    metrics.Counter
+	SentBytes       metrics.Counter
+	DroppedBytes    metrics.Counter
+	SentEntries     metrics.Counter
+	DroppedEntries  metrics.Counter
+	RequestDuration metrics.Histogram
+	BatchRetries    metrics.Counter
+	StreamLag       metrics.Gauge
 }
 
-func newClient(reg prometheus.Registerer, cfg Config, logger *zap.Logger) (*client, error) {
-	if cfg.URL.URL == nil {
-		return nil, errors.New("client needs target URL")
+func NewWriterMetrics(metricFactory metrics.Factory) WriterMetrics {
+	return WriterMetrics{
+		EncodedBytes: metricFactory.Counter(
+			metrics.Options{
+				Name: "encoded_bytes_total",
+				Help: "Number of bytes encoded and ready to send.",
+			}),
+		SentBytes: metricFactory.Counter(
+			metrics.Options{
+				Name: "sent_bytes_total",
+				Help: "Number of bytes sent.",
+			}),
+		DroppedBytes: metricFactory.Counter(
+			metrics.Options{
+				Name: "dropped_bytes_total",
+				Help: "Number of bytes dropped because failed to be sent to the ingester after all retries.",
+			}),
+		SentEntries: metricFactory.Counter(
+			metrics.Options{
+				Name: "sent_entries_total",
+				Help: "Number of log entries sent to the ingester.",
+			}),
+		DroppedEntries: metricFactory.Counter(
+			metrics.Options{
+				Name: "dropped_entries_total",
+				Help: "Number of log entries dropped because failed to be sent to the ingester after all retries.",
+			}),
+		RequestDuration: metricFactory.Histogram(
+			metrics.HistogramOptions{
+				Name: "request_duration_seconds",
+				Help: "Duration of send requests.",
+				Tags: map[string]string{"status_code": HostLabel}}),
+		BatchRetries: metricFactory.Counter(
+			metrics.Options{
+				Name: "batch_retries_total",
+				Help: "Number of times batches has had to be retried.",
+			}),
+		StreamLag: metricFactory.Gauge(
+			metrics.Options{
+				Name: "stream_lag_seconds",
+				Help: "Difference between current time and last batch timestamp for successful sends",
+			}),
 	}
+}
 
+// New makes a new Client.
+func New(options Options, logWriter logstore.Writer, factory metrics.Factory, logger *zap.Logger) (Client, error) {
+	return newClient(options, logWriter, factory, logger)
+}
+
+func newClient(options Options, logWriter logstore.Writer, metricFactory metrics.Factory, logger *zap.Logger) (*client, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-
 	c := &client{
-		logger:  logger.With(zap.String("component", "client"), zap.String("host", cfg.URL.Host)),
-		cfg:     cfg,
-		entries: make(chan api.Entry),
-		metrics: newMetrics(reg),
-
-		externalLabels: cfg.ExternalLabels.LabelSet,
+		logger:         logger.With(zap.String("component", "client")),
+		entries:        make(chan api.Entry),
+		logWriter:      logWriter,
 		ctx:            ctx,
 		cancel:         cancel,
+		options:        options,
+		externalLabels: options.ExternalLabels.LabelSet,
+		writerMetrics:  NewWriterMetrics(metricFactory),
 	}
-
-	err := cfg.Client.Validate()
-	if err != nil {
-		return nil, err
-	}
-
-	c.client, err = config.NewClientFromConfig(cfg.Client, "promtail", config.WithHTTP2Disabled())
-	if err != nil {
-		return nil, err
-	}
-
-	c.client.Timeout = cfg.Timeout
-
-	// Initialize counters to 0 so the metrics are exported before the first
-	// occurrence of incrementing to avoid missing metrics.
-	for _, counter := range c.metrics.countersWithHost {
-		counter.WithLabelValues(c.cfg.URL.Host).Add(0)
-	}
-
 	c.wg.Add(1)
 	go c.run()
-	return c, nil
-}
-
-// NewWithTripperware creates a new Loki client with a custom tripperware.
-func NewWithTripperware(reg prometheus.Registerer, cfg Config, logger *zap.Logger, tp Tripperware) (Client, error) {
-	c, err := newClient(reg, cfg, logger)
-	if err != nil {
-		return nil, err
-	}
-
-	if tp != nil {
-		c.client.Transport = tp(c.client.Transport)
-	}
-
 	return c, nil
 }
 
@@ -225,13 +148,12 @@ func (c *client) run() {
 	// We apply a cap of 10ms to the ticker, to avoid too frequent checks in
 	// case the BatchWait is very low.
 	minWaitCheckFrequency := 10 * time.Millisecond
-	maxWaitCheckFrequency := c.cfg.BatchWait / 10
+	maxWaitCheckFrequency := c.options.BatchWait / 10
 	if maxWaitCheckFrequency < minWaitCheckFrequency {
 		maxWaitCheckFrequency = minWaitCheckFrequency
 	}
 
 	maxWaitCheck := time.NewTicker(maxWaitCheckFrequency)
-
 	defer func() {
 		maxWaitCheck.Stop()
 		// Send all pending batches
@@ -259,7 +181,8 @@ func (c *client) run() {
 
 			// If adding the entry to the batch will increase the size over the max
 			// size allowed, we do send the current batch and then create a new one
-			if batch.sizeBytesAfter(e) > c.cfg.BatchSize {
+
+			if batch.sizeBytesAfter(e) > c.options.BatchSize {
 				c.sendBatch(tenantID, batch)
 
 				batches[tenantID] = newBatch(e)
@@ -272,7 +195,7 @@ func (c *client) run() {
 		case <-maxWaitCheck.C:
 			// Send all batches whose max wait time has been reached
 			for tenantID, batch := range batches {
-				if batch.age() < c.cfg.BatchWait {
+				if batch.age() < c.options.BatchWait {
 					continue
 				}
 
@@ -288,26 +211,26 @@ func (c *client) Chan() chan<- api.Entry {
 }
 
 func (c *client) sendBatch(tenantID string, batch *batch) {
-	buf, entriesCount, err := batch.encode()
+	buf, entriesCount, err := batch.Encode()
 	if err != nil {
 		c.logger.Error("error encoding batch", zap.Error(err))
 		return
 	}
-	bufBytes := float64(len(buf))
-	c.metrics.encodedBytes.WithLabelValues(c.cfg.URL.Host).Add(bufBytes)
+	bufBytes := int64(len(buf))
+	c.writerMetrics.EncodedBytes.Inc(bufBytes)
 
-	backoff := backoff.New(c.ctx, c.cfg.BackoffConfig)
+	backoff := backoff.New(c.ctx, c.options.BackoffConfig)
 	var status int
 	for {
 		start := time.Now()
 		// send uses `timeout` internally, so `context.Background` is good enough.
-		status, err = c.send(context.Background(), tenantID, buf)
+		status, err := c.logWriter.Writelog(context.Background(), tenantID, buf)
 
-		c.metrics.requestDuration.WithLabelValues(strconv.Itoa(status), c.cfg.URL.Host).Observe(time.Since(start).Seconds())
-
+		c.writerMetrics.RequestDuration.Record(time.Since(start).Seconds())
 		if err == nil {
-			c.metrics.sentBytes.WithLabelValues(c.cfg.URL.Host).Add(bufBytes)
-			c.metrics.sentEntries.WithLabelValues(c.cfg.URL.Host).Add(float64(entriesCount))
+			c.writerMetrics.SentBytes.Inc(bufBytes)
+			c.writerMetrics.SentEntries.Inc(int64(entriesCount))
+
 			for _, s := range batch.streams {
 				lbls, err := parser.ParseMetric(s.Labels)
 				if err != nil {
@@ -317,7 +240,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 				}
 				var lblSet model.LabelSet
 				for i := range lbls {
-					for _, lbl := range c.cfg.StreamLagLabels {
+					for _, lbl := range c.options.StreamLagLabels {
 						if lbls[i].Name == lbl {
 							if lblSet == nil {
 								lblSet = model.LabelSet{}
@@ -330,9 +253,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 					}
 				}
 				if lblSet != nil {
-					// always set host
-					lblSet = lblSet.Merge(model.LabelSet{model.LabelName(HostLabel): model.LabelValue(c.cfg.URL.Host)})
-					c.metrics.streamLag.With(lblSet).Set(time.Since(s.Entries[len(s.Entries)-1].Timestamp).Seconds())
+					c.writerMetrics.StreamLag.Update(int64(time.Since(s.Entries[len(s.Entries)-1].Timestamp).Seconds()))
 				}
 			}
 			return
@@ -344,7 +265,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 		}
 
 		c.logger.Warn("error sending batch, will retry", zap.Int("status", status), zap.Error(err))
-		c.metrics.batchRetries.WithLabelValues(c.cfg.URL.Host).Inc()
+		c.writerMetrics.BatchRetries.Inc(1)
 		backoff.Wait()
 
 		// Make sure it sends at least once before checking for retry.
@@ -355,45 +276,10 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 
 	if err != nil {
 		c.logger.Error("final error sending batch", zap.Int("status", status), zap.Error(err))
-		c.metrics.droppedBytes.WithLabelValues(c.cfg.URL.Host).Add(bufBytes)
-		c.metrics.droppedEntries.WithLabelValues(c.cfg.URL.Host).Add(float64(entriesCount))
+		c.writerMetrics.DroppedBytes.Inc(bufBytes)
+		c.writerMetrics.DroppedEntries.Inc(int64(entriesCount))
 	}
 }
-
-func (c *client) send(ctx context.Context, tenantID string, buf []byte) (int, error) {
-	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
-	defer cancel()
-	req, err := http.NewRequest("POST", c.cfg.URL.String(), bytes.NewReader(buf))
-	if err != nil {
-		return -1, err
-	}
-	req = req.WithContext(ctx)
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("User-Agent", UserAgent)
-
-	// If the tenant ID is not empty promtail is running in multi-tenant mode, so
-	// we should send it to Loki
-	if tenantID != "" {
-		req.Header.Set("X-Scope-OrgID", tenantID)
-	}
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return -1, err
-	}
-	defer util.LogError("closing response body", c.logger, resp.Body.Close)
-
-	if resp.StatusCode/100 != 2 {
-		scanner := bufio.NewScanner(io.LimitReader(resp.Body, maxErrMsgLen))
-		line := ""
-		if scanner.Scan() {
-			line = scanner.Text()
-		}
-		err = fmt.Errorf("server returned HTTP status %s (%d): %s", resp.Status, resp.StatusCode, line)
-	}
-	return resp.StatusCode, err
-}
-
 func (c *client) getTenantID(labels model.LabelSet) string {
 	// Check if it has been overridden while processing the pipeline stages
 	if value, ok := labels[ReservedLabelTenantID]; ok {
@@ -401,8 +287,8 @@ func (c *client) getTenantID(labels model.LabelSet) string {
 	}
 
 	// Check if has been specified in the config
-	if c.cfg.TenantID != "" {
-		return c.cfg.TenantID
+	if c.options.TenantID != "" {
+		return c.options.TenantID
 	}
 
 	// Defaults to an empty string, which means the X-Scope-OrgID header
@@ -432,6 +318,5 @@ func (c *client) processEntry(e api.Entry) (api.Entry, string) {
 }
 
 func (c *client) UnregisterLatencyMetric(labels model.LabelSet) {
-	labels[HostLabel] = model.LabelValue(c.cfg.URL.Host)
-	c.metrics.streamLag.Delete(labels)
+	c.writerMetrics.StreamLag.Update(0)
 }

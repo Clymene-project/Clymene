@@ -21,6 +21,7 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/pkg/config"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/plugin/storage"
@@ -81,7 +82,7 @@ func main() {
 				logger.Fatal("Failed to create log writer", zap.Error(err))
 			}
 
-			options := app.Options{}
+			options := client.Options{}
 			options.InitFromViper(v)
 			promtail, err := app.New(&app.PromtailConfig{
 				Options:        options,
@@ -112,7 +113,7 @@ func main() {
 		command,
 		svc.AddFlags,
 		storageFactory.AddPipelineFlags,
-		app.AddFlags,
+		client.AddFlags,
 	)
 
 	if err := command.Execute(); err != nil {

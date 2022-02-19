@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021 The Clymene Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package client
 
 import (
@@ -13,10 +29,6 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-// batch holds pending log streams waiting to be sent to Loki, and it's used
-// to reduce the number of push requests to Loki aggregating multiple log streams
-// and entries in a single batch request. In case of multi-tenant Promtail, log
-// streams for each tenant are stored in a dedicated batch.
 type batch struct {
 	streams   map[string]*logproto.Stream
 	bytes     int
@@ -90,7 +102,7 @@ func (b *batch) age() time.Duration {
 
 // encode the batch as snappy-compressed push request, and returns
 // the encoded bytes and the number of encoded entries
-func (b *batch) encode() ([]byte, int, error) {
+func (b *batch) Encode() ([]byte, int, error) {
 	req, entriesCount := b.createPushRequest()
 	buf, err := proto.Marshal(req)
 	if err != nil {

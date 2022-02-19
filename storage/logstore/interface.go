@@ -16,6 +16,27 @@
 
 package logstore
 
+import (
+	"context"
+)
+
 type Writer interface {
-	Writelog() error
+	//WriterMetric
+	Writelog(ctx context.Context, tenantID string, batch []byte) (int, error)
+}
+
+type WriterMetric interface {
+	EncodedBytesInc(int64)
+	SentBytesInc(int64)
+	SentEntriesInc(int64)
+	StreamLagSet(int64)
+	StreamLagInit()
+	RequestDurationSet(float64)
+	BatchRetriesInc()
+	DroppedBytesInc(int64)
+	DroppedEntriesInc(int64)
+}
+
+type Batch interface {
+	Encode() ([]byte, int, error)
 }

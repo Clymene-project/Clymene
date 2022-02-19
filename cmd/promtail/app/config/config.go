@@ -3,7 +3,6 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/limit"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/positions"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/scrapeconfig"
@@ -18,7 +17,6 @@ import (
 // Config for promtail, describing what files to watch.
 type Config struct {
 	ServerConfig    server.Config         `yaml:"server,omitempty"`
-	ClientConfigs   []client.Config       `yaml:"clients,omitempty"`
 	PositionsConfig positions.Config      `yaml:"positions,omitempty"`
 	ScrapeConfig    []scrapeconfig.Config `yaml:"scrape_configs,omitempty"`
 	TargetConfig    file.Config           `yaml:"target_config,omitempty"`

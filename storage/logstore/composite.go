@@ -17,11 +17,57 @@
 package logstore
 
 import (
+	"context"
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 )
 
 type CompositeWriter struct {
 	logWriters []Writer
+}
+
+func (c *CompositeWriter) EncodedBytesInc(i int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) SentBytesInc(i int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) SentEntriesInc(i int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) StreamLagSet(i int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) StreamLagInit() {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) RequestDurationSet(f float64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) BatchRetriesInc() {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) DroppedBytesInc(i int64) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *CompositeWriter) DroppedEntriesInc(i int64) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // NewCompositeWriter creates a CompositeWriter
@@ -31,13 +77,13 @@ func NewCompositeWriter(logWriters ...Writer) *CompositeWriter {
 	}
 }
 
-// Writelog calls WriteMetric on each metric writer. It will sum up failures, it is not transactional
-func (c *CompositeWriter) Writelog() error {
+// Writelog calls WriteMetric on each log writer. It will sum up failures, it is not transactional
+func (c *CompositeWriter) Writelog(ctx context.Context, tenantID string, batch []byte) (int, error) {
 	var errors []error
 	for _, writer := range c.logWriters {
-		if err := writer.Writelog(); err != nil {
+		if _, err := writer.Writelog(ctx, tenantID, batch); err != nil {
 			errors = append(errors, err)
 		}
 	}
-	return multierror.Wrap(errors)
+	return -1, multierror.Wrap(errors)
 }

@@ -3,15 +3,14 @@ package client
 import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/api"
+	"github.com/Clymene-project/Clymene/storage/logstore"
+	"github.com/fatih/color"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"os"
 	"runtime"
 	"sync"
 	"text/tabwriter"
-
-	"github.com/fatih/color"
-	"github.com/prometheus/client_golang/prometheus"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -35,23 +34,14 @@ type logger struct {
 }
 
 // NewLogger creates a new client logger that logs entries instead of sending them.
-func NewLogger(reg prometheus.Registerer, log *zap.Logger, cfgs ...Config) (Client, error) {
+func NewLogger(options Options, logWriter logstore.Writer, factory metrics.Factory, log *zap.Logger) (Client, error) {
 	// make sure the clients config is valid
-	c, err := NewMulti(reg, log, cfgs...)
+	c, err := NewMulti(options, logWriter, factory, log)
 	if err != nil {
 		return nil, err
 	}
 	c.Stop()
 
-	fmt.Println(yellow.Sprint("Clients configured:"))
-	for _, cfg := range cfgs {
-		yaml, err := yaml.Marshal(cfg)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println("----------------------")
-		fmt.Println(string(yaml))
-	}
 	entries := make(chan api.Entry)
 	l := &logger{
 		Writer:  tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0),

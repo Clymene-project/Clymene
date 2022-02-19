@@ -17,6 +17,7 @@
 package es
 
 import (
+	"context"
 	"github.com/Clymene-project/Clymene/pkg/es"
 	"github.com/Clymene-project/Clymene/plugin/storage/es/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
@@ -38,7 +39,7 @@ type Writer struct {
 	converter dbmodel.Converter
 }
 
-func (s *Writer) Writelog() error {
+func (s *Writer) Writelog(ctx context.Context, tenantID string, batch []byte) (int, error) {
 	//TODO implement me
 	panic("implement me")
 }
