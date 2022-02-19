@@ -211,25 +211,22 @@ func (c *client) Chan() chan<- api.Entry {
 }
 
 func (c *client) sendBatch(tenantID string, batch *batch) {
-	buf, entriesCount, err := batch.Encode()
-	if err != nil {
-		c.logger.Error("error encoding batch", zap.Error(err))
-		return
-	}
-	bufBytes := int64(len(buf))
-	c.writerMetrics.EncodedBytes.Inc(bufBytes)
-
-	backoff := backoff.New(c.ctx, c.options.BackoffConfig)
+	backOff := backoff.New(c.ctx, c.options.BackoffConfig)
 	var status int
+	var err error
+	var bufBytes int64
+	var entriesCount int64
 	for {
 		start := time.Now()
 		// send uses `timeout` internally, so `context.Background` is good enough.
-		status, err := c.logWriter.Writelog(context.Background(), tenantID, buf)
-
+		status, bufBytes, entriesCount, err = c.logWriter.Writelog(context.Background(), tenantID, batch)
+		if bufBytes != -1 {
+			c.writerMetrics.EncodedBytes.Inc(bufBytes)
+		}
 		c.writerMetrics.RequestDuration.Record(time.Since(start).Seconds())
 		if err == nil {
 			c.writerMetrics.SentBytes.Inc(bufBytes)
-			c.writerMetrics.SentEntries.Inc(int64(entriesCount))
+			c.writerMetrics.SentEntries.Inc(entriesCount)
 
 			for _, s := range batch.streams {
 				lbls, err := parser.ParseMetric(s.Labels)
@@ -266,10 +263,10 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 
 		c.logger.Warn("error sending batch, will retry", zap.Int("status", status), zap.Error(err))
 		c.writerMetrics.BatchRetries.Inc(1)
-		backoff.Wait()
+		backOff.Wait()
 
 		// Make sure it sends at least once before checking for retry.
-		if !backoff.Ongoing() {
+		if !backOff.Ongoing() {
 			break
 		}
 	}
@@ -277,7 +274,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 	if err != nil {
 		c.logger.Error("final error sending batch", zap.Int("status", status), zap.Error(err))
 		c.writerMetrics.DroppedBytes.Inc(bufBytes)
-		c.writerMetrics.DroppedEntries.Inc(int64(entriesCount))
+		c.writerMetrics.DroppedEntries.Inc(entriesCount)
 	}
 }
 func (c *client) getTenantID(labels model.LabelSet) string {

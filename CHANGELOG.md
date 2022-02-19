@@ -1,6 +1,13 @@
 Changes by Version
 ==================
 
+2.0.0 (2022-02-20)
+-----------------
+A log collection agent, promtail, is now available. Collected logs can be stored in loki and elasticsearch.  
+1. Add log collection component clymene-promtail issue: #41  
+2. Added http receiver function to send/receive gateway metricWriter to http issue: #37  
+3. Add elasticsearch index name change option #44  
+
 1.5.0 (2022-01-30)
 -----------------
 Updated Clymene's service discovery feature. For details, please check the clymene official docs(https://clymene-project.github.io/docs/service-discovery/configuration/)

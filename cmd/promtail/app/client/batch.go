@@ -103,7 +103,7 @@ func (b *batch) age() time.Duration {
 // encode the batch as snappy-compressed push request, and returns
 // the encoded bytes and the number of encoded entries
 func (b *batch) Encode() ([]byte, int, error) {
-	req, entriesCount := b.createPushRequest()
+	req, entriesCount := b.CreatePushRequest()
 	buf, err := proto.Marshal(req)
 	if err != nil {
 		return nil, 0, err
@@ -113,7 +113,7 @@ func (b *batch) Encode() ([]byte, int, error) {
 }
 
 // creates push request and returns it, together with number of entries
-func (b *batch) createPushRequest() (*logproto.PushRequest, int) {
+func (b *batch) CreatePushRequest() (*logproto.PushRequest, int) {
 	req := logproto.PushRequest{
 		Streams: make([]logproto.Stream, 0, len(b.streams)),
 	}

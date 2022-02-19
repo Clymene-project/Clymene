@@ -18,25 +18,14 @@ package logstore
 
 import (
 	"context"
+	"github.com/Clymene-project/Clymene/pkg/logproto"
 )
 
 type Writer interface {
-	//WriterMetric
-	Writelog(ctx context.Context, tenantID string, batch []byte) (int, error)
-}
-
-type WriterMetric interface {
-	EncodedBytesInc(int64)
-	SentBytesInc(int64)
-	SentEntriesInc(int64)
-	StreamLagSet(int64)
-	StreamLagInit()
-	RequestDurationSet(float64)
-	BatchRetriesInc()
-	DroppedBytesInc(int64)
-	DroppedEntriesInc(int64)
+	Writelog(ctx context.Context, tenantID string, batch Batch) (int, int64, int64, error)
 }
 
 type Batch interface {
 	Encode() ([]byte, int, error)
+	CreatePushRequest() (*logproto.PushRequest, int)
 }

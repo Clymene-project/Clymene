@@ -19,17 +19,16 @@ package es
 import (
 	"context"
 	"github.com/Clymene-project/Clymene/pkg/es"
+	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/plugin/storage/es/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"go.uber.org/zap"
 )
 
 const (
-	clymeneIndex = "clymene-metrics"
-	metricType   = "metric"
-
-	clymeneLogIndex = "clymene-logs"
-	logType         = "log"
+	metricType = "metric"
+	logType    = "log"
 )
 
 type Writer struct {
@@ -39,9 +38,33 @@ type Writer struct {
 	converter dbmodel.Converter
 }
 
-func (s *Writer) Writelog(ctx context.Context, tenantID string, batch []byte) (int, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
+	var statusCode int
+	var bufBytes int64
+	var entriesCount64 int64
+	var errs []error
+	streams, entriesCount := batch.CreatePushRequest()
+	entriesCount64 = int64(entriesCount)
+	for _, stream := range streams.Streams {
+		labels, err := s.converter.ConvertStringToLabel(stream.Labels)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		for _, entry := range stream.Entries {
+			logs, err := s.converter.ConvertLogsToJSON(labels, entry, stream.Hash)
+			s.writelog(logs)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}
+	return statusCode, bufBytes, entriesCount64, multierror.Wrap(errs)
+}
+
+// bulk insert
+func (s *Writer) writelog(logs *map[string]interface{}) {
+	s.client.Index().Index(s.index).Type(logType).BodyJson(&logs).Add()
 }
 
 // WriterParams holds constructor parameters for NewMetricWriter

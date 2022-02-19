@@ -35,7 +35,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grafana/dskit v0.0.0-20220209070952-ea22a8f662d0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/consul/api v1.12.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/hetznercloud/hcloud-go v1.33.1
@@ -100,7 +99,6 @@ require (
 require (
 	github.com/containerd/containerd v1.5.9 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
-	github.com/google/btree v1.0.1 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	golang.org/x/tools v0.1.8 // indirect
@@ -113,6 +111,7 @@ require (
 	github.com/dnaeon/go-vcr v1.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/onsi/gomega v1.16.0 // indirect
+	github.com/prometheus/prometheus v1.8.2-0.20200911110723-e83ef207b6c2
 )
 
 // Upgrade to run with gRPC 1.3.0 and above.

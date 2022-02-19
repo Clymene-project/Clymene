@@ -16,7 +16,13 @@
 
 package dbmodel
 
-import "github.com/Clymene-project/Clymene/prompb"
+import (
+	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/prometheus/prometheus/pkg/labels"
+	"github.com/prometheus/prometheus/promql/parser"
+	"strconv"
+)
 
 type Converter struct{}
 
@@ -31,4 +37,23 @@ func (c *Converter) ConvertTsToJSON(metric prompb.TimeSeries) map[string]interfa
 		jsonTs["value"] = sample.Value
 	}
 	return jsonTs
+}
+
+func (c *Converter) ConvertLogsToJSON(labels labels.Labels, entry logproto.Entry, hash uint64) (*map[string]interface{}, error) {
+	ret := make(map[string]interface{}, len(labels))
+	for _, l := range labels {
+		ret[l.Name] = l.Value
+	}
+	ret["hash"] = strconv.FormatUint(hash, 10)
+	ret["entries.ts"] = entry.Timestamp
+	ret["entries.line"] = entry.Line
+	return &ret, nil
+}
+
+func (c *Converter) ConvertStringToLabel(label string) (labels.Labels, error) {
+	convertedLabel, err := parser.ParseMetric(label)
+	if err != nil {
+		return nil, err
+	}
+	return convertedLabel, nil
 }

@@ -24,6 +24,7 @@ import (
 	util "github.com/Clymene-project/Clymene/pkg/lokiutil"
 	lokiflag "github.com/Clymene-project/Clymene/pkg/lokiutil/flagext"
 	"github.com/Clymene-project/Clymene/pkg/version"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -44,12 +45,20 @@ type LogWriter struct {
 	externalLabels lokiflag.LabelSet
 }
 
-func (l *LogWriter) Writelog(ctx context.Context, tenantID string, batch []byte) (int, error) {
+func (l *LogWriter) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
+	buf, entriesCount, err := batch.Encode()
+	if err != nil {
+		l.logger.Error("error encoding batch", zap.Error(err))
+		return -1, -1, -1, err
+	}
+	bufBytes := int64(len(buf))
+	entriesCount64 := int64(entriesCount)
+
 	ctx, cancel := context.WithTimeout(ctx, l.client.Timeout)
 	defer cancel()
-	req, err := http.NewRequest("POST", l.url.String(), bytes.NewReader(batch))
+	req, err := http.NewRequest("POST", l.url.String(), bytes.NewReader(buf))
 	if err != nil {
-		return -1, err
+		return -1, bufBytes, entriesCount64, err
 	}
 	req = req.WithContext(ctx)
 	req.Header.Set("Content-Type", contentType)
@@ -63,7 +72,7 @@ func (l *LogWriter) Writelog(ctx context.Context, tenantID string, batch []byte)
 
 	resp, err := l.client.Do(req)
 	if err != nil {
-		return -1, err
+		return -1, bufBytes, entriesCount64, err
 	}
 	defer util.LogError("closing response body", l.logger, resp.Body.Close)
 
@@ -75,7 +84,7 @@ func (l *LogWriter) Writelog(ctx context.Context, tenantID string, batch []byte)
 		}
 		err = fmt.Errorf("server returned HTTP status %s (%d): %s", resp.Status, resp.StatusCode, line)
 	}
-	return resp.StatusCode, err
+	return resp.StatusCode, bufBytes, entriesCount64, err
 }
 
 func NewLogWriter(client *http.Client, url *url.URL, externalLabels lokiflag.LabelSet, logger *zap.Logger) *LogWriter {
