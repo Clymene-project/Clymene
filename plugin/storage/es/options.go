@@ -44,11 +44,15 @@ const (
 	suffixVersion            = ".version"
 	suffixMaxDocCount        = ".max-doc-count"
 	suffixLogLevel           = ".log-level"
+	suffixMetricIndex        = "es.clymene-agent.index.name"
+	suffixLogIndex           = "es.clymene-promtail.index.name"
 	// default number of documents to return from a query (es allowed limit)
 	// see search.max_buckets and index.max_result_window
 	defaultMaxDocCount        = 10_000
 	defaultServerURL          = "http://127.0.0.1:9200"
 	defaultRemoteReadClusters = ""
+	defaultMetricIndex        = "clymene-metrics"
+	defaultLogIndex           = "clymene-logs"
 	// default separator for Elasticsearch index date layout.
 )
 
@@ -61,6 +65,9 @@ type Options struct {
 	Primary namespaceConfig `mapstructure:",squash"`
 
 	others map[string]*namespaceConfig
+
+	metricsIndex string
+	logsIndex    string
 }
 
 type namespaceConfig struct {
@@ -117,6 +124,8 @@ func (config *namespaceConfig) getTLSFlagsConfig() tlscfg.ClientFlagsConfig {
 
 // AddFlags adds flags for Options
 func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
+	flagSet.String(suffixMetricIndex, defaultMetricIndex, "Set the index name to save the metrics collected by clymene-agent.")
+	flagSet.String(suffixLogIndex, defaultLogIndex, "Set the index name to save the log collected by clymene-promtail.")
 	addFlags(flagSet, &opt.Primary)
 	for _, cfg := range opt.others {
 		addFlags(flagSet, cfg)
@@ -198,6 +207,8 @@ func addFlags(flagSet *flag.FlagSet, nsConfig *namespaceConfig) {
 
 // InitFromViper initializes Options with properties from viper
 func (opt *Options) InitFromViper(v *viper.Viper) {
+	opt.metricsIndex = v.GetString(suffixMetricIndex)
+	opt.logsIndex = v.GetString(suffixLogIndex)
 	initFromViper(&opt.Primary, v)
 	for _, cfg := range opt.others {
 		initFromViper(cfg, v)

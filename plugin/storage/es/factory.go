@@ -94,19 +94,15 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 }
 
 func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
-	return createMetricWriter(f.logger, f.primaryClient, f.primaryConfig, false)
+	return createMetricWriter(f.logger, f.primaryClient, f.primaryConfig, f.Options.metricsIndex, false)
 }
 
-func createMetricWriter(
-	logger *zap.Logger,
-	client es.Client,
-	cfg config.ClientBuilder,
-	archive bool,
-) (metricstore.Writer, error) {
+func createMetricWriter(logger *zap.Logger, client es.Client, cfg config.ClientBuilder, metricsIndex string, archive bool) (metricstore.Writer, error) {
 	writer := NewMetricWriter(WriterParams{
 		Client:      client,
 		Logger:      logger,
 		IndexPrefix: cfg.GetIndexPrefix(),
+		Index:       metricsIndex,
 		Archive:     archive,
 	})
 
@@ -114,19 +110,15 @@ func createMetricWriter(
 }
 
 func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	return createLogWriter(f.logger, f.primaryClient, f.primaryConfig, false)
+	return createLogWriter(f.logger, f.primaryClient, f.primaryConfig, f.Options.logsIndex, false)
 }
 
-func createLogWriter(
-	logger *zap.Logger,
-	client es.Client,
-	cfg config.ClientBuilder,
-	archive bool,
-) (logstore.Writer, error) {
+func createLogWriter(logger *zap.Logger, client es.Client, cfg config.ClientBuilder, logsIndex string, archive bool) (logstore.Writer, error) {
 	writer := NewLogWriter(WriterParams{
 		Client:      client,
 		Logger:      logger,
 		IndexPrefix: cfg.GetIndexPrefix(),
+		Index:       logsIndex,
 		Archive:     archive,
 	})
 	return writer, nil

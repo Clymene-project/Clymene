@@ -50,6 +50,7 @@ type WriterParams struct {
 	Client      es.Client
 	IndexPrefix string
 	Archive     bool
+	Index       string
 }
 
 // NewMetricWriter creates a new MetricWriter for use
@@ -61,7 +62,7 @@ func NewMetricWriter(p WriterParams) *Writer {
 	return &Writer{
 		client:    p.Client,
 		logger:    p.Logger,
-		index:     prefix + clymeneIndex,
+		index:     prefix + p.Index,
 		converter: dbmodel.Converter{},
 	}
 }
@@ -88,7 +89,7 @@ func NewLogWriter(p WriterParams) *Writer {
 	return &Writer{
 		client:    p.Client,
 		logger:    p.Logger,
-		index:     prefix + clymeneLogIndex,
+		index:     prefix + p.Index,
 		converter: dbmodel.Converter{},
 	}
 }
