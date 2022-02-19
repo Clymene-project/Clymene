@@ -40,52 +40,52 @@ The Clymene ingester is an optional service responsible for insert time series d
 ElasticSearch
 
 ```
-TS_STORAGE_TYPE=elasticsearch
+STORAGE_TYPE=elasticsearch
 ```
 
 Kafka
 
 ```
-TS_STORAGE_TYPE=kafka
+STORAGE_TYPE=kafka
 ```
 
 prometheus
 
 ```
-TS_STORAGE_TYPE=prometheus
+STORAGE_TYPE=prometheus
 ```
 
 cortex
 
 ```
-TS_STORAGE_TYPE=cortex
+STORAGE_TYPE=cortex
 ```
 
 gateway
 
 ```
-TS_STORAGE_TYPE=gateway
+STORAGE_TYPE=gateway
 ```
 
 opentsdb
 
 ```
-TS_STORAGE_TYPE=opentsdb
+STORAGE_TYPE=opentsdb
 ```
 
 influxdb
 
 ```
-TS_STORAGE_TYPE=influxdb
+STORAGE_TYPE=influxdb
 ```
 tdengine
 ```
-TS_STORAGE_TYPE=tdengine
+STORAGE_TYPE=tdengine
 ```
 Several
 
 ```
-TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write
+STORAGE_TYPE=elasticsearch,prometheus  # composite write
 ```
 
 #### 2. Option description by storage type
@@ -109,8 +109,8 @@ services:
     ports:
       - "15694:15694"
     environment:
-      #      - TS_STORAGE_TYPE=elasticsearch,prometheus   # use composite writer
-      - TS_STORAGE_TYPE=elasticsearch
+      #      - STORAGE_TYPE=elasticsearch,prometheus   # use composite writer
+      - STORAGE_TYPE=elasticsearch
     command:
       - --log-level=debug
       - --kafka.consumer.brokers=[KAFKA-IP]:9092
@@ -149,7 +149,7 @@ spec:
             - --log-level=info
             - --kafka.consumer.brokers=clymene-kafka-broker:9092
           env:
-            - name: TS_STORAGE_TYPE
+            - name: STORAGE_TYPE
               value: prometheus
       securityContext:
         runAsUser: 1000

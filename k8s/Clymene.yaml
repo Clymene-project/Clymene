@@ -26,7 +26,7 @@
 #            - --log-level=info
 #            - --kafka.consumer.brokers=clymene-kafka-broker:9092
 #          env:
-#            - name: TS_STORAGE_TYPE
+#            - name: STORAGE_TYPE
 #              value: prometheus
 #      securityContext:
 #        runAsUser: 1000
@@ -60,7 +60,7 @@ spec:
             - --kafka.producer.brokers=clymene-kafka-broker:9092
             - --log-level=info
           env:
-            - name: TS_STORAGE_TYPE
+            - name: STORAGE_TYPE
               value: kafka
 #              value: prometheus
           volumeMounts:

@@ -28,35 +28,35 @@ The Clymene Gateway is an optional service that can receive metric data from the
 
 ElasticSearch
 ```
-TS_STORAGE_TYPE=elasticsearch
+STORAGE_TYPE=elasticsearch
 ```
 Kafka
 ```
-TS_STORAGE_TYPE=kafka
+STORAGE_TYPE=kafka
 ```
 prometheus
 ```
-TS_STORAGE_TYPE=prometheus
+STORAGE_TYPE=prometheus
 ```
 cortex
 ```
-TS_STORAGE_TYPE=cortex
+STORAGE_TYPE=cortex
 ```
 opentsdb
 ```
-TS_STORAGE_TYPE=opentsdb
+STORAGE_TYPE=opentsdb
 ```
 influxdb
 ```
-TS_STORAGE_TYPE=influxdb
+STORAGE_TYPE=influxdb
 ```
 tdengine
 ```
-TS_STORAGE_TYPE=tdengine
+STORAGE_TYPE=tdengine
 ```
 Several
 ```
-TS_STORAGE_TYPE=elasticsearch,prometheus  # composite write
+STORAGE_TYPE=elasticsearch,prometheus  # composite write
 ```
 
 #### 2. Option description by storage type
@@ -77,7 +77,7 @@ services:
     ports:
       - "15610:15610"
     environment:
-      - TS_STORAGE_TYPE=elasticsearch
+      - STORAGE_TYPE=elasticsearch
     command:
       - --log-level=debug
       - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
@@ -112,7 +112,7 @@ spec:
             - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
             - --log-level=info
           env:
-            - name: TS_STORAGE_TYPE
+            - name: STORAGE_TYPE
               value: elasticsearch
       securityContext:
         runAsUser: 1000

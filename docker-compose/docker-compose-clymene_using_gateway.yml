@@ -6,7 +6,7 @@ services:
       - "15691:15691"
       - "15692:15692"
     environment:
-      - TS_STORAGE_TYPE=gateway
+      - STORAGE_TYPE=gateway
     volumes:
       - ./config/clymene_scrape_config.yml:/etc/clymene/clymene.yml
     command:
@@ -17,7 +17,7 @@ services:
     ports:
       - "15694:15694"
     environment:
-      - TS_STORAGE_TYPE=elasticsearch
+      - STORAGE_TYPE=elasticsearch
     command:
       - --kafka.consumer.brokers=[KAFKA-BROKER-IP]:9092
       - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
@@ -28,7 +28,7 @@ services:
       - "15610:15610"
       - "15690:15690"
     environment:
-      - TS_STORAGE_TYPE=kafka
+      - STORAGE_TYPE=kafka
     command:
       - --kafka.producer.brokers=[KAFKA-BROKER-IP]:9092
 

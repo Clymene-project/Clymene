@@ -27,6 +27,8 @@ const (
 	// TypeEnvVar is the name of the env var that defines the type of backend used for time series, log storage.
 	TypeEnvVar = "STORAGE_TYPE"
 
+	TypeEnvVarDeprecated = "TS_STORAGE_TYPE"
+
 	// DependencyStorageTypeEnvVar is the name of the env var that defines the type of backend used for dependencies storage.
 	DependencyStorageTypeEnvVar = "DEPENDENCY_STORAGE_TYPE"
 )
@@ -54,6 +56,10 @@ type FactoryConfig struct {
 // If found, it writes a deprecation warning to the log.
 func FactoryConfigFromEnvAndCLI(log io.Writer) FactoryConfig {
 	tsStorageType := os.Getenv(TypeEnvVar)
+
+	if os.Getenv(TypeEnvVarDeprecated) != "" {
+		panic("TS_STORAGE_TYPE is not available. use STORAGE_TYPE env var.")
+	}
 
 	if tsStorageType == "" {
 		tsStorageType = elasticsearchStorageType

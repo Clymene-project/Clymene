@@ -46,21 +46,21 @@ influxdb is now officially supported. The options below are mandatory.
 ```
 TDengin support has been added to the roadmap.
 
-- influxdb option (TS_STORAGE_TYPE=influxdb)
+- influxdb option (STORAGE_TYPE=influxdb)
 - [Influxdb option](./docs/clymene-agent/influxdb/influxdb-options.md)
 
 1.2.1 (2022-01-01)
 -----------------
 Separate the prometheus option and the cortex option to block confusion
 
-- cortex option (TS_STORAGE_TYPE=cortex)
+- cortex option (STORAGE_TYPE=cortex)
 - [Cortex option](./docs/clymene-agent/cortex/cortex-option.md)
 
 1.2.0 (2021-12-29)
 -----------------
 Now, you can use the opentsdb in Clymene.
 
-- opentsdb support (TS_STORAGE_TYPE=opentsdb)
+- opentsdb support (STORAGE_TYPE=opentsdb)
 - opentsdb supports two methods: socket(default) and
   http([Opentsdb option](./docs/clymene-agent/opentsdb/opentsdb-option.md))
 
@@ -69,7 +69,7 @@ Now, you can use the opentsdb in Clymene.
 A gateway supporting gRPC communication has been added.  
 Try using it in various architectures.
 
-- gRPC support (TS_STORAGE_TYPE=gateway)
+- gRPC support (STORAGE_TYPE=gateway)
 
 1.0.0 (2021-12-12)
 ------------------
