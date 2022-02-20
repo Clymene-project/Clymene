@@ -1,6 +1,11 @@
 Changes by Version
 ==================
 
+2.0.1 (2022-02-20)
+-----------------
+Added missing tenantID when saving to elasticsearch with clymene-promtail.
+
+
 2.0.0 (2022-02-20)
 -----------------
 A log collection agent, promtail, is now available. Collected logs can be stored in loki and elasticsearch.[Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-promtail/README.md)  
