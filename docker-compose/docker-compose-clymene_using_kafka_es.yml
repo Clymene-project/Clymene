@@ -1,7 +1,7 @@
 version: '2'
 services:
   clymene-agent:
-    image: bourbonkk/clymene-agent:v1.0.0
+    image: bourbonkk/clymene-agent:latest
     ports:
       - "15691:15691"
       - "15692:15692"
@@ -14,7 +14,7 @@ services:
       - --es.server-urls=http://localhost:9200
 
   clymene-ingester:
-    image: bourbonkk/clymene-ingester:main
+    image: bourbonkk/clymene-ingester:latest
     ports:
       - "15694:15694"
     environment:
@@ -27,7 +27,7 @@ services:
 #      - --prometheus.remote.url=http://prometheus:9090/api/v1/write
 
   clymene-gateway:
-    image: bourbonkk/clymene-gateway:v1.2.0
+    image: bourbonkk/clymene-gateway:latest
     ports:
       - "15610:15610"
       - "15690:15690"

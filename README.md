@@ -8,9 +8,9 @@
 
 <img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148681479-3ddf237c-6e5d-49a1-a517-8b3bfa92f54e.png" alt="clymene_logo">
 
-The Clymene is a time series data collection platform for distributed systems inspired
+The Clymene is a time-series data and Logs collection platform for distributed systems inspired
 by [Prometheus](https://prometheus.io)
-and [Jaeger](https://www.jaegertracing.io). Time series data from various environments can be collected and stored in
+and [Jaeger](https://www.jaegertracing.io). Time-series data and logs from various environments can be collected and stored in
 different types of databases. It can be configured in a variety of architectures. Also, Clymene Agent's time series data collection uses fewer resources than Prometheus' remote_write. 
 Various time series data analysis functions will be added.
 
@@ -23,10 +23,10 @@ once.
 
 <img src="https://user-images.githubusercontent.com/25188468/152248922-8b86e107-ed16-4ec1-a68a-48e1016a7521.png" width="70%" height="70%" alt="architecture_v1.4.0">
 
-### Use Log collection agent
-Clymene Promtail(Comming Soon!)  
-Clymene-promtail is Loki's log collection agent. It will be developed for use in Clymene's HA architecture.  
-<img src="https://user-images.githubusercontent.com/25188468/152685257-5c78fa76-f24d-4200-8c3b-58addedd6e59.png" width="70%" height="70%" alt="architecture_v2.0.0">
+### Use log collection agent promtail
+
+Clymene-promtail customized [Loki's](https://github.com/grafana/loki) log collection agent for the Clymene project. Logs of various environments can be collected and stored in Loki and ElasticSearch. It will be developed for use in Clymene's HA architecture.  
+<img src="https://user-images.githubusercontent.com/25188468/154828122-19509c86-d7e3-449f-9a6e-3a5d96fb9a60.png" width="70%" height="70%" alt="architecture_v2.0.0">
 
 
 ### Including kafka and ingester
@@ -47,8 +47,8 @@ Composite Writers that can be stored in multiple DBs at once.
 
 ### Clymene Agent([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md))
 
-```dockerhub : bourbonkk/clymene-agent:v1.x.x```  
-```redhatQuay: quay.io/clymene/clymene-agent:v1.x.x```  
+```dockerhub : bourbonkk/clymene-agent:v2.x.x```  
+```redhatQuay: quay.io/clymene/clymene-agent:v2.x.x```  
 ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-agent.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-agent/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-agent)   
 The Clymene-agent is service that collects time series data(does not use disks)
 
@@ -60,10 +60,24 @@ The Clymene-agent is service that collects time series data(does not use disks)
 4. Time-series data transfer to kafka (Optional)
 5. Time-series data insert to Database([supported DB](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-agent/README.md#Option-description-by-storage-type)) (Optional)
 
+### Clymene Promtail([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-promtail/README.md))
+
+```dockerhub : bourbonkk/clymene-promtail:v2.x.x```  
+```redhatQuay: quay.io/clymene/clymene-promtail:v2.x.x```  
+![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-promtail.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-promtail/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-agent)   
+The Clymene-promtail customized loki's log collection agent for the Clymene project.
+
+1. [Service Discovery](https://clymene-project.github.io/docs/service-discovery/promtail-config/)
+2. log collection
+3. log data transfer to gateway(gRPC) (TODO)
+4. log data transfer to kafka (TODO)
+5. log data insert to Database([supported DB](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-promtail/README.md#Option-description-by-storage-type)) (Optional)
+
+
 ### Clymene Ingester(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-ingester/README.md))
 
-```dockerhub : bourbonkk/clymene-ingester:v1.x.x```  
-```redhatQuay: quay.io/clymene/clymene-ingester:v1.x.x```  
+```dockerhub : bourbonkk/clymene-ingester:v2.x.x```  
+```redhatQuay: quay.io/clymene/clymene-ingester:v2.x.x```  
 ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-ingester.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-ingester/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-ingester)  
 The Clymene ingester is an optional service responsible for insert time series data loaded on kafka into the database.
 
@@ -72,8 +86,8 @@ The Clymene ingester is an optional service responsible for insert time series d
 
 ### Clymene Gateway(Optional) ([Getting Started](https://github.com/Clymene-project/Clymene/blob/main/docs/clymene-gateway/README.md))
 
-```dockerhub : bourbonkk/clymene-gateway:v1.x.x```  
-```redhatQuay: quay.io/clymene/clymene-gateway:v1.x.x```  
+```dockerhub : bourbonkk/clymene-gateway:v2.x.x```  
+```redhatQuay: quay.io/clymene/clymene-gateway:v2.x.x```  
 ![Docker Pulls](https://img.shields.io/docker/pulls/bourbonkk/clymene-gateway.svg?maxAge=86400) [![Docker Repository on Quay](https://quay.io/repository/clymene/clymene-gateway/status "Docker Repository on Quay")](https://quay.io/repository/clymene/clymene-gateway)  
 The Clymene Gateway is an optional service that can receive metric data from the another component through gRPC
 communication.

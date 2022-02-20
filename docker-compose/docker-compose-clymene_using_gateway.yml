@@ -1,7 +1,7 @@
 version: '2'
 services:
   clymene-agent:
-    image: bourbonkk/clymene-agent:v1.5.0
+    image: bourbonkk/clymene-agent:latest
     ports:
       - "15691:15691"
       - "15692:15692"
@@ -23,7 +23,7 @@ services:
       - --es.server-urls=http://[ELASTICSEARCH-IP]:9200
 
   clymene-gateway:
-    image: bourbonkk/clymene-gateway:v1.2.0
+    image: bourbonkk/clymene-gateway:latest
     ports:
       - "15610:15610"
       - "15690:15690"

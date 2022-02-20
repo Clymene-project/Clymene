@@ -7,6 +7,7 @@ A log collection agent, promtail, is now available. Collected logs can be stored
 1. Add log collection component clymene-promtail issue: #41  
 2. Added http receiver function to send/receive gateway metricWriter to http issue: #37  
 3. Add elasticsearch index name change option #44  
+4. Logs collected by clymene-promtail can be stored in elasticsearch #43  
 
 1.5.0 (2022-01-30)
 -----------------
