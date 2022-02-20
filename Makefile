@@ -54,6 +54,10 @@ build-ingester :
 build-gateway :
 	$(GOBUILD) -o ./out/clymene-gateway-$(GOOS)-$(GOARCH) $(BUILD_INFO) ./cmd/gateway/main.go
 
+.PHONY: build-promtail
+build-promtail :
+	$(GOBUILD) -o ./out/clymene-promtail-$(GOOS)-$(GOARCH) $(BUILD_INFO) ./cmd/promtail/main.go
+
 .PHONY: docker
 docker: build-binaries-linux docker-images-only
 
@@ -85,6 +89,7 @@ build-binaries-ppc64le:
 build-platform-binaries: build-agent \
 	build-ingester \
 	build-gateway \
+	build-promtail \
 
 .PHONY: build-all-platforms
 build-all-platforms: build-binaries-linux build-binaries-windows build-binaries-darwin build-binaries-s390x build-binaries-arm64 build-binaries-ppc64le
