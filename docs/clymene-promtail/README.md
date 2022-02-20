@@ -82,18 +82,13 @@ STORAGE_TYPE=loki
 ```
 
 [//]: # (Kafka)
-
 [//]: # (```)
-
 [//]: # (STORAGE_TYPE=kafka)
-
 [//]: # (```)
 #### 2. Option description by storage type
 
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Loki option](./loki/loki-option.md)
-  [//]: # (- [Kafka option]&#40;./kafka/kafka-option.md&#41;)
-  [//]: # (- [gateway option]&#40;./gateway/gataway-option.md&#41;)
 
 ### Docker-compose Example
 ```yaml
