@@ -52,7 +52,7 @@ func (s *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.B
 			continue
 		}
 		for _, entry := range stream.Entries {
-			logs, err := s.converter.ConvertLogsToJSON(labels, entry, stream.Hash)
+			logs, err := s.converter.ConvertLogsToJSON(tenantID, labels, entry, stream.Hash)
 			s.writelog(logs)
 			if err != nil {
 				errs = append(errs, err)

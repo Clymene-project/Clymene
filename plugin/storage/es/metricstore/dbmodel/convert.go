@@ -39,7 +39,7 @@ func (c *Converter) ConvertTsToJSON(metric prompb.TimeSeries) map[string]interfa
 	return jsonTs
 }
 
-func (c *Converter) ConvertLogsToJSON(labels labels.Labels, entry logproto.Entry, hash uint64) (*map[string]interface{}, error) {
+func (c *Converter) ConvertLogsToJSON(tenantId string, labels labels.Labels, entry logproto.Entry, hash uint64) (*map[string]interface{}, error) {
 	ret := make(map[string]interface{}, len(labels))
 	for _, l := range labels {
 		ret[l.Name] = l.Value
@@ -47,6 +47,7 @@ func (c *Converter) ConvertLogsToJSON(labels labels.Labels, entry logproto.Entry
 	ret["hash"] = strconv.FormatUint(hash, 10)
 	ret["entries.ts"] = entry.Timestamp
 	ret["entries.line"] = entry.Line
+	ret["tenant"] = tenantId
 	return &ret, nil
 }
 
