@@ -19,13 +19,20 @@ package grpc
 import (
 	"context"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
+type WriterMetrics struct {
+	WrittenSuccess metrics.Counter
+	WrittenFailure metrics.Counter
+}
+
 type MetricWriter struct {
-	logger   *zap.Logger
-	reporter prompb.ClymeneServiceClient
+	logger        *zap.Logger
+	reporter      prompb.ClymeneServiceClient
+	writerMetrics WriterMetrics
 }
 
 func (m *MetricWriter) WriteMetric(metric []prompb.TimeSeries) error {
@@ -33,19 +40,27 @@ func (m *MetricWriter) WriteMetric(metric []prompb.TimeSeries) error {
 		Timeseries: metric,
 	})
 	if err != nil {
+		m.writerMetrics.WrittenFailure.Inc(1)
 		return err
 	}
+	m.writerMetrics.WrittenSuccess.Inc(1)
 	return nil
 }
 
 type MetricWriterParams struct {
-	Conn   *grpc.ClientConn
-	Logger *zap.Logger
+	Conn          *grpc.ClientConn
+	Logger        *zap.Logger
+	MetricFactory metrics.Factory
 }
 
 func NewMetricWriter(p *MetricWriterParams) (*MetricWriter, error) {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: p.MetricFactory.Counter(metrics.Options{Name: "gateway_grpc_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: p.MetricFactory.Counter(metrics.Options{Name: "gateway_grpc_metrics_written", Tags: map[string]string{"status": "failure"}}),
+	}
 	return &MetricWriter{
-		reporter: prompb.NewClymeneServiceClient(p.Conn),
-		logger:   p.Logger,
+		reporter:      prompb.NewClymeneServiceClient(p.Conn),
+		logger:        p.Logger,
+		writerMetrics: writeMetrics,
 	}, nil
 }

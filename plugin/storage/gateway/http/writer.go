@@ -55,8 +55,8 @@ func NewMetricWriter(
 	marshaller Marshaller,
 ) *Writer {
 	writeMetrics := WriterMetrics{
-		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_metrics_written", Tags: map[string]string{"status": "success"}}),
-		WrittenFailure: factory.Counter(metrics.Options{Name: "gateway_metrics_written", Tags: map[string]string{"status": "failure"}}),
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_http_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "gateway_http_metrics_written", Tags: map[string]string{"status": "failure"}}),
 	}
 	return &Writer{
 		metrics:      writeMetrics,

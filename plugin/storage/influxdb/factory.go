@@ -59,7 +59,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 }
 
 func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(f.logger, f.client, f.options.org, f.options.bucket), nil
+	return NewMetricWriter(f.logger, f.client, f.options.org, f.options.bucket, f.metricsFactory), nil
 }
 
 func NewFactory() *Factory {

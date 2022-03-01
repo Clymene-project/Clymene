@@ -25,21 +25,27 @@ import (
 )
 
 type Client struct {
-	conn   *grpc.ClientConn
-	logger *zap.Logger
+	conn          *grpc.ClientConn
+	logger        *zap.Logger
+	metricFactory metrics.Factory
 }
 
 func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(&MetricWriterParams{Conn: c.conn, Logger: c.logger})
+	return NewMetricWriter(&MetricWriterParams{
+		Conn:          c.conn,
+		Logger:        c.logger,
+		MetricFactory: c.metricFactory,
+	})
 }
 
-func NewClient(options Options, factory metrics.Factory, logger *zap.Logger) (*Client, error) {
+func NewClient(options Options, metricFactory metrics.Factory, logger *zap.Logger) (*Client, error) {
 	conn, err := options.CreateConnection(logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gRPC connect: %w", err)
 	}
 	return &Client{
-		conn:   conn,
-		logger: logger,
+		conn:          conn,
+		logger:        logger,
+		metricFactory: metricFactory,
 	}, nil
 }

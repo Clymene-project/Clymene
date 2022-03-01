@@ -21,13 +21,20 @@ import (
 	"github.com/Clymene-project/Clymene/prompb"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 )
 
+type WriterMetrics struct {
+	WrittenSuccess metrics.Counter
+	WrittenFailure metrics.Counter
+}
+
 type MetricWriter struct {
-	logger    *zap.Logger
-	client    api.WriteAPI
-	converter dbmodel.Converter
+	logger       *zap.Logger
+	client       api.WriteAPI
+	converter    dbmodel.Converter
+	writeMetrics WriterMetrics
 }
 
 // WriteMetric is Asynchronous writer, and it is bulk insert
@@ -35,15 +42,27 @@ func (m *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
 	for _, metric := range metrics {
 		m.client.WritePoint(m.converter.ConvertTsToPoint(metric))
 	}
+	m.writeMetrics.WrittenSuccess.Inc(1)
 	return nil
 }
 
-func NewMetricWriter(l *zap.Logger, client influxdb2.Client, org string, bucket string) *MetricWriter {
+func NewMetricWriter(l *zap.Logger, client influxdb2.Client, org string, bucket string, metricFactory metrics.Factory) *MetricWriter {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: metricFactory.Counter(metrics.Options{Name: "influxdb_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: metricFactory.Counter(metrics.Options{Name: "influxdb_metrics_written", Tags: map[string]string{"status": "failure"}}),
+	}
+	writerClient := client.WriteAPI(org, bucket)
+	go func() {
+		for range writerClient.Errors() {
+			writeMetrics.WrittenFailure.Inc(1)
+		}
+	}()
 	return &MetricWriter{
 		logger: l,
-		client: client.WriteAPI(org, bucket),
+		client: writerClient,
 		converter: dbmodel.Converter{
 			Logger: l,
 		},
+		writeMetrics: writeMetrics,
 	}
 }
