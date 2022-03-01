@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"github.com/Clymene-project/Clymene/plugin/storage/tdengine/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 )
 
@@ -30,14 +31,21 @@ import (
 https://github.com/taosdata/TDengine/blob/develop/tests/examples/go/taosdemo.go
 */
 
+type WriterMetrics struct {
+	WrittenSuccess metrics.Counter
+	WrittenFailure metrics.Counter
+}
+
 type MetricWriter struct {
 	converter    dbmodel.Converter
 	tdEngine     *sql.DB
 	maxSQLLength int
 	logger       *zap.Logger
+	writeMetrics WriterMetrics
 }
 
 func (m *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
+	var err error
 	if len(metrics) > m.maxSQLLength {
 		q := len(metrics) / m.maxSQLLength
 		r := len(metrics) % m.maxSQLLength
@@ -53,11 +61,16 @@ func (m *MetricWriter) WriteMetric(metrics []prompb.TimeSeries) error {
 			} else {
 				timeSeriesDiv = metrics[(i-1)*m.maxSQLLength:]
 			}
-			_ = m.writeMetric(timeSeriesDiv)
+			err = m.writeMetric(timeSeriesDiv)
 		}
 	} else {
-		return m.writeMetric(metrics)
+		err = m.writeMetric(metrics)
 	}
+	if err != nil {
+		m.writeMetrics.WrittenFailure.Inc(1)
+		return err
+	}
+	m.writeMetrics.WrittenSuccess.Inc(1)
 	return nil
 }
 
@@ -83,11 +96,16 @@ func (m *MetricWriter) writeMetric(metrics []prompb.TimeSeries) error {
 	return nil
 }
 
-func NewMetricWriter(tdEngine *sql.DB, maxSQLLength int, l *zap.Logger) *MetricWriter {
+func NewMetricWriter(tdEngine *sql.DB, maxSQLLength int, factory metrics.Factory, l *zap.Logger) *MetricWriter {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "tdengine_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "tdengine_metrics_written", Tags: map[string]string{"status": "failure"}}),
+	}
 	return &MetricWriter{
 		converter:    dbmodel.Converter{},
 		tdEngine:     tdEngine,
 		logger:       l,
 		maxSQLLength: maxSQLLength,
+		writeMetrics: writeMetrics,
 	}
 }

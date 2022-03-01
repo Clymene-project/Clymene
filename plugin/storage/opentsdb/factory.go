@@ -117,7 +117,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 		//	socket
 		f.client = socket.NewClient(&socket.Options{
 			Hosts: hosts,
-		}, converter, f.logger)
+		}, converter, f.metricsFactory, f.logger)
 	}
 
 	return nil

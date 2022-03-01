@@ -61,7 +61,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 }
 
 func (f *Factory) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(f.tdEngine, f.options.maxSQLLength, f.logger), nil
+	return NewMetricWriter(f.tdEngine, f.options.maxSQLLength, f.metricsFactory, f.logger), nil
 }
 
 // NewFactory creates a new Factory.

@@ -163,8 +163,8 @@ func NewClient(o *Options, converter *dbmodel.Converter, l *zap.Logger) *Client 
 		authorization = "Basic " + b64.StdEncoding.EncodeToString([]byte(encodeData))
 	}
 	writeMetrics := WriterMetrics{
-		WrittenSuccess: o.Factory.Counter(metrics.Options{Name: "opentsdb_metrics_written", Tags: map[string]string{"status": "success"}}),
-		WrittenFailure: o.Factory.Counter(metrics.Options{Name: "opentsdb_metrics_written", Tags: map[string]string{"status": "failure"}}),
+		WrittenSuccess: o.Factory.Counter(metrics.Options{Name: "opentsdb_http_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: o.Factory.Counter(metrics.Options{Name: "opentsdb_http_metrics_written", Tags: map[string]string{"status": "failure"}}),
 	}
 	return &Client{
 		hosts:         hosts,

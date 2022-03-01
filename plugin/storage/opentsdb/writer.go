@@ -18,20 +18,14 @@ package opentsdb
 
 import (
 	"github.com/Clymene-project/Clymene/prompb"
-	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 )
 
 // The opentsdb factory was developed based on opentsdb's tcollector.
 
 type Writer struct {
-	metrics WriterMetrics
-	client  Client
-	l       *zap.Logger
-}
-type WriterMetrics struct {
-	WrittenSuccess metrics.Counter
-	WrittenFailure metrics.Counter
+	client Client
+	l      *zap.Logger
 }
 
 func NewMetricWriter(

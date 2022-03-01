@@ -21,15 +21,23 @@ import (
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/http"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"net"
 )
 
+type WriterMetrics struct {
+	WrittenSuccess metrics.Counter
+	WrittenFailure metrics.Counter
+}
+
 type Client struct {
-	connections []net.Conn
-	converter   *dbmodel.Converter
-	hosts       []http.Hosts
-	l           *zap.Logger
+	connections  []net.Conn
+	converter    *dbmodel.Converter
+	hosts        []http.Hosts
+	l            *zap.Logger
+	writeMetrics WriterMetrics
+	cons         []net.Conn
 }
 type Options struct {
 	Hosts []http.Hosts
@@ -41,39 +49,50 @@ func (c *Client) SendData(metrics []prompb.TimeSeries) error {
 		c.l.Error("data convert Error", zap.Error(err))
 		return err
 	}
-	for _, conn := range c.makeConn() {
+	for _, conn := range c.cons {
 		_, err = conn.Write(data)
 		if err != nil {
+			c.writeMetrics.WrittenFailure.Inc(1)
 			c.l.Error("socket Write Error", zap.Error(err))
+			continue
 		}
+		c.writeMetrics.WrittenSuccess.Inc(1)
 	}
-	c.closeConn()
+	// need reconnection?
+	//c.closeConn()
 	return nil
 }
 
-func NewClient(o *Options, converter *dbmodel.Converter, l *zap.Logger) *Client {
-	c := &Client{
-		converter: converter,
-		hosts:     o.Hosts,
-		l:         l,
+func NewClient(o *Options, converter *dbmodel.Converter, factory metrics.Factory, l *zap.Logger) *Client {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "opentsdb_socket_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "opentsdb_socket_metrics_written", Tags: map[string]string{"status": "failure"}}),
 	}
+	c := &Client{
+		converter:    converter,
+		hosts:        o.Hosts,
+		writeMetrics: writeMetrics,
+		l:            l,
+	}
+	c.makeConn()
 	return c
 }
 
-func (c *Client) makeConn() []net.Conn {
+func (c *Client) makeConn() {
 	var cons []net.Conn
 	for _, h := range c.hosts {
 		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", h.Host, h.Port))
 		if err != nil {
 			c.l.Error("socket connect Error", zap.Error(err))
+			return
 		}
 		cons = append(cons, conn)
 	}
-	return cons
+	c.cons = cons
 }
 
 func (c *Client) closeConn() {
-	for _, c := range c.connections {
-		_ = c.Close()
+	for _, conn := range c.connections {
+		_ = conn.Close()
 	}
 }
