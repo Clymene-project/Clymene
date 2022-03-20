@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"github.com/Clymene-project/Clymene/pkg/logproto"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/golang/snappy"
 
@@ -13,6 +14,11 @@ type Marshaller interface {
 }
 
 type protobufMarshaller struct{}
+
+func (h *protobufMarshaller) MarshalLog(logs *logproto.PushRequest) ([]byte, error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (h *protobufMarshaller) MarshalMetric(ts []prompb.TimeSeries) ([]byte, error) {
 	req := &prompb.WriteRequest{

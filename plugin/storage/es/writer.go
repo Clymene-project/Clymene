@@ -45,6 +45,7 @@ func (s *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.B
 	var errs []error
 	streams, entriesCount := batch.CreatePushRequest()
 	entriesCount64 = int64(entriesCount)
+	bufBytes = int64(len(streams.Streams)) // Put the length value of Streams for data verification
 	for _, stream := range streams.Streams {
 		labels, err := s.converter.ConvertStringToLabel(stream.Labels)
 		if err != nil {

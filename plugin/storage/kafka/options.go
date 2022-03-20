@@ -21,6 +21,7 @@ const (
 	configPrefix           = "kafka.producer"
 	suffixBrokers          = ".brokers"
 	suffixTopic            = ".topic"
+	suffixPromtailTopic    = ".promtail.topic"
 	suffixEncoding         = ".encoding"
 	suffixRequiredAcks     = ".required-acks"
 	suffixCompression      = ".compression"
@@ -33,6 +34,7 @@ const (
 
 	defaultBroker           = "127.0.0.1:9092"
 	defaultTopic            = "clymene"
+	defaultPromtailTopic    = "clymene-logs"
 	defaultEncoding         = EncodingProto
 	defaultRequiredAcks     = "local"
 	defaultCompression      = "none"
@@ -93,9 +95,10 @@ var (
 
 // Options stores the configuration options for Kafka
 type Options struct {
-	Config   producer.Configuration `mapstructure:",squash"`
-	Topic    string                 `mapstructure:"topic"`
-	Encoding string                 `mapstructure:"encoding"`
+	Config        producer.Configuration `mapstructure:",squash"`
+	Topic         string                 `mapstructure:"topic"`
+	PromtailTopic string                 `mapstructure:"promtail_topic"`
+	Encoding      string                 `mapstructure:"encoding"`
 }
 
 // AddFlags adds flags for Options
@@ -142,7 +145,11 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
 		configPrefix+suffixTopic,
 		defaultTopic,
-		"The name of the kafka topic")
+		"kafka topic to save time series")
+	flagSet.String(
+		configPrefix+suffixPromtailTopic,
+		defaultPromtailTopic,
+		"kafka topic to save log")
 	flagSet.String(
 		configPrefix+suffixProtocolVersion,
 		"",
@@ -190,6 +197,7 @@ func (opt *Options) InitFromViper(v *viper.Viper) {
 		BatchMaxMessages:     v.GetInt(configPrefix + suffixBatchMaxMessages),
 	}
 	opt.Topic = v.GetString(configPrefix + suffixTopic)
+	opt.PromtailTopic = v.GetString(configPrefix + suffixPromtailTopic)
 	opt.Encoding = v.GetString(configPrefix + suffixEncoding)
 }
 

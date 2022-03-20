@@ -26,8 +26,7 @@ type Factory struct {
 }
 
 func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	//TODO implement me
-	panic("not supported")
+	return NewLogWriter(f.producer, f.marshaller, f.options.PromtailTopic, f.metricsFactory, f.logger), nil
 }
 
 // NewFactory creates a new Factory.
@@ -59,7 +58,9 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 
 	logger.Info("Kafka factory",
 		zap.Any("producer builder", f.Builder),
-		zap.Any("topic", f.options.Topic))
+		zap.Any("topic", f.options.Topic),
+		zap.Any("topic of promtail", f.options.PromtailTopic))
+
 	p, err := f.NewProducer(logger)
 	if err != nil {
 		return err
