@@ -7,8 +7,8 @@ WORKDIR /
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-ADD ./out/clymene-ingester /clymene-ingester
+ADD ./out/promtail-ingester /promtail-ingester
 
 EXPOSE 15694
 
-ENTRYPOINT ["/clymene-ingester"]
+ENTRYPOINT ["/promtail-ingester"]
