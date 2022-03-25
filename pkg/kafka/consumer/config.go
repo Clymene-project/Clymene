@@ -40,7 +40,6 @@ type Builder interface {
 type Configuration struct {
 	auth.AuthenticationConfig `mapstructure:"authentication"`
 	Consumer
-
 	Brokers         []string `mapstructure:"brokers"`
 	Topic           string   `mapstructure:"topic"`
 	GroupID         string   `mapstructure:"group_id"`

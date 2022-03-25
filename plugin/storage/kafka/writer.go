@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/Clymene-project/Clymene/storage/logstore"
@@ -23,16 +24,13 @@ type Writer struct {
 	topic      string
 }
 
-func (w *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
+func (w *Writer) Writelog(_ context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
 	var bufBytes int64
 	var entriesCount64 int64
 	var errs []error
 
-	req, entriesCount := batch.CreatePushRequest()
-	entriesCount64 = int64(entriesCount)
-	bufBytes = int64(len(req.Streams)) // Put the length value of Streams for data verification
-
-	metricsBytes, err := w.marshaller.MarshalLog(req)
+	producerMessage := &client.ProducerBatch{TenantID: tenantID, Batch: *batch.(*client.Batch)}
+	metricsBytes, err := w.marshaller.MarshalLog(producerMessage)
 	if err != nil {
 		w.metrics.WrittenFailure.Inc(1)
 		errs = append(errs, err)
@@ -43,9 +41,8 @@ func (w *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.B
 	// in the background as efficiently as possible
 	// If there is no key provided, then Kafka will partition the data in a round-robin fashion.
 	w.producer.Input() <- &sarama.ProducerMessage{
-		Topic:    w.topic,
-		Metadata: tenantID,
-		Value:    sarama.ByteEncoder(metricsBytes),
+		Topic: w.topic,
+		Value: sarama.ByteEncoder(metricsBytes),
 	}
 	return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
 

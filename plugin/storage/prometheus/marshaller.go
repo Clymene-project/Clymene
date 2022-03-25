@@ -1,8 +1,9 @@
 package prometheus
 
 import (
-	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/golang/snappy"
 
 	"github.com/gogo/protobuf/proto"
@@ -15,7 +16,12 @@ type Marshaller interface {
 
 type protobufMarshaller struct{}
 
-func (h *protobufMarshaller) MarshalLog(logs *logproto.PushRequest) ([]byte, error) {
+func (h *protobufMarshaller) MarshalBatch(logs logstore.Batch) ([]byte, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (h *protobufMarshaller) MarshalLog(logs *client.ProducerBatch) ([]byte, error) {
 	//TODO implement me
 	panic("implement me")
 }

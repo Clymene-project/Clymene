@@ -37,3 +37,10 @@ docker cp %DOCKERID%:/clymene/out/clymene-promtail-linux-arm64 ./out/clymene-%RE
 docker cp %DOCKERID%:/clymene/out/clymene-promtail-linux-ppc64le ./out/clymene-%RELEASE%-linux-ppc64le/
 docker cp %DOCKERID%:/clymene/out/clymene-promtail-linux-s390x ./out/clymene-%RELEASE%-linux-s390x/
 docker cp %DOCKERID%:/clymene/out/clymene-promtail-windows-amd64 ./out/clymene-%RELEASE%-windows-amd64/clymene-promtail-windows-amd64.exe
+
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-amd64 ./out/clymene-%RELEASE%-linux-amd64/
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-darwin-amd64 ./out/clymene-%RELEASE%-darwin-amd64/
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-arm64 ./out/clymene-%RELEASE%-linux-arm64/
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-ppc64le ./out/clymene-%RELEASE%-linux-ppc64le/
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-s390x ./out/clymene-%RELEASE%-linux-s390x/
+docker cp %DOCKERID%:/clymene/out/promtail-ingester-windows-amd64 ./out/clymene-%RELEASE%-windows-amd64/promtail-ingester-windows-amd64.exe

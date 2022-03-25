@@ -26,7 +26,7 @@ type Factory struct {
 }
 
 func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	return NewLogWriter(f.producer, f.marshaller, f.options.PromtailTopic, f.metricsFactory, f.logger), nil
+	return NewLogWriter(f.producer, newJSONMarshaller(), f.options.PromtailTopic, f.metricsFactory, f.logger), nil
 }
 
 // NewFactory creates a new Factory.
@@ -69,6 +69,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	switch f.options.Encoding {
 	case EncodingProto:
 		f.marshaller = newProtobufMarshaller()
+		logger.Info("promtail can only use json Marshaller.")
 	case EncodingJSON:
 		f.marshaller = newJSONMarshaller()
 	default:

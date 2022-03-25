@@ -2,19 +2,16 @@ syntax = "proto3";
 
 package logproto;
 
-option go_package = "github.com/grafana/loki/pkg/logproto";
+option go_package = "github.com/clymene-project/clymene/pkg/logproto";
 
 import "google/protobuf/timestamp.proto";
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "pkg/logqlmodel/stats/stats.proto";
+import "gogoproto/gogo.proto";
 
 service Pusher {
   rpc Push(PushRequest) returns (PushResponse) {};
 }
 
 service Querier {
-  rpc Query(QueryRequest) returns (stream QueryResponse) {};
-  rpc QuerySample(SampleQueryRequest) returns (stream SampleQueryResponse) {};
   rpc Label(LabelRequest) returns (LabelResponse) {};
   rpc Tail(TailRequest) returns (stream TailResponse) {};
   rpc Series(SeriesRequest) returns (SeriesResponse) {};
@@ -50,15 +47,6 @@ message SampleQueryRequest {
   repeated string shards = 4 [(gogoproto.jsontag) = "shards,omitempty"];
 }
 
-message QueryResponse {
-  repeated StreamAdapter streams = 1 [(gogoproto.customtype) = "Stream", (gogoproto.nullable) = true];
-  stats.Ingester stats = 2 [(gogoproto.nullable) = false];
-}
-
-message SampleQueryResponse {
-  repeated Series series = 1 [(gogoproto.customtype) = "Series", (gogoproto.nullable) = true];
-  stats.Ingester stats = 2 [(gogoproto.nullable) = false];
-}
 
 
 enum Direction {

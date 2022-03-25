@@ -32,8 +32,8 @@ const (
 	suffixPrintConfigStdErr = ".print-config-stderr"
 
 	suffixTenantID        = ".tenant-id"
-	suffixBatchWait       = ".batch-wait"
-	suffixBatchSize       = ".batch-size-bytes"
+	suffixBatchWait       = ".Batch-wait"
+	suffixBatchSize       = ".Batch-size-bytes"
 	suffixMaxRetries      = ".max-retries"
 	suffixMinBackOff      = ".min-backoff"
 	suffixMaxBackOff      = ".max-backoff"
@@ -79,12 +79,12 @@ func AddFlags(flags *flag.FlagSet) {
 	flags.Duration(
 		ConfigPrefix+suffixBatchWait,
 		defaultBatchWait,
-		"Maximum wait period before sending batch.",
+		"Maximum wait period before sending Batch.",
 	)
 	flags.Int(
 		ConfigPrefix+suffixBatchSize,
 		defaultBatchSize,
-		"Maximum batch size to accrue before sending.",
+		"Maximum Batch size to accrue before sending.",
 	)
 	// Default backoff schedule: 0.5s, 1s, 2s, 4s, 8s, 16s, 32s, 64s, 128s, 256s(4.267m) For a total time of 511.5s(8.5m) before logs are lost
 	flags.Int(

@@ -2,7 +2,7 @@ package cortex
 
 import (
 	"bytes"
-	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/golang/snappy"
 
@@ -17,7 +17,7 @@ type Marshaller interface {
 
 type protobufMarshaller struct{}
 
-func (h *protobufMarshaller) MarshalLog(logs *logproto.PushRequest) ([]byte, error) {
+func (h *protobufMarshaller) MarshalLog(logs *client.ProducerBatch) ([]byte, error) {
 	//TODO implement me
 	panic("implement me")
 }

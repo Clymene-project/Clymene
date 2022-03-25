@@ -29,20 +29,25 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-type batch struct {
-	streams   map[string]*logproto.Stream
-	bytes     int
-	createdAt time.Time
+type Batch struct {
+	Streams   map[string]*logproto.Stream `json:"streams"`
+	Bytes     int                         `json:"bytes"`
+	CreatedAt time.Time                   `json:"createdAt"`
 }
 
-func newBatch(entries ...api.Entry) *batch {
-	b := &batch{
-		streams:   map[string]*logproto.Stream{},
-		bytes:     0,
-		createdAt: time.Now(),
+type ProducerBatch struct {
+	Batch    Batch  `json:"batch"`
+	TenantID string `json:"tenantID"`
+}
+
+func newBatch(entries ...api.Entry) *Batch {
+	b := &Batch{
+		Streams:   map[string]*logproto.Stream{},
+		Bytes:     0,
+		CreatedAt: time.Now(),
 	}
 
-	// Add entries to the batch
+	// Add entries to the Batch
 	for _, entry := range entries {
 		b.add(entry)
 	}
@@ -50,19 +55,19 @@ func newBatch(entries ...api.Entry) *batch {
 	return b
 }
 
-// add an entry to the batch
-func (b *batch) add(entry api.Entry) {
-	b.bytes += len(entry.Line)
+// add an entry to the Batch
+func (b *Batch) add(entry api.Entry) {
+	b.Bytes += len(entry.Line)
 
 	// Append the entry to an already existing stream (if any)
 	labels := labelsMapToString(entry.Labels, ReservedLabelTenantID)
-	if stream, ok := b.streams[labels]; ok {
+	if stream, ok := b.Streams[labels]; ok {
 		stream.Entries = append(stream.Entries, entry.Entry)
 		return
 	}
 
 	// Add the entry as a new stream
-	b.streams[labels] = &logproto.Stream{
+	b.Streams[labels] = &logproto.Stream{
 		Labels:  labels,
 		Entries: []logproto.Entry{entry.Entry},
 	}
@@ -84,25 +89,25 @@ Outer:
 	return fmt.Sprintf("{%s}", strings.Join(lstrs, ", "))
 }
 
-// sizeBytes returns the current batch size in bytes
-func (b *batch) sizeBytes() int {
-	return b.bytes
+// sizeBytes returns the current Batch size in Bytes
+func (b *Batch) sizeBytes() int {
+	return b.Bytes
 }
 
-// sizeBytesAfter returns the size of the batch after the input entry
-// will be added to the batch itself
-func (b *batch) sizeBytesAfter(entry api.Entry) int {
-	return b.bytes + len(entry.Line)
+// sizeBytesAfter returns the size of the Batch after the input entry
+// will be added to the Batch itself
+func (b *Batch) sizeBytesAfter(entry api.Entry) int {
+	return b.Bytes + len(entry.Line)
 }
 
-// age of the batch since its creation
-func (b *batch) age() time.Duration {
-	return time.Since(b.createdAt)
+// age of the Batch since its creation
+func (b *Batch) age() time.Duration {
+	return time.Since(b.CreatedAt)
 }
 
-// encode the batch as snappy-compressed push request, and returns
+// Encode the Batch as snappy-compressed push request, and returns
 // the encoded bytes and the number of encoded entries
-func (b *batch) Encode() ([]byte, int, error) {
+func (b *Batch) Encode() ([]byte, int, error) {
 	req, entriesCount := b.CreatePushRequest()
 	buf, err := proto.Marshal(req)
 	if err != nil {
@@ -113,13 +118,13 @@ func (b *batch) Encode() ([]byte, int, error) {
 }
 
 // creates push request and returns it, together with number of entries
-func (b *batch) CreatePushRequest() (*logproto.PushRequest, int) {
+func (b *Batch) CreatePushRequest() (*logproto.PushRequest, int) {
 	req := logproto.PushRequest{
-		Streams: make([]logproto.Stream, 0, len(b.streams)),
+		Streams: make([]logproto.Stream, 0, len(b.Streams)),
 	}
 
 	entriesCount := 0
-	for _, stream := range b.streams {
+	for _, stream := range b.Streams {
 		req.Streams = append(req.Streams, *stream)
 		entriesCount += len(stream.Entries)
 	}

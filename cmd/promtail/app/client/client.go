@@ -34,7 +34,7 @@ var UserAgent = fmt.Sprintf("promtail/%s", version.Get().Version)
 // Client pushes entries to Loki and can be stopped
 type Client interface {
 	api.EntryHandler
-	// StopNow Stop goroutine sending batch of entries without retries.
+	// StopNow Stop goroutine sending Batch of entries without retries.
 	StopNow()
 }
 
@@ -111,7 +111,7 @@ func NewWriterMetrics(metricFactory metrics.Factory) WriterMetrics {
 		StreamLag: metricFactory.Gauge(
 			metrics.Options{
 				Name: "stream_lag_seconds",
-				Help: "Difference between current time and last batch timestamp for successful sends",
+				Help: "Difference between current time and last Batch timestamp for successful sends",
 			}),
 	}
 }
@@ -139,9 +139,9 @@ func newClient(options Options, logWriter logstore.Writer, metricFactory metrics
 }
 
 func (c *client) run() {
-	batches := map[string]*batch{}
+	batches := map[string]*Batch{}
 
-	// Given the client handles multiple batches (1 per tenant) and each batch
+	// Given the client handles multiple batches (1 per tenant) and each Batch
 	// can be created at a different point in time, we look for batches whose
 	// max wait time has been reached every 10 times per BatchWait, so that the
 	// maximum delay we have sending batches is 10% of the max waiting time.
@@ -173,14 +173,14 @@ func (c *client) run() {
 			e, tenantID := c.processEntry(e)
 			batch, ok := batches[tenantID]
 
-			// If the batch doesn't exist yet, we create a new one with the entry
+			// If the Batch doesn't exist yet, we create a new one with the entry
 			if !ok {
 				batches[tenantID] = newBatch(e)
 				break
 			}
 
-			// If adding the entry to the batch will increase the size over the max
-			// size allowed, we do send the current batch and then create a new one
+			// If adding the entry to the Batch will increase the size over the max
+			// size allowed, we do send the current Batch and then create a new one
 
 			if batch.sizeBytesAfter(e) > c.options.BatchSize {
 				c.sendBatch(tenantID, batch)
@@ -189,7 +189,7 @@ func (c *client) run() {
 				break
 			}
 
-			// The max size of the batch isn't reached, so we can add the entry
+			// The max size of the Batch isn't reached, so we can add the entry
 			batch.add(e)
 
 		case <-maxWaitCheck.C:
@@ -210,7 +210,7 @@ func (c *client) Chan() chan<- api.Entry {
 	return c.entries
 }
 
-func (c *client) sendBatch(tenantID string, batch *batch) {
+func (c *client) sendBatch(tenantID string, batch *Batch) {
 	backOff := backoff.New(c.ctx, c.options.BackoffConfig)
 	var status int
 	var err error
@@ -228,7 +228,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 			c.writerMetrics.SentBytes.Inc(bufBytes)
 			c.writerMetrics.SentEntries.Inc(entriesCount)
 
-			for _, s := range batch.streams {
+			for _, s := range batch.Streams {
 				lbls, err := parser.ParseMetric(s.Labels)
 				if err != nil {
 					// is this possible?
@@ -261,7 +261,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 			break
 		}
 
-		c.logger.Warn("error sending batch, will retry", zap.Int("status", status), zap.Error(err))
+		c.logger.Warn("error sending Batch, will retry", zap.Int("status", status), zap.Error(err))
 		c.writerMetrics.BatchRetries.Inc(1)
 		backOff.Wait()
 
@@ -272,7 +272,7 @@ func (c *client) sendBatch(tenantID string, batch *batch) {
 	}
 
 	if err != nil {
-		c.logger.Error("final error sending batch", zap.Int("status", status), zap.Error(err))
+		c.logger.Error("final error sending Batch", zap.Int("status", status), zap.Error(err))
 		c.writerMetrics.DroppedBytes.Inc(bufBytes)
 		c.writerMetrics.DroppedEntries.Inc(entriesCount)
 	}

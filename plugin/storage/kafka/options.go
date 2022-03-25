@@ -35,7 +35,7 @@ const (
 	defaultBroker           = "127.0.0.1:9092"
 	defaultTopic            = "clymene"
 	defaultPromtailTopic    = "clymene-logs"
-	defaultEncoding         = EncodingProto
+	defaultEncoding         = EncodingJSON
 	defaultRequiredAcks     = "local"
 	defaultCompression      = "none"
 	defaultCompressionLevel = 0
@@ -145,11 +145,11 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
 		configPrefix+suffixTopic,
 		defaultTopic,
-		"kafka topic to save time series")
+		"The name of the clymene-agent kafka topic to consume from")
 	flagSet.String(
 		configPrefix+suffixPromtailTopic,
 		defaultPromtailTopic,
-		"kafka topic to save log")
+		"The name of the promtail kafka topic to consume from")
 	flagSet.String(
 		configPrefix+suffixProtocolVersion,
 		"",
