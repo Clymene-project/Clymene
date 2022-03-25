@@ -30,7 +30,7 @@ func (w *Writer) Writelog(_ context.Context, tenantID string, batch logstore.Bat
 	var errs []error
 
 	producerMessage := &client.ProducerBatch{TenantID: tenantID, Batch: *batch.(*client.Batch)}
-	metricsBytes, err := w.marshaller.MarshalLog(producerMessage)
+	logsBytes, err := w.marshaller.MarshalLog(producerMessage)
 	if err != nil {
 		w.metrics.WrittenFailure.Inc(1)
 		errs = append(errs, err)
@@ -42,7 +42,7 @@ func (w *Writer) Writelog(_ context.Context, tenantID string, batch logstore.Bat
 	// If there is no key provided, then Kafka will partition the data in a round-robin fashion.
 	w.producer.Input() <- &sarama.ProducerMessage{
 		Topic: w.topic,
-		Value: sarama.ByteEncoder(metricsBytes),
+		Value: sarama.ByteEncoder(logsBytes),
 	}
 	return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
 

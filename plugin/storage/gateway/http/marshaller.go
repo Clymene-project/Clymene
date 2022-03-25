@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/golang/snappy"
 
@@ -10,9 +11,15 @@ import (
 // Marshaller encodes a metric into a byte array to be sent to Kafka
 type Marshaller interface {
 	MarshalMetric([]prompb.TimeSeries) ([]byte, error)
+	MarshalLog(*client.ProducerBatch) ([]byte, error)
 }
 
 type protobufMarshaller struct{}
+
+func (h *protobufMarshaller) MarshalLog(batch *client.ProducerBatch) ([]byte, error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (h *protobufMarshaller) MarshalMetric(ts []prompb.TimeSeries) ([]byte, error) {
 	req := &prompb.WriteRequest{

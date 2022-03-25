@@ -17,6 +17,8 @@
 package http
 
 import (
+	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -26,6 +28,10 @@ type Client struct {
 	options        Options
 	logger         *zap.Logger
 	metricsFactory metrics.Factory
+}
+
+func (c *Client) CreateLogWriter() (logstore.Writer, error) {
+	return NewLogWriter(c.logger, c.metricsFactory, c.options, kafka.NewJSONMarshaller()), nil
 }
 
 func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {

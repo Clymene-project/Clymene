@@ -18,6 +18,7 @@ package grpc
 
 import (
 	"fmt"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -28,6 +29,11 @@ type Client struct {
 	conn          *grpc.ClientConn
 	logger        *zap.Logger
 	metricFactory metrics.Factory
+}
+
+func (c *Client) CreateLogWriter() (logstore.Writer, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {

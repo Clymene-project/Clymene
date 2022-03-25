@@ -80,12 +80,17 @@ func main() {
 			if err != nil {
 				logger.Fatal("Failed to create metric writer", zap.Error(err))
 			}
+			logWriter, err := storageFactory.CreateLogWriter()
+			if err != nil {
+				logger.Fatal("Failed to create metric writer", zap.Error(err))
+			}
 			gatewayOpt := new(app.GatewayOptions).InitFromViper(v)
 
 			gateway := app.New(&app.GatewayParams{
 				Logger:        logger,
 				MetricFactory: metricsFactory,
 				MetricWriter:  metricWriter,
+				LogWriter:     logWriter,
 			})
 
 			if err := gateway.Start(gatewayOpt); err != nil {

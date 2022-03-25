@@ -20,8 +20,11 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
+	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/pkg/errors"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -48,6 +51,90 @@ type Writer struct {
 	marshaller   Marshaller
 }
 
+func (w *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
+	var bufBytes int64
+	var entriesCount64 int64
+	var errs []error
+
+	producerMessage := &client.ProducerBatch{TenantID: tenantID, Batch: *batch.(*client.Batch)}
+	logsBytes, err := w.marshaller.MarshalLog(producerMessage)
+	if err != nil {
+		w.metrics.WrittenFailure.Inc(1)
+		errs = append(errs, err)
+		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+	}
+
+	httpReq, err := http.NewRequest("POST", w.url, bytes.NewReader(logsBytes))
+	if err != nil {
+		// Errors from NewRequest are from unparsable URLs, so are not
+		// recoverable.
+		w.logger.Error("NewRequest", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
+		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+	}
+	//httpReq.Header.Add("Content-Encoding", "snappy")
+	httpReq.Header.Set("Content-Type", "application/x-protobuf")
+	httpReq.Header.Set("User-Agent", w.userAgent)
+	//httpReq.Header.Set("Clymene-Version", version.Get().Version)
+
+	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
+	defer cancel()
+
+	httpResp, err := w.client.Do(httpReq.WithContext(ctx))
+	if err != nil {
+		// Errors from client.Do are from (for example) network errors, so are
+		// recoverable.
+		w.logger.Error("client.Do", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
+		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+	}
+	defer func() {
+		io.Copy(ioutil.Discard, httpResp.Body)
+		httpResp.Body.Close()
+	}()
+
+	if httpResp.StatusCode/100 != 2 {
+		scanner := bufio.NewScanner(io.LimitReader(httpResp.Body, w.maxErrMsgLen))
+		line := ""
+		if scanner.Scan() {
+			line = scanner.Text()
+		}
+		err = errors.Errorf("server returned HTTP status %s: %s", httpResp.Status, line)
+	}
+	if httpResp.StatusCode/100 == 5 {
+		w.logger.Error("HTTP status error", zap.Error(err))
+		w.metrics.WrittenFailure.Inc(1)
+		return httpResp.StatusCode, bufBytes, entriesCount64, multierror.Wrap(errs)
+	}
+	if err == nil {
+		w.metrics.WrittenSuccess.Inc(1)
+	}
+	return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+
+}
+
+func NewLogWriter(
+	logger *zap.Logger,
+	factory metrics.Factory,
+	options Options,
+	marshaller Marshaller,
+) *Writer {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_http_logs_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: factory.Counter(metrics.Options{Name: "gateway_http_logs_written", Tags: map[string]string{"status": "failure"}}),
+	}
+	return &Writer{
+		metrics:      writeMetrics,
+		logger:       logger,
+		client:       &http.Client{Transport: newLatencyTransport(http.DefaultTransport, factory), Timeout: options.timeout},
+		url:          options.logsUrl,
+		userAgent:    options.userAgent,
+		maxErrMsgLen: options.maxErrMsgLen,
+		timeout:      options.timeout,
+		marshaller:   marshaller,
+	}
+}
+
 func NewMetricWriter(
 	logger *zap.Logger,
 	factory metrics.Factory,
@@ -62,7 +149,7 @@ func NewMetricWriter(
 		metrics:      writeMetrics,
 		logger:       logger,
 		client:       &http.Client{Transport: newLatencyTransport(http.DefaultTransport, factory), Timeout: options.timeout},
-		url:          options.url,
+		url:          options.metricsUrl,
 		userAgent:    options.userAgent,
 		maxErrMsgLen: options.maxErrMsgLen,
 		timeout:      options.timeout,

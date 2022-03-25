@@ -27,10 +27,10 @@ import (
 
 // HTTPServerParams to construct a new Clymene Gateway HTTP Server
 type HTTPServerParams struct {
-	TLSConfig     tlscfg.Options
-	HostPort      string
-	MetricHandler *handler.HTTPHandler
-	Logger        *zap.Logger
+	TLSConfig tlscfg.Options
+	HostPort  string
+	Handler   *handler.HTTPHandler
+	Logger    *zap.Logger
 }
 
 // StartHTTPServer based on the given parameters
@@ -55,7 +55,7 @@ func StartHTTPServer(params *HTTPServerParams) (*http.Server, error) {
 
 func serveHTTP(server *http.Server, listener net.Listener, params *HTTPServerParams) {
 	r := mux.NewRouter()
-	apiHandler := params.MetricHandler
+	apiHandler := params.Handler
 	apiHandler.RegisterRoutes(r)
 
 	server.Handler = r

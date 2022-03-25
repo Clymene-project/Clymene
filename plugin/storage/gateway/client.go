@@ -16,8 +16,12 @@
 
 package gateway
 
-import "github.com/Clymene-project/Clymene/storage/metricstore"
+import (
+	"github.com/Clymene-project/Clymene/storage/logstore"
+	"github.com/Clymene-project/Clymene/storage/metricstore"
+)
 
 type Client interface {
 	CreateMetricWriter() (metricstore.Writer, error)
+	CreateLogWriter() (logstore.Writer, error)
 }

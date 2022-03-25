@@ -26,7 +26,7 @@ type Factory struct {
 }
 
 func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	return NewLogWriter(f.producer, newJSONMarshaller(), f.options.PromtailTopic, f.metricsFactory, f.logger), nil
+	return NewLogWriter(f.producer, NewJSONMarshaller(), f.options.PromtailTopic, f.metricsFactory, f.logger), nil
 }
 
 // NewFactory creates a new Factory.
@@ -71,7 +71,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 		f.marshaller = newProtobufMarshaller()
 		logger.Info("promtail can only use json Marshaller.")
 	case EncodingJSON:
-		f.marshaller = newJSONMarshaller()
+		f.marshaller = NewJSONMarshaller()
 	default:
 		return errors.New("kafka encoding is not one of '" + EncodingJSON + "' or '" + EncodingProto + "'")
 	}

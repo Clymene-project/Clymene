@@ -37,10 +37,11 @@ type Factory struct {
 }
 
 func (f *Factory) CreateLogWriter() (logstore.Writer, error) {
-	//TODO implement me
-	panic("not supported")
+	return createLogsWriter(f.client)
 }
-
+func createLogsWriter(client Client) (logstore.Writer, error) {
+	return client.CreateLogWriter()
+}
 func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger) error {
 	f.metricsFactory, f.logger = metricsFactory, logger
 	logger.Info("Factory Initialize", zap.String("type", "gateway"))

@@ -59,6 +59,6 @@ func (h *jsonMarshaller) MarshalLog(batch *client.ProducerBatch) ([]byte, error)
 	return out, nil
 }
 
-func newJSONMarshaller() *jsonMarshaller {
+func NewJSONMarshaller() *jsonMarshaller {
 	return &jsonMarshaller{&jsonpb.Marshaler{}}
 }

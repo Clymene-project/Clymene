@@ -19,6 +19,7 @@ package handler
 import (
 	"context"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"go.uber.org/zap"
 )
@@ -27,6 +28,7 @@ import (
 type GRPCHandler struct {
 	logger       *zap.Logger
 	metricWriter metricstore.Writer
+	logWriter    logstore.Writer
 }
 
 func (g *GRPCHandler) RequestMetrics(c context.Context, r *prompb.WriteRequest) (*prompb.MetricsResponse, error) {
@@ -38,12 +40,10 @@ func (g *GRPCHandler) RequestMetrics(c context.Context, r *prompb.WriteRequest) 
 	return &prompb.MetricsResponse{}, nil
 }
 
-func NewGRPCHandler(
-	logger *zap.Logger,
-	metricWriter metricstore.Writer,
-) *GRPCHandler {
+func NewGRPCHandler(logger *zap.Logger, metricWriter metricstore.Writer, logWriter logstore.Writer) *GRPCHandler {
 	return &GRPCHandler{
 		logger:       logger,
 		metricWriter: metricWriter,
+		logWriter:    logWriter,
 	}
 }

@@ -29,11 +29,11 @@ import (
 
 // GRPCServerParams to construct a new Clymene Gateway gRPC Server
 type GRPCServerParams struct {
-	TLSConfig     tlscfg.Options
-	HostPort      string
-	MetricHandler *handler.GRPCHandler
-	Logger        *zap.Logger
-	OnError       func(error)
+	TLSConfig tlscfg.Options
+	HostPort  string
+	Handler   *handler.GRPCHandler
+	Logger    *zap.Logger
+	OnError   func(error)
 }
 
 // StartGRPCServer based on the given parameters
@@ -67,7 +67,7 @@ func StartGRPCServer(params *GRPCServerParams) (*grpc.Server, error) {
 }
 
 func serveGRPC(server *grpc.Server, listener net.Listener, params *GRPCServerParams) error {
-	prompb.RegisterClymeneServiceServer(server, params.MetricHandler)
+	prompb.RegisterClymeneServiceServer(server, params.Handler)
 
 	params.Logger.Info("Starting clymene-gateway gRPC server", zap.String("grpc.host-port", params.HostPort))
 	go func() {

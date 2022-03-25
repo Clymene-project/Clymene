@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/gateway/app/handler"
 	"github.com/Clymene-project/Clymene/cmd/gateway/app/server"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
@@ -41,12 +42,14 @@ type Gateway struct {
 	tlsGRPCCertWatcherCloser io.Closer
 	httpServer               *http.Server
 	tlsHTTPCertWatcherCloser io.Closer
+	logWriter                logstore.Writer
 }
 
 type GatewayParams struct {
 	Logger        *zap.Logger
 	MetricFactory metrics.Factory
 	MetricWriter  metricstore.Writer
+	LogWriter     logstore.Writer
 }
 
 func New(params *GatewayParams) *Gateway {
@@ -54,24 +57,25 @@ func New(params *GatewayParams) *Gateway {
 		logger:         params.Logger,
 		metricsFactory: params.MetricFactory,
 		metricWriter:   params.MetricWriter,
+		logWriter:      params.LogWriter,
 	}
 }
 
 func (g *Gateway) Start(opt *GatewayOptions) error {
 	grpcServer, err := server.StartGRPCServer(&server.GRPCServerParams{
-		HostPort:      opt.gatewayGRPCHostPort,
-		MetricHandler: handler.NewGRPCHandler(g.logger, g.metricWriter),
-		TLSConfig:     opt.TLSGRPC,
-		Logger:        g.logger,
+		HostPort:  opt.gatewayGRPCHostPort,
+		Handler:   handler.NewGRPCHandler(g.logger, g.metricWriter, g.logWriter),
+		TLSConfig: opt.TLSGRPC,
+		Logger:    g.logger,
 	})
 	if err != nil {
 		return fmt.Errorf("could not start gRPC gateway %w", err)
 	}
 	httpServer, err := server.StartHTTPServer(&server.HTTPServerParams{
-		HostPort:      opt.gatewayHTTPHostPort,
-		MetricHandler: handler.NewHTTPHandler(g.logger, g.metricWriter),
-		TLSConfig:     opt.TLSHTTP,
-		Logger:        g.logger,
+		HostPort:  opt.gatewayHTTPHostPort,
+		Handler:   handler.NewHTTPHandler(g.logger, g.metricWriter, g.logWriter),
+		TLSConfig: opt.TLSHTTP,
+		Logger:    g.logger,
 	})
 	if err != nil {
 		return fmt.Errorf("could not start HTTP gateway %w", err)

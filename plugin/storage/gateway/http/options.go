@@ -25,7 +25,8 @@ import (
 )
 
 type Options struct {
-	url          string
+	metricsUrl   string
+	logsUrl      string
 	userAgent    string
 	timeout      time.Duration
 	maxErrMsgLen int64
@@ -36,13 +37,15 @@ type Options struct {
 const (
 	hTTPPrefix         = "gateway.http"
 	suffixUrl          = ".url"
+	suffixLogsUrl      = ".logs.url"
 	suffixUserAgent    = ".user.agent"
 	suffixTimeout      = ".timeout"
 	suffixMaxErrMsgLen = ".max-err-msg-len"
 
-	defaultClymeneGatewayUrl = "http://localhost:15611/api/metrics"
-	defaultTimeout           = 10 * time.Second
-	defaultMaxErrMsgLen      = 256
+	defaultClymeneGatewayUrl     = "http://localhost:15611/api/metrics"
+	defaultClymeneGatewayLogsUrl = "http://localhost:15611/api/logs"
+	defaultTimeout               = 10 * time.Second
+	defaultMaxErrMsgLen          = 256
 )
 
 // AddFlags adds flags for Options.
@@ -51,6 +54,11 @@ func AddFlags(flagSet *flag.FlagSet) {
 		hTTPPrefix+suffixUrl,
 		defaultClymeneGatewayUrl,
 		"the clymene-gateway remote write HTTP receiver endpoint(/api/metrics)",
+	)
+	flagSet.String(
+		hTTPPrefix+suffixLogsUrl,
+		defaultClymeneGatewayLogsUrl,
+		"the clymene-gateway logs write HTTP receiver endpoint(/api/logs)",
 	)
 	flagSet.Duration(
 		hTTPPrefix+suffixTimeout,
@@ -72,7 +80,8 @@ func AddFlags(flagSet *flag.FlagSet) {
 
 // InitFromViper initializes Options with properties retrieved from Viper.
 func (o *Options) InitFromViper(v *viper.Viper) {
-	o.url = v.GetString(hTTPPrefix + suffixUrl)
+	o.metricsUrl = v.GetString(hTTPPrefix + suffixUrl)
+	o.logsUrl = v.GetString(hTTPPrefix + suffixLogsUrl)
 	o.maxErrMsgLen = v.GetInt64(hTTPPrefix + suffixMaxErrMsgLen)
 	o.timeout = v.GetDuration(hTTPPrefix + suffixTimeout)
 	o.userAgent = v.GetString(hTTPPrefix + suffixUserAgent)

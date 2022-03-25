@@ -17,7 +17,10 @@
 package handler
 
 import (
+	"encoding/json"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/snappy"
@@ -33,10 +36,12 @@ type HTTPHandler struct {
 	logger       *zap.Logger
 	metricWriter metricstore.Writer
 	prefix       string
+	logWriter    logstore.Writer
 }
 
 func (h *HTTPHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc(h.prefix+"/metrics", h.RequestMetrics).Methods(http.MethodPost)
+	router.HandleFunc(h.prefix+"/logs", h.RequestLogs).Methods(http.MethodPost)
 }
 
 func (h *HTTPHandler) RequestMetrics(w http.ResponseWriter, r *http.Request) {
@@ -50,13 +55,11 @@ func (h *HTTPHandler) RequestMetrics(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func NewHTTPHandler(
-	logger *zap.Logger,
-	metricWriter metricstore.Writer,
-) *HTTPHandler {
+func NewHTTPHandler(logger *zap.Logger, metricWriter metricstore.Writer, logWriter logstore.Writer) *HTTPHandler {
 	return &HTTPHandler{
 		logger:       logger,
 		metricWriter: metricWriter,
+		logWriter:    logWriter,
 		prefix:       "/api",
 	}
 }
@@ -79,4 +82,22 @@ func (h *HTTPHandler) DecodeWriteRequest(r io.Reader) (*prompb.WriteRequest, err
 		return nil, err
 	}
 	return &req, nil
+}
+
+func (h *HTTPHandler) RequestLogs(w http.ResponseWriter, r *http.Request) {
+	compressed, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		h.logger.Error("Error decoding logs write request", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	req := &client.ProducerBatch{}
+	err = json.Unmarshal(compressed, req)
+	if err != nil {
+		h.logger.Error("Error Unmarshal logs write request", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, _, _, _ = h.logWriter.Writelog(r.Context(), req.TenantID, &req.Batch)
+	w.WriteHeader(http.StatusNoContent)
 }
