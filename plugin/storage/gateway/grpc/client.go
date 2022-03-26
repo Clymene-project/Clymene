@@ -18,6 +18,7 @@ package grpc
 
 import (
 	"fmt"
+	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"github.com/uber/jaeger-lib/metrics"
@@ -32,8 +33,12 @@ type Client struct {
 }
 
 func (c *Client) CreateLogWriter() (logstore.Writer, error) {
-	//TODO implement me
-	panic("implement me")
+	return NewLogWriter(&LogWriterParams{
+		Conn:          c.conn,
+		Logger:        c.logger,
+		MetricFactory: c.metricFactory,
+		Marshaller:    kafka.NewJSONMarshaller(),
+	})
 }
 
 func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {

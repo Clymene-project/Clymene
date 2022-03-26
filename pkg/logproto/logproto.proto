@@ -23,6 +23,13 @@ service Ingester {
   rpc TransferChunks(stream TimeSeriesChunk) returns (TransferChunksResponse) {};
 }
 
+message Batch {
+  bytes batch = 1;
+}
+service Gateway {
+  rpc TransferBatch(Batch) returns(PushResponse){};
+}
+
 message PushRequest {
   repeated StreamAdapter streams = 1 [(gogoproto.jsontag) = "streams", (gogoproto.customtype) = "Stream"];
 }
@@ -86,7 +93,7 @@ message Sample {
 }
 
 message LegacySample {
-  double value       = 1;
+  double value = 1;
   int64 timestamp_ms = 2;
 }
 
@@ -121,7 +128,7 @@ message SeriesResponse {
 }
 
 message SeriesIdentifier {
-  map<string,string> labels = 1;
+  map<string, string> labels = 1;
 }
 
 message DroppedStream {

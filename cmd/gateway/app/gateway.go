@@ -36,7 +36,8 @@ type Gateway struct {
 	metricsFactory metrics.Factory
 	metricWriter   metricstore.Writer
 
-	metricsHandler *handler.GRPCHandler
+	metricsHandler *handler.GRPCMetricHandler
+	logHandler     *handler.GRPCLogsHandler
 
 	grpcServer               *grpc.Server
 	tlsGRPCCertWatcherCloser io.Closer
@@ -63,10 +64,11 @@ func New(params *GatewayParams) *Gateway {
 
 func (g *Gateway) Start(opt *GatewayOptions) error {
 	grpcServer, err := server.StartGRPCServer(&server.GRPCServerParams{
-		HostPort:  opt.gatewayGRPCHostPort,
-		Handler:   handler.NewGRPCHandler(g.logger, g.metricWriter, g.logWriter),
-		TLSConfig: opt.TLSGRPC,
-		Logger:    g.logger,
+		HostPort:      opt.gatewayGRPCHostPort,
+		MetricHandler: handler.NewGRPCMetricHandler(g.logger, g.metricWriter),
+		LogHandler:    handler.NewGRPCLogHandler(g.logger, g.logWriter),
+		TLSConfig:     opt.TLSGRPC,
+		Logger:        g.logger,
 	})
 	if err != nil {
 		return fmt.Errorf("could not start gRPC gateway %w", err)

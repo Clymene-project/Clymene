@@ -23,6 +23,7 @@ import (
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
 	"github.com/Clymene-project/Clymene/pkg/multierror"
 	"github.com/Clymene-project/Clymene/pkg/version"
+	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/pkg/errors"
@@ -48,7 +49,7 @@ type Writer struct {
 	userAgent    string
 	maxErrMsgLen int64
 	timeout      time.Duration
-	marshaller   Marshaller
+	marshaller   kafka.Marshaller
 }
 
 func (w *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
@@ -72,10 +73,8 @@ func (w *Writer) Writelog(ctx context.Context, tenantID string, batch logstore.B
 		w.metrics.WrittenFailure.Inc(1)
 		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
 	}
-	//httpReq.Header.Add("Content-Encoding", "snappy")
 	httpReq.Header.Set("Content-Type", "application/x-protobuf")
 	httpReq.Header.Set("User-Agent", w.userAgent)
-	//httpReq.Header.Set("Clymene-Version", version.Get().Version)
 
 	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
 	defer cancel()
@@ -117,7 +116,7 @@ func NewLogWriter(
 	logger *zap.Logger,
 	factory metrics.Factory,
 	options Options,
-	marshaller Marshaller,
+	marshaller kafka.Marshaller,
 ) *Writer {
 	writeMetrics := WriterMetrics{
 		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_http_logs_written", Tags: map[string]string{"status": "success"}}),
@@ -139,7 +138,7 @@ func NewMetricWriter(
 	logger *zap.Logger,
 	factory metrics.Factory,
 	options Options,
-	marshaller Marshaller,
+	marshaller kafka.Marshaller,
 ) *Writer {
 	writeMetrics := WriterMetrics{
 		WrittenSuccess: factory.Counter(metrics.Options{Name: "gateway_http_metrics_written", Tags: map[string]string{"status": "success"}}),

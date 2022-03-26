@@ -18,7 +18,12 @@ package grpc
 
 import (
 	"context"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
+	"github.com/Clymene-project/Clymene/pkg/logproto"
+	"github.com/Clymene-project/Clymene/pkg/multierror"
+	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
 	"github.com/Clymene-project/Clymene/prompb"
+	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/uber/jaeger-lib/metrics"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -63,4 +68,53 @@ func NewMetricWriter(p *MetricWriterParams) (*MetricWriter, error) {
 		logger:        p.Logger,
 		writerMetrics: writeMetrics,
 	}, nil
+}
+
+type LogWriter struct {
+	logger        *zap.Logger
+	reporter      logproto.GatewayClient
+	writerMetrics WriterMetrics
+	marshaller    kafka.Marshaller
+}
+
+type LogWriterParams struct {
+	Conn          *grpc.ClientConn
+	Logger        *zap.Logger
+	MetricFactory metrics.Factory
+	Marshaller    kafka.Marshaller
+}
+
+func NewLogWriter(p *LogWriterParams) (*LogWriter, error) {
+	writeMetrics := WriterMetrics{
+		WrittenSuccess: p.MetricFactory.Counter(metrics.Options{Name: "gateway_grpc_metrics_written", Tags: map[string]string{"status": "success"}}),
+		WrittenFailure: p.MetricFactory.Counter(metrics.Options{Name: "gateway_grpc_metrics_written", Tags: map[string]string{"status": "failure"}}),
+	}
+	return &LogWriter{
+		reporter:      logproto.NewGatewayClient(p.Conn),
+		logger:        p.Logger,
+		writerMetrics: writeMetrics,
+		marshaller:    p.Marshaller,
+	}, nil
+}
+func (m *LogWriter) Writelog(ctx context.Context, tenantID string, batch logstore.Batch) (int, int64, int64, error) {
+	var bufBytes int64
+	var entriesCount64 int64
+	var errs []error
+
+	producerMessage := &client.ProducerBatch{TenantID: tenantID, Batch: *batch.(*client.Batch)}
+	logsBytes, err := m.marshaller.MarshalLog(producerMessage)
+	if err != nil {
+		m.writerMetrics.WrittenFailure.Inc(1)
+		errs = append(errs, err)
+		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+	}
+	_, err = m.reporter.TransferBatch(ctx, &logproto.Batch{Batch: logsBytes})
+	if err != nil {
+		m.writerMetrics.WrittenFailure.Inc(1)
+		errs = append(errs, err)
+		return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
+	} else {
+		m.writerMetrics.WrittenSuccess.Inc(1)
+	}
+	return 201, bufBytes, entriesCount64, multierror.Wrap(errs)
 }

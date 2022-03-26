@@ -18,20 +18,22 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
+	"github.com/Clymene-project/Clymene/pkg/logproto"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/Clymene-project/Clymene/storage/logstore"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 	"go.uber.org/zap"
 )
 
-// GRPCHandler implements gRPC CollectorService.
-type GRPCHandler struct {
+// GRPCMetricHandler implements gRPC CollectorService.
+type GRPCMetricHandler struct {
 	logger       *zap.Logger
 	metricWriter metricstore.Writer
-	logWriter    logstore.Writer
 }
 
-func (g *GRPCHandler) RequestMetrics(c context.Context, r *prompb.WriteRequest) (*prompb.MetricsResponse, error) {
+func (g *GRPCMetricHandler) RequestMetrics(c context.Context, r *prompb.WriteRequest) (*prompb.MetricsResponse, error) {
 	err := g.metricWriter.WriteMetric(r.GetTimeseries())
 	if err != nil {
 		g.logger.Warn("Failed to create metric", zap.Error(err))
@@ -40,10 +42,33 @@ func (g *GRPCHandler) RequestMetrics(c context.Context, r *prompb.WriteRequest) 
 	return &prompb.MetricsResponse{}, nil
 }
 
-func NewGRPCHandler(logger *zap.Logger, metricWriter metricstore.Writer, logWriter logstore.Writer) *GRPCHandler {
-	return &GRPCHandler{
+func NewGRPCMetricHandler(logger *zap.Logger, metricWriter metricstore.Writer) *GRPCMetricHandler {
+	return &GRPCMetricHandler{
 		logger:       logger,
 		metricWriter: metricWriter,
-		logWriter:    logWriter,
+	}
+}
+
+// GRPCLogsHandler implements gRPC CollectorService.
+type GRPCLogsHandler struct {
+	logger    *zap.Logger
+	logWriter logstore.Writer
+}
+
+func (g *GRPCLogsHandler) TransferBatch(c context.Context, batch *logproto.Batch) (*logproto.PushResponse, error) {
+	req := &client.ProducerBatch{}
+	err := json.Unmarshal(batch.GetBatch(), req)
+	if err != nil {
+		g.logger.Error("Error Unmarshal logs write request", zap.Error(err))
+		return nil, err
+	}
+	_, _, _, _ = g.logWriter.Writelog(c, req.TenantID, &req.Batch)
+	return &logproto.PushResponse{}, nil
+}
+
+func NewGRPCLogHandler(logger *zap.Logger, logWriter logstore.Writer) *GRPCLogsHandler {
+	return &GRPCLogsHandler{
+		logger:    logger,
+		logWriter: logWriter,
 	}
 }

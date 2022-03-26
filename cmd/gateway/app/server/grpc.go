@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/gateway/app/handler"
 	"github.com/Clymene-project/Clymene/pkg/config/tlscfg"
+	"github.com/Clymene-project/Clymene/pkg/logproto"
 	"github.com/Clymene-project/Clymene/prompb"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -29,11 +30,12 @@ import (
 
 // GRPCServerParams to construct a new Clymene Gateway gRPC Server
 type GRPCServerParams struct {
-	TLSConfig tlscfg.Options
-	HostPort  string
-	Handler   *handler.GRPCHandler
-	Logger    *zap.Logger
-	OnError   func(error)
+	TLSConfig     tlscfg.Options
+	HostPort      string
+	MetricHandler *handler.GRPCMetricHandler
+	LogHandler    *handler.GRPCLogsHandler
+	Logger        *zap.Logger
+	OnError       func(error)
 }
 
 // StartGRPCServer based on the given parameters
@@ -67,7 +69,8 @@ func StartGRPCServer(params *GRPCServerParams) (*grpc.Server, error) {
 }
 
 func serveGRPC(server *grpc.Server, listener net.Listener, params *GRPCServerParams) error {
-	prompb.RegisterClymeneServiceServer(server, params.Handler)
+	prompb.RegisterClymeneServiceServer(server, params.MetricHandler)
+	logproto.RegisterGatewayServer(server, params.LogHandler)
 
 	params.Logger.Info("Starting clymene-gateway gRPC server", zap.String("grpc.host-port", params.HostPort))
 	go func() {

@@ -68,7 +68,7 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 	f.producer = p
 	switch f.options.Encoding {
 	case EncodingProto:
-		f.marshaller = newProtobufMarshaller()
+		f.marshaller = NewProtobufMarshaller()
 		logger.Info("promtail can only use json Marshaller.")
 	case EncodingJSON:
 		f.marshaller = NewJSONMarshaller()

@@ -35,7 +35,7 @@ func (c *Client) CreateLogWriter() (logstore.Writer, error) {
 }
 
 func (c *Client) CreateMetricWriter() (metricstore.Writer, error) {
-	return NewMetricWriter(c.logger, c.metricsFactory, c.options, newProtobufMarshaller()), nil
+	return NewMetricWriter(c.logger, c.metricsFactory, c.options, kafka.NewProtobufMarshaller()), nil
 }
 
 func NewClient(options Options, factory metrics.Factory, logger *zap.Logger) (*Client, error) {

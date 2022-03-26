@@ -13,7 +13,7 @@ import (
 // Marshaller encodes a metric into a byte array to be sent to Kafka
 type Marshaller interface {
 	MarshalMetric([]prompb.TimeSeries) ([]byte, error)
-	MarshalLog(batch *client.ProducerBatch) ([]byte, error)
+	MarshalLog(*client.ProducerBatch) ([]byte, error)
 }
 
 type protobufMarshaller struct{}
@@ -34,7 +34,7 @@ func (h *protobufMarshaller) MarshalLog(batch *client.ProducerBatch) ([]byte, er
 	panic("not supported")
 }
 
-func newProtobufMarshaller() *protobufMarshaller {
+func NewProtobufMarshaller() *protobufMarshaller {
 	return &protobufMarshaller{}
 }
 
