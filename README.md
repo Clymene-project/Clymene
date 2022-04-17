@@ -136,4 +136,4 @@ Apache License 2.0, see [LICENSE](https://github.com/Clymene-project/Clymene/blo
 #### 2. https://peter.bourgon.org/go-in-production/#formatting-and-style    
 
 # supported
-The Clymene project is being developed with the support of [Jetbrains](https://www.jetbrains.com) Open Source development license.
+The Clymene project is being developed with the support of Open Source development license of [Jetbrains'](https://www.jetbrains.com).
