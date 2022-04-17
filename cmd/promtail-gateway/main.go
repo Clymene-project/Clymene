@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/Clymene-project/Clymene/cmd/docs"
 	"github.com/Clymene-project/Clymene/cmd/flags"
-	"github.com/Clymene-project/Clymene/cmd/gateway/app"
+	"github.com/Clymene-project/Clymene/cmd/promtail-gateway/app"
 	"github.com/Clymene-project/Clymene/pkg/config"
 	"github.com/Clymene-project/Clymene/pkg/version"
 	"github.com/Clymene-project/Clymene/plugin/storage"
@@ -42,7 +42,7 @@ var (
 )
 
 const (
-	ClymeneGatewayName = "Clymene-gateway"
+	PromtailGatewayName = "promtail-gateway"
 )
 
 func main() {
@@ -57,15 +57,15 @@ func main() {
 
 	v := viper.New()
 	command := &cobra.Command{
-		Use:   ClymeneGatewayName,
-		Short: ClymeneGatewayName + " can receive data through gRPC.",
+		Use:   PromtailGatewayName,
+		Short: PromtailGatewayName + " can receive log data through gRPC.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := svc.Start(v); err != nil {
 				return err
 			}
 			logger := svc.Logger
 
-			logger.Info("start....", zap.String("component name", ClymeneGatewayName))
+			logger.Info("start....", zap.String("component name", PromtailGatewayName))
 			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
@@ -76,7 +76,7 @@ func main() {
 				logger.Fatal("Failed to init storage factory", zap.Error(err))
 			}
 
-			metricWriter, err := storageFactory.CreateMetricWriter()
+			logWriter, err := storageFactory.CreateLogWriter()
 			if err != nil {
 				logger.Fatal("Failed to create metric writer", zap.Error(err))
 			}
@@ -85,7 +85,7 @@ func main() {
 			gateway := app.New(&app.GatewayParams{
 				Logger:        logger,
 				MetricFactory: metricsFactory,
-				MetricWriter:  metricWriter,
+				LogWriter:     logWriter,
 			})
 
 			if err := gateway.Start(gatewayOpt); err != nil {
@@ -96,10 +96,10 @@ func main() {
 				if err = gateway.Close(); err != nil {
 					logger.Error("Failed to close gateway", zap.Error(err))
 				}
-				if closer, ok := metricWriter.(io.Closer); ok {
+				if closer, ok := logWriter.(io.Closer); ok {
 					err := closer.Close()
 					if err != nil {
-						logger.Error("Failed to close metrics writer", zap.Error(err))
+						logger.Error("Failed to close log writer", zap.Error(err))
 					}
 				}
 				if err := storageFactory.Close(); err != nil {
