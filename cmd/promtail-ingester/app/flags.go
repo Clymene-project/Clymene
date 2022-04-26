@@ -15,7 +15,7 @@ import (
 
 const (
 	// ConfigPrefix is a prefix for the ingester flags
-	ConfigPrefix = "clymene-ingester"
+	ConfigPrefix = "promtail-ingester"
 	// KafkaConsumerConfigPrefix is a prefix for the Kafka flags
 	KafkaConsumerConfigPrefix = "kafka.consumer"
 	// SuffixBrokers is a suffix for the brokers flag
@@ -38,8 +38,6 @@ const (
 	SuffixHTTPPort = ".http-port"
 	// DefaultBroker is the default kafka broker
 	DefaultBroker = "127.0.0.1:9092"
-	// DefaultTopic is the default kafka topic
-	DefaultTopic = "clymene"
 	// DefaultPromtailTopic is the default kafka topic for promtail
 	DefaultPromtailTopic = "clymene-logs"
 	// DefaultGroupID is the default consumer Group ID

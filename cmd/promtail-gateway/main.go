@@ -68,7 +68,7 @@ func main() {
 			logger.Info("start....", zap.String("component name", PromtailGatewayName))
 			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
-			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "clymene"})
+			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "promtail"})
 			metricsFactory := baseFactory.Namespace(metrics.NSOptions{Name: "gateway"})
 
 			storageFactory.InitFromViper(v)
