@@ -1,6 +1,13 @@
 Changes by Version
 ==================
 
+2.1.0 (2022-02-20)
+-----------------
+1. gateway, influxdb, opentsdb, tdengine success/failure metric integration completed issue: #40  
+2. Added promtail-ingester component that can use kafka to promtail's log transfer backend #47  
+3. promtail - log data transfer to gateway(gRPC, HTTP) #46  
+4. Development of promtail-gateway component for log data pipeline #53  
+
 2.0.1 (2022-02-20)
 -----------------
 Added missing tenantID when saving to elasticsearch with clymene-promtail.
