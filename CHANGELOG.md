@@ -1,7 +1,7 @@
 Changes by Version
 ==================
 
-2.1.0 (2022-02-20)
+2.1.0 (2022-04-26)
 -----------------
 1. gateway, influxdb, opentsdb, tdengine success/failure metric integration completed issue: #40  
 2. Added promtail-ingester component that can use kafka to promtail's log transfer backend #47  
