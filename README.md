@@ -18,7 +18,7 @@ Various time series data analysis functions will be added.
 # Architecture  
 
 The Clymene project is a platform for collecting time series data and log data. Agent can collect data and store it directly in the database, or it can be used according to the situation using various components. It is also suitable for very large, high-load architectures. The Clymene Project provides various storage types, so choose a storage you are familiar with. And build great monitoring systems using familiar dashboards.  
-<img src="https://user-images.githubusercontent.com/25188468/165543261-917322d1-9731-44fd-8c80-5eb92e8ca9a0.png" width="70%" height="70%" alt="architecture_v2.1.0">
+<img src="https://user-images.githubusercontent.com/25188468/165543261-917322d1-9731-44fd-8c80-5eb92e8ca9a0.png" width="90%" height="90%" alt="architecture_v2.1.0">
 
 # components
 
