@@ -6,7 +6,7 @@
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch) <img src="https://img.shields.io/badge/influxdb-%2322ADF6.svg?&style=for-the-badge&logo=influxdb&logoColor=white"/>  <img src="https://img.shields.io/badge/prometheus-%23E6522C.svg?&style=for-the-badge&logo=prometheus&logoColor=white" />   <img src="https://img.shields.io/badge/OpenTSDB-green?style=for-the-badge"> <img src="https://img.shields.io/badge/cortex-blue?style=for-the-badge">  <img src="https://img.shields.io/badge/tdengine-gray?style=for-the-badge">     
 
 
-<img align="right" width="400" height="400" src="https://user-images.githubusercontent.com/25188468/148681479-3ddf237c-6e5d-49a1-a517-8b3bfa92f54e.png" alt="clymene_logo">
+<img align="right" width="40%" height="40%" src="https://user-images.githubusercontent.com/25188468/148681479-3ddf237c-6e5d-49a1-a517-8b3bfa92f54e.png" alt="clymene_logo">
 
 The Clymene is a time-series data and logs collection platform for distributed systems inspired
 by [Prometheus](https://prometheus.io)
@@ -14,34 +14,11 @@ and [Jaeger](https://www.jaegertracing.io). Time-series data and logs from vario
 different types of databases. It can be configured in a variety of architectures. Also, Clymene Agent's time series data collection uses fewer resources than Prometheus' remote_write. 
 Various time series data analysis functions will be added.
 
-# Architecture
 
-### Use only agent
+# Architecture  
 
-Agent can store time series data in a variety of DBs and support Composite Writers that can be stored in multiple DBs at
-once.
-
-<img src="https://user-images.githubusercontent.com/25188468/152248922-8b86e107-ed16-4ec1-a68a-48e1016a7521.png" width="70%" height="70%" alt="architecture_v1.4.0">
-
-### Use log collection agent promtail
-
-Clymene-promtail customized [Loki's](https://github.com/grafana/loki) log collection agent for the Clymene project. Logs of various environments can be collected and stored in Loki and ElasticSearch. It will be developed for use in Clymene's HA architecture.  
-<img src="https://user-images.githubusercontent.com/25188468/154828122-19509c86-d7e3-449f-9a6e-3a5d96fb9a60.png" width="70%" height="70%" alt="architecture_v2.0.0">
-
-
-### Including kafka and ingester
-
-Ingester consumes time series data loaded on kafka, can store time series data in various DBs, and supports Composite
-Writers that can be stored in multiple DBs at once.
-
-<img src="https://user-images.githubusercontent.com/25188468/152248986-a2835944-4aba-4acc-a1b5-3d430197da1b.png" width="70%" height="70%" alt="architecture_v1.4.0_ingester">  
-
-### Use gateway
-
-Gateway collects time series data through gRPC communication, stores time series data in various DBs, and supports
-Composite Writers that can be stored in multiple DBs at once.
-
-<img src="https://user-images.githubusercontent.com/25188468/152249028-701c3372-dee8-49dd-b284-dd04e9da0597.png" width="70%" height="70%" alt="architecture_v1.4.0_gateway">
+The Clymene project is a platform for collecting time series data and log data. Agent can collect data and store it directly in the database, or it can be used according to the situation using various components. It is also suitable for very large, high-load architectures. The Clymene Project provides various storage types, so choose a storage you are familiar with. And build great monitoring systems using familiar dashboards.  
+<img src="https://user-images.githubusercontent.com/25188468/165543261-917322d1-9731-44fd-8c80-5eb92e8ca9a0.png" width="70%" height="70%" alt="architecture_v2.1.0">
 
 # components
 
