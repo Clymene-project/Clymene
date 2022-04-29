@@ -44,3 +44,10 @@ docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-arm64 ./out/clymene-%R
 docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-ppc64le ./out/clymene-%RELEASE%-linux-ppc64le/
 docker cp %DOCKERID%:/clymene/out/promtail-ingester-linux-s390x ./out/clymene-%RELEASE%-linux-s390x/
 docker cp %DOCKERID%:/clymene/out/promtail-ingester-windows-amd64 ./out/clymene-%RELEASE%-windows-amd64/promtail-ingester-windows-amd64.exe
+
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-linux-amd64 ./out/clymene-%RELEASE%-linux-amd64/
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-darwin-amd64 ./out/clymene-%RELEASE%-darwin-amd64/
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-linux-arm64 ./out/clymene-%RELEASE%-linux-arm64/
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-linux-ppc64le ./out/clymene-%RELEASE%-linux-ppc64le/
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-linux-s390x ./out/clymene-%RELEASE%-linux-s390x/
+docker cp %DOCKERID%:/clymene/out/promtail-gateway-windows-amd64 ./out/clymene-%RELEASE%-windows-amd64/promtail-gateway-windows-amd64.exe
