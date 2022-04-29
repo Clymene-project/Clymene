@@ -81,14 +81,22 @@ Loki
 STORAGE_TYPE=loki
 ```
 
-[//]: # (Kafka)
-[//]: # (```)
-[//]: # (STORAGE_TYPE=kafka)
-[//]: # (```)
+Promtail-gateway
+```
+STORAGE_TYPE=gateway
+```
+
+Kafka
+```
+STORAGE_TYPE=kafka
+```
+
 #### 2. Option description by storage type
 
 - [ElasticSearch option](./elasticsearch/es-option.md)
 - [Loki option](./loki/loki-option.md)
+- [Kafka option](./kafka/kafka-option.md)
+- [Promtail-gateway](./gateway/gateway-option.md)
 
 ### Docker-compose Example
 ```yaml
@@ -154,10 +162,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: clymene-agent
+  name: clymene-promtail
   namespace: clymene
   labels:
-    app: clymene-agent
+    app: clymene-promtail
 spec:
   ports:
     - name: admin
@@ -167,7 +175,7 @@ spec:
       port: 9080
       targetPort: 9080
   selector:
-    app: clymene-agent
+    app: clymene-promtail
 --- # configmap.yaml
 apiVersion: v1
 kind: ConfigMap

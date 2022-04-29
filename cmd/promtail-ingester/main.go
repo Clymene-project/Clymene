@@ -43,7 +43,7 @@ var (
 )
 
 const (
-	ClymeneIngesterName = "promtail-ingester"
+	PromtailIngesterName = "promtail-ingester"
 )
 
 func main() {
@@ -58,15 +58,15 @@ func main() {
 
 	v := viper.New()
 	command := &cobra.Command{
-		Use:   ClymeneIngesterName,
-		Short: ClymeneIngesterName + " consumes from Kafka and send to db.",
+		Use:   PromtailIngesterName,
+		Short: PromtailIngesterName + " consumes from Kafka and send to db.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := svc.Start(v); err != nil {
 				return err
 			}
 			logger := svc.Logger
 
-			logger.Info("start....", zap.String("component name", ClymeneIngesterName))
+			logger.Info("start....", zap.String("component name", PromtailIngesterName))
 			logger.Info("build info", zap.String("version", Version), zap.String("build_time", BuildTime))
 
 			baseFactory := svc.MetricsFactory.Namespace(metrics.NSOptions{Name: "promtail"})
