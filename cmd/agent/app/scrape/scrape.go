@@ -5,6 +5,15 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"reflect"
+	"sync"
+	"time"
+	"unsafe"
+
 	"github.com/Clymene-project/Clymene/cmd/agent/app/config"
 	"github.com/Clymene-project/Clymene/cmd/agent/app/discovery/targetgroup"
 	"github.com/Clymene-project/Clymene/model/labels"
@@ -16,15 +25,7 @@ import (
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/Clymene-project/Clymene/storage/metricstore"
 
-	"fmt"
 	"go.uber.org/zap"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"reflect"
-	"sync"
-	"time"
-	"unsafe"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
@@ -1124,6 +1125,7 @@ loop:
 			// and relabeling and store the final label set.
 			lset = sl.sampleMutator(lset)
 
+			// The label set may be set to nil to indicate dropping.
 			// The label set may be set to nil to indicate dropping.
 			if lset == nil {
 				sl.cache.addDropped(mets)

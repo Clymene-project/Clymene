@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clymene-ingester
+  namespace: clymene
+  labels:
+    app: clymene-ingester
+spec:
+  selector:
+    matchLabels:
+      app: clymene-ingester
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: clymene-ingester
+    spec:
+      containers:
+        - name: clymene-agent
+          image: bourbonkk/clymene-ingester:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 15694
+          args:
+            - --prometheus.remote.url=http://prometheus-server-http.prometheus:9090/api/v1/write
+            - --kafka.consumer.brokers=kafka-1657422030-headless.kafka:9092
+            - --log-level=info
+          env:
+            - name: STORAGE_TYPE
+              value: prometheus
+      securityContext:
+        runAsUser: 1000
