@@ -172,11 +172,15 @@ type scrapeLoopOptions struct {
 	cache           *scrapeCache
 }
 
-const maxAheadTime = 10 * time.Minute
-
 type labelsMutator func(labels.Labels) labels.Labels
 
-func newScrapePool(cfg *config.ScrapeConfig, app metricstore.Writer, jitterSeed uint64, logger *zap.Logger) (*scrapePool, error) {
+func newScrapePool(
+	cfg *config.ScrapeConfig,
+	writer metricstore.Writer,
+	jitterSeed uint64,
+	splitLength int,
+	logger *zap.Logger,
+) (*scrapePool, error) {
 	targetScrapePools.Inc()
 	if logger == nil {
 		logger = zap.NewNop()
@@ -194,7 +198,7 @@ func newScrapePool(cfg *config.ScrapeConfig, app metricstore.Writer, jitterSeed 
 	ctx, cancel := context.WithCancel(context.Background())
 	sp := &scrapePool{
 		cancel:        cancel,
-		writer:        app,
+		writer:        writer,
 		config:        cfg,
 		client:        httpClient,
 		activeTargets: map[uint64]*Target{},
@@ -211,19 +215,21 @@ func newScrapePool(cfg *config.ScrapeConfig, app metricstore.Writer, jitterSeed 
 		opts.target.SetMetadataStore(cache)
 
 		return newScrapeLoop(
-			ctx,
-			opts.scraper,
-			logger.With(zap.String("target", opts.target.String())),
-			buffers,
-			func(l labels.Labels) labels.Labels {
-				return mutateSampleLabels(l, opts.target, opts.honorLabels, opts.mrc)
+			&scrapeLoopConfig{
+				ctx:     ctx,
+				sc:      opts.scraper,
+				l:       logger.With(zap.String("target", opts.target.String())),
+				buffers: buffers,
+				sampleMutator: func(l labels.Labels) labels.Labels {
+					return mutateSampleLabels(l, opts.target, opts.honorLabels, opts.mrc)
+				},
+				reportSampleMutator: func(l labels.Labels) labels.Labels { return mutateReportSampleLabels(l, opts.target) },
+				writer:              writer,
+				cache:               cache,
+				jitterSeed:          jitterSeed,
+				honorTimestamps:     opts.honorTimestamps,
+				splitLength:         splitLength,
 			},
-			func(l labels.Labels) labels.Labels { return mutateReportSampleLabels(l, opts.target) },
-			//func() metricstore.Appender { return appender(app.Appender(), opts.limit) },
-			app,
-			cache,
-			jitterSeed,
-			opts.honorTimestamps,
 		)
 	}
 
@@ -612,6 +618,8 @@ type scrapeLoop struct {
 	disabledEndOfRunStalenessMarkers bool
 
 	interval time.Duration
+
+	splitLength int
 }
 
 // scrapeCache tracks mappings of exposed metric strings to label sets and
@@ -858,40 +866,45 @@ func (c *scrapeCache) LengthMetadata() int {
 	return len(c.metadata)
 }
 
-func newScrapeLoop(ctx context.Context,
-	sc scraper,
-	l *zap.Logger,
-	buffers *pool.Pool,
-	sampleMutator labelsMutator,
-	reportSampleMutator labelsMutator,
-	writer metricstore.Writer,
-	cache *scrapeCache,
-	jitterSeed uint64,
-	honorTimestamps bool,
-) *scrapeLoop {
-	if l == nil {
-		l = zap.NewNop()
+type scrapeLoopConfig struct {
+	ctx                 context.Context
+	sc                  scraper
+	l                   *zap.Logger
+	buffers             *pool.Pool
+	sampleMutator       labelsMutator
+	reportSampleMutator labelsMutator
+	writer              metricstore.Writer
+	cache               *scrapeCache
+	jitterSeed          uint64
+	honorTimestamps     bool
+	splitLength         int
+}
+
+func newScrapeLoop(config *scrapeLoopConfig) *scrapeLoop {
+	if config.l == nil {
+		config.l = zap.NewNop()
 	}
-	if buffers == nil {
-		buffers = pool.New(1e3, 1e6, 3, func(sz int) interface{} { return make([]byte, 0, sz) })
+	if config.buffers == nil {
+		config.buffers = pool.New(1e3, 1e6, 3, func(sz int) interface{} { return make([]byte, 0, sz) })
 	}
-	if cache == nil {
-		cache = newScrapeCache()
+	if config.cache == nil {
+		config.cache = newScrapeCache()
 	}
 	sl := &scrapeLoop{
-		scraper:             sc,
-		buffers:             buffers,
-		cache:               cache,
-		writer:              writer,
-		sampleMutator:       sampleMutator,
-		reportSampleMutator: reportSampleMutator,
+		scraper:             config.sc,
+		buffers:             config.buffers,
+		cache:               config.cache,
+		writer:              config.writer,
+		sampleMutator:       config.sampleMutator,
+		reportSampleMutator: config.reportSampleMutator,
 		stopped:             make(chan struct{}),
-		jitterSeed:          jitterSeed,
-		l:                   l,
-		parentCtx:           ctx,
-		honorTimestamps:     honorTimestamps,
+		jitterSeed:          config.jitterSeed,
+		l:                   config.l,
+		parentCtx:           config.ctx,
+		honorTimestamps:     config.honorTimestamps,
+		splitLength:         config.splitLength,
 	}
-	sl.ctx, sl.cancel = context.WithCancel(ctx)
+	sl.ctx, sl.cancel = context.WithCancel(config.ctx)
 	return sl
 }
 
@@ -1171,7 +1184,8 @@ func (sl *scrapeLoop) write(timeSeries []prompb.TimeSeries, defTime int64) error
 		return err
 	}
 	timeSeries = append(timeSeries, upTs)
-	if err := sl.writer.WriteMetric(timeSeries); err != nil {
+
+	if err := sl.splitMetricWriter(timeSeries); err != nil {
 		return err
 	}
 	return nil
@@ -1238,4 +1252,27 @@ func (sl *scrapeLoop) makeTimeSeries(labels labels.Labels, ts int64, v float64) 
 	promSample = append(promSample, sample)
 
 	return promLabel, promSample
+}
+
+func (sl *scrapeLoop) splitMetricWriter(timeSeries []prompb.TimeSeries) error {
+	tsLength := len(timeSeries)
+	if sl.splitLength >= tsLength {
+		if err := sl.writer.WriteMetric(timeSeries); err != nil {
+			return err
+		}
+	} else {
+		quotient := tsLength / sl.splitLength
+		var splittedTs []prompb.TimeSeries
+		for i := 0; i <= quotient; i++ {
+			if i == quotient {
+				splittedTs = timeSeries[i*sl.splitLength+i : tsLength]
+			} else {
+				splittedTs = timeSeries[i*sl.splitLength+i : (i+1)*sl.splitLength+i]
+			}
+			if err := sl.writer.WriteMetric(splittedTs); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

@@ -454,6 +454,7 @@ type Builder struct {
 	ConfigFile   string
 	HostPort     int
 	NewSDManager bool
+	SplitLength  int
 }
 
 // NewConfigBuilder creates a new configfile builder.
