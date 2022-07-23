@@ -67,6 +67,53 @@ services:
       - es01
     networks:
       - elastic
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka-network
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.0.1
+    container_name: kafka
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "clymene:1:1,clymene-logs:1:1"   # Topic명:Partition개수:Replica개수
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-network
+  kafka-manager:
+    container_name: kafka-manager
+    image: hlebalbau/kafka-manager
+    restart: on-failure
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: "random-secret"
+      KM_ARGS: -Djava.net.preferIPv4Stack=true
+    ports:
+      - "9000:9000"
+    networks:
+      - kafka-network
+  loki:
+    image: grafana/loki:2.4.1
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
 volumes:
   data01:
     driver: local
@@ -78,3 +125,4 @@ volumes:
 networks:
   elastic:
     driver: bridge
+  kafka-network:

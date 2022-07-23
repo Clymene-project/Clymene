@@ -98,3 +98,21 @@ spec:
     rollingUpdate:
       maxUnavailable: 10%
     type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  name: node-exporter-http
+  namespace: monitoring
+  labels:
+    app: node-exporter
+spec:
+  type: ClusterIP
+  selector:
+    app: node-exporter
+  ports:
+    - name: scrape
+      port: 9100
+      protocol: TCP

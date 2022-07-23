@@ -19,7 +19,7 @@ import (
 )
 
 // NewManager is the Manager constructor
-func NewManager(logger *zap.Logger, app metricstore.Writer) *Manager {
+func NewManager(logger *zap.Logger, app metricstore.Writer, splitLength int) *Manager {
 	if logger == nil {
 		logger = zap.NewNop()
 	}
@@ -31,6 +31,7 @@ func NewManager(logger *zap.Logger, app metricstore.Writer) *Manager {
 		scrapePools:   make(map[string]*scrapePool),
 		graceShut:     make(chan struct{}),
 		triggerReload: make(chan struct{}, 1),
+		splitLength:   splitLength,
 	}
 
 	return m
@@ -50,6 +51,7 @@ type Manager struct {
 	targetSets    map[string][]*targetgroup.Group
 
 	triggerReload chan struct{}
+	splitLength   int
 }
 
 // Run receives and saves target set updates and triggers the scraping loops reloading.
@@ -102,7 +104,7 @@ func (m *Manager) reload() {
 				m.logger.Error("error reloading target set", zap.String("err", "invalid config id:"+setName))
 				continue
 			}
-			sp, err := newScrapePool(scrapeConfig, m.append, m.jitterSeed, m.logger.With(zap.String("scrape_pool", setName)))
+			sp, err := newScrapePool(scrapeConfig, m.append, m.jitterSeed, m.splitLength, m.logger.With(zap.String("scrape_pool", setName)))
 			if err != nil {
 				m.logger.Error("error creating new scrape pool", zap.Error(err), zap.String("scrape_pool", setName))
 				continue

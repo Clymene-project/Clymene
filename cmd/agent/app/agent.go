@@ -57,6 +57,7 @@ type AgentConfig struct {
 	HttpPort      int
 	MetricFactory metrics.Factory
 	NewSDManager  bool
+	SplitLength   int
 }
 
 // New constructs a new agent component
@@ -88,7 +89,7 @@ func New(config *AgentConfig) *Agent {
 		discoveryManagerScrape = legacymanager.NewManager(ctxScrape, config.Logger.With(zap.String("component", "discovery manager scrape")), legacymanager.Name("scrape"))
 	}
 
-	scrapeManager = scrape.NewManager(config.Logger.With(zap.String("component", "scrape manager")), config.MetricWriter)
+	scrapeManager = scrape.NewManager(config.Logger.With(zap.String("component", "scrape manager")), config.MetricWriter, config.SplitLength)
 
 	reloaders := []func(cfg *agent_config.Config) error{
 		scrapeManager.ApplyConfig,

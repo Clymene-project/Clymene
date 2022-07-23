@@ -134,7 +134,7 @@ func (c *Consumer) handleMessages(pc sc.PartitionConsumer) {
 				c.logger.Info("Message channel closed. ", zap.Int32("partition", pc.Partition()))
 				return
 			}
-			c.logger.Debug("Got msg", zap.Any("msg", msg))
+			//c.logger.Debug("Got msg", zap.Any("msg", msg))
 			msgMetrics.counter.Inc(1)
 			msgMetrics.offsetGauge.Update(msg.Offset)
 			msgMetrics.lagGauge.Update(pc.HighWaterMarkOffset() - msg.Offset - 1)

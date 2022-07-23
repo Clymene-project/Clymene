@@ -25,6 +25,9 @@ func (p *ProtobufUnmarshaller) UnmarshalLog(msg []byte) (*client.ProducerBatch, 
 func (p *ProtobufUnmarshaller) Unmarshal(msg []byte) ([]prompb.TimeSeries, error) {
 	req := &prompb.WriteRequest{}
 	decodeMsg, err := snappy.Decode(nil, msg)
+	if err != nil {
+		return req.Timeseries, err
+	}
 	err = proto.Unmarshal(decodeMsg, req)
 	return req.Timeseries, err
 }

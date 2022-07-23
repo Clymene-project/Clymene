@@ -91,6 +91,7 @@ func main() {
 				ConfigFile:    scrapeConfig.ConfigFile,
 				HttpPort:      scrapeConfig.HostPort,
 				NewSDManager:  scrapeConfig.NewSDManager,
+				SplitLength:   scrapeConfig.SplitLength,
 				MetricFactory: metricsFactory,
 				Logger:        logger,
 				MetricWriter:  metricWriter,
