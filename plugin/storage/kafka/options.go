@@ -35,7 +35,7 @@ const (
 	defaultBroker           = "127.0.0.1:9092"
 	defaultTopic            = "clymene"
 	defaultPromtailTopic    = "clymene-logs"
-	defaultEncoding         = EncodingJSON
+	defaultEncoding         = EncodingProto
 	defaultRequiredAcks     = "local"
 	defaultCompression      = "none"
 	defaultCompressionLevel = 0
