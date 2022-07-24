@@ -22,8 +22,9 @@ then
   docker push bourbonkk/clymene-ingester:latest
   docker push quay.io/clymene/clymene-ingester:latest
 else
-  docker build -t bourbonkk/clymene-ingester:"${BRANCH}" .
-  docker tag bourbonkk/clymene-ingester:"${BRANCH}" quay.io/clymene/clymene-ingester:"${BRANCH}"
-  docker push bourbonkk/clymene-ingester:"${BRANCH}"
-  docker push quay.io/clymene/clymene-ingester:"${BRANCH}"
+  REPLACE_BRANCH=${BRANCH//"release/"/""}
+  docker build -t bourbonkk/clymene-ingester:"${REPLACE_BRANCH}" .
+  docker tag bourbonkk/clymene-ingester:"${REPLACE_BRANCH}" quay.io/clymene/clymene-ingester:"${REPLACE_BRANCH}"
+  docker push bourbonkk/clymene-ingester:"${REPLACE_BRANCH}"
+  docker push quay.io/clymene/clymene-ingester:"${REPLACE_BRANCH}"
 fi
