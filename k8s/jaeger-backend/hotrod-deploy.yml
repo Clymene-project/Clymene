@@ -24,6 +24,8 @@ spec:
           env:
             - name: JAEGER_AGENT_HOST
               value: jaeger-agent
+            - name: JAEGER_TAGS
+              value: cluster=clymene-cluster
       securityContext:
         runAsUser: 1000
 ---
