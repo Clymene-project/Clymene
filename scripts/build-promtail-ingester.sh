@@ -22,8 +22,9 @@ then
   docker push bourbonkk/promtail-ingester:latest
   docker push quay.io/clymene/promtail-ingester:latest
 else
-  docker build -t bourbonkk/promtail-ingester:"${BRANCH}" .
-  docker tag bourbonkk/promtail-ingester:"${BRANCH}" quay.io/clymene/promtail-ingester:"${BRANCH}"
-  docker push bourbonkk/promtail-ingester:"${BRANCH}"
-  docker push quay.io/clymene/promtail-ingester:"${BRANCH}"
+  REPLACE_BRANCH=${BRANCH//"release/"/""}
+  docker build -t bourbonkk/promtail-ingester:"${REPLACE_BRANCH}" .
+  docker tag bourbonkk/promtail-ingester:"${REPLACE_BRANCH}" quay.io/clymene/promtail-ingester:"${REPLACE_BRANCH}"
+  docker push bourbonkk/promtail-ingester:"${REPLACE_BRANCH}"
+  docker push quay.io/clymene/promtail-ingester:"${REPLACE_BRANCH}"
 fi

@@ -17,6 +17,7 @@
 package dbmodel
 
 import (
+	"github.com/Clymene-project/Clymene/model/timestamp"
 	"github.com/Clymene-project/Clymene/pkg/logproto"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/prometheus/prometheus/pkg/labels"
@@ -33,7 +34,7 @@ func (c *Converter) ConvertTsToJSON(metric prompb.TimeSeries) map[string]interfa
 		jsonTs[label.Name] = label.Value
 	}
 	for _, sample := range metric.Samples {
-		jsonTs["timestamp"] = sample.Timestamp
+		jsonTs["timestamp"] = timestamp.Time(sample.Timestamp)
 		jsonTs["value"] = sample.Value
 	}
 	return jsonTs

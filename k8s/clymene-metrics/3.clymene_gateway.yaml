@@ -16,13 +16,13 @@ spec:
         app: clymene-gateway
     spec:
       containers:
-        - name: clymene-agent
+        - name: gateway
           image: bourbonkk/clymene-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 15694
           args:
-            - --kafka.producer.brokers=kafka-1657422030-headless.kafka:9092
+            - --kafka.producer.brokers=kafka.kafka:9092
             - --log-level=info
           env:
             - name: STORAGE_TYPE

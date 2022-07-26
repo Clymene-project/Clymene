@@ -21,8 +21,9 @@ then
   docker push bourbonkk/clymene-agent:latest
   docker push quay.io/clymene/clymene-agent:latest
 else
-  docker build -t bourbonkk/clymene-agent:"${BRANCH}" .
-  docker tag bourbonkk/clymene-agent:"${BRANCH}" quay.io/clymene/clymene-agent:"${BRANCH}"
-  docker push bourbonkk/clymene-agent:"${BRANCH}"
-  docker push quay.io/clymene/clymene-agent:"${BRANCH}"
+  REPLACE_BRANCH=${BRANCH//"release/"/""}
+  docker build -t bourbonkk/clymene-agent:"${REPLACE_BRANCH}" .
+  docker tag bourbonkk/clymene-agent:"${REPLACE_BRANCH}" quay.io/clymene/clymene-agent:"${REPLACE_BRANCH}"
+  docker push bourbonkk/clymene-agent:"${REPLACE_BRANCH}"
+  docker push quay.io/clymene/clymene-agent:"${REPLACE_BRANCH}"
 fi

@@ -84,7 +84,7 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "clymene:1:1,clymene-logs:1:1"   # Topic명:Partition개수:Replica개수
+      KAFKA_CREATE_TOPICS: "clymene:1:1,clymene-logs:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
