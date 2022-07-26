@@ -116,6 +116,7 @@ the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-projec
 1. AI/ML platform for clymene(https://github.com/Clymene-project/clymene-analyzer)
 2. push-type agent(node-exporter, cadvisor, process-exporter, etc)
 3. Add new pipeline(trace or Something - [discussions](https://github.com/Clymene-project/Clymene/discussions))
+4. eBPF trace agent(for v3.0.0 release)
 
 ## Get in Touch
 
