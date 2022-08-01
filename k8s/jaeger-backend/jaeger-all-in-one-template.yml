@@ -28,11 +28,11 @@ items:
             prometheus.io/port: "16686"
         spec:
           containers:
-            -   env:
-                  - name: COLLECTOR_ZIPKIN_HTTP_PORT
-                    value: "9411"
-                image: jaegertracing/all-in-one
+            -   image: jaegertracing/all-in-one
                 name: jaeger
+                env:
+                  - name: JAEGER_AGENT_PORT
+                    value: '6831'
                 ports:
                   - containerPort: 5775
                     protocol: UDP
@@ -126,7 +126,6 @@ items:
           port: 5778
           protocol: TCP
           targetPort: 5778
-      clusterIP: None
       selector:
         app.kubernetes.io/name: jaeger
         app.kubernetes.io/component: all-in-one
@@ -145,7 +144,6 @@ items:
           port: 9411
           protocol: TCP
           targetPort: 9411
-      clusterIP: None
       selector:
         app.kubernetes.io/name: jaeger
         app.kubernetes.io/component: all-in-one

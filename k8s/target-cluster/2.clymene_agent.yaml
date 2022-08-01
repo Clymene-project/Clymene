@@ -24,7 +24,7 @@ spec:
             - containerPort: 15692
           args:
             - --config.file=/etc/clymene/clymene.yml
-            - --gateway.grpc.host-port=clymene-gateway:15610
+            - --gateway.grpc.host-port=[CLYMENE_GATEWAY_NODE_PORT]:30610
             - --log-level=info
           env:
             - name: STORAGE_TYPE

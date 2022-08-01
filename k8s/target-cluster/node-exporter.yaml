@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: clymene
+  labels:
+    k8s-app: node-exporter
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: node-exporter
+    spec:
+      containers:
+        - image: prom/node-exporter
+          name: node-exporter
+          ports:
+            - containerPort: 9100
+              protocol: TCP
+              name: http
+  selector:
+    matchLabels:
+      k8s-app: node-exporter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: node-exporter
+  name: node-exporter
+  namespace: clymene
+spec:
+  ports:
+    - name: http
+      port: 9100
+      nodePort: 31672
+      protocol: TCP
+  type: NodePort
+  selector:
+    k8s-app: node-exporter
