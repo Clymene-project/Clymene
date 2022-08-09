@@ -131,6 +131,7 @@ To learn more about Clymene, consult the following talks and articles.
 
 ### Recent talks and articles
 - Jan 2022 blog post "[Efficient time series data collection and management plan in a distributed environment](https://medium.com/@clymeneallen/efficient-time-series-data-collection-and-management-plan-in-a-distributed-environment-5c4a62d45e36)"
+- Aug 2022 blog post "[Best Practices, Monitoring System for Multi-K8s Cluster Environments Using Open Source](https://medium.com/@clymeneallen/best-practices-monitoring-system-for-multi-k8s-cluster-environments-using-open-source-d85544052f37)"
 
 ## License
 
