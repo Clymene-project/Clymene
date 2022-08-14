@@ -16,7 +16,7 @@ spec:
         app: hotrod
     spec:
       containers:
-        - name: promtail-agent
+        - name: hotrod
           image: jaegertracing/example-hotrod:latest
           imagePullPolicy: Always
           ports:
@@ -24,6 +24,8 @@ spec:
           env:
             - name: JAEGER_AGENT_HOST
               value: jaeger-agent
+            - name: JAEGER_AGENT_PORT
+              value: '6831'
             - name: JAEGER_TAGS
               value: cluster=clymene-cluster
       securityContext:
