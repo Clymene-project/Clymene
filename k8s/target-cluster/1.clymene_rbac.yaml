@@ -7,19 +7,13 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: clymene
-  namespace: clymene
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: default
+  name: clymene-agent
   namespace: clymene
 ---
 apiVersion: rbac.authorization.k8s.io/v1  # kubernetes 1.22+
 kind: ClusterRole
 metadata:
-  name: clymene
+  name: clymene-agent
   namespace: clymene
 rules:
   - apiGroups: [""]
@@ -30,16 +24,25 @@ rules:
       - services
       - endpoints
       - pods
-    verbs: ["get", "list", "watch"]
+    verbs:
+      - get
+      - list
+      - watch
   - apiGroups:
       - extensions
       - networking.k8s.io
     resources:
       - ingresses
       - configmaps
-    verbs: ["get", "list", "watch"]
-  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
-    verbs: ["get"]
+    verbs:
+      - get
+      - list
+      - watch
+  - nonResourceURLs:
+      - /metrics
+      - /metrics/cadvisor
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1 # kubernetes 1.22+
 kind: ClusterRoleBinding
@@ -47,23 +50,9 @@ metadata:
   name: clymene
 subjects:
   - kind: ServiceAccount
-    name: clymene
+    name: clymene-agent
     namespace: clymene
 roleRef:
   kind: ClusterRole
-  name: clymene
+  name: clymene-agent
   apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1 # kubernetes 1.22+
-kind: ClusterRoleBinding
-metadata:
-  name: clymene-default
-subjects:
-  - kind: ServiceAccount
-    name: default
-    namespace: clymene
-roleRef:
-  kind: ClusterRole
-  name: clymene
-  apiGroup: rbac.authorization.k8s.io
----

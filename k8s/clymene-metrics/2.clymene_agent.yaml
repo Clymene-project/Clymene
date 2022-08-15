@@ -125,7 +125,7 @@ data:
             regex: __meta_kubernetes_pod_label_(.+)
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
-            target_label: kubernetes_namespace
+            target_label: namespace
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
             target_label: kubernetes_pod_name
@@ -157,7 +157,10 @@ data:
           - action: replace
             target_label: cluster
             replacement: clymene-cluster
-            
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+
       - job_name: 'kubernetes-service-endpoints'
         kubernetes_sd_configs:
           - role: endpoints
@@ -182,7 +185,7 @@ data:
             regex: __meta_kubernetes_service_label_(.+)
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
-            target_label: kubernetes_namespace
+            target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             action: replace
             target_label: kubernetes_name
