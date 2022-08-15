@@ -23,9 +23,9 @@ items:
             app: jaeger
             app.kubernetes.io/name: jaeger
             app.kubernetes.io/component: all-in-one
-          annotations:
-            prometheus.io/scrape: "true"
-            prometheus.io/port: "16686"
+#          annotations:
+#            prometheus.io/scrape: "true"
+#            prometheus.io/port: "16686"
         spec:
           containers:
             -   image: jaegertracing/all-in-one
