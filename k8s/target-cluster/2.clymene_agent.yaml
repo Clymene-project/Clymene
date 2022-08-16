@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: clymene-agent
-  namespace: clymene
+  namespace: target
   labels:
     app: clymene-agent
 spec:
@@ -43,7 +43,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: clymene-agent
-  namespace: clymene
+  namespace: target
   labels:
     app: clymene-agent
 spec:
@@ -62,7 +62,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clymene-agent-config
-  namespace: clymene
+  namespace: target
 data:
   clymene.yml: |
     global:
@@ -81,7 +81,7 @@ data:
             regex: default;kubernetes;https
           - action: replace
             target_label: cluster
-            replacement: clymene-cluster
+            replacement: target-cluster
 
       - job_name: 'kubernetes-nodes'
         scheme: https
@@ -101,7 +101,7 @@ data:
             replacement: /api/v1/nodes/${1}/proxy/metrics
           - action: replace
             target_label: cluster
-            replacement: clymene-cluster
+            replacement: target-cluster
       
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
@@ -129,12 +129,12 @@ data:
             target_label: kubernetes_pod_name
           - action: replace
             target_label: cluster
-            replacement: clymene-cluster
+            replacement: target-cluster
       - job_name: 'kube-state-metrics'
         static_configs:
           - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
             labels:
-              cluster: clymene-cluster
+              cluster: target-cluster
       
       - job_name: 'kubernetes-cadvisor'
         scheme: https
@@ -154,7 +154,7 @@ data:
             replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
           - action: replace
             target_label: cluster
-            replacement: clymene-cluster
+            replacement: target-cluster
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
             target_label: namespace
@@ -189,4 +189,9 @@ data:
             target_label: kubernetes_name
           - action: replace
             target_label: cluster
-            replacement: clymene-cluster
+            replacement: target-cluster
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: [ 'node-exporter:9100' ]
+            labels:
+              cluster: 'target-cluster'

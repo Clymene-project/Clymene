@@ -1,20 +1,14 @@
-# rbac.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: clymene
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: clymene-agent
-  namespace: clymene
+  namespace: target
 ---
 apiVersion: rbac.authorization.k8s.io/v1  # kubernetes 1.22+
 kind: ClusterRole
 metadata:
   name: clymene-agent
-  namespace: clymene
+  namespace: target
 rules:
   - apiGroups: [""]
     resources:
@@ -51,7 +45,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: clymene-agent
-    namespace: clymene
+    namespace: target
 roleRef:
   kind: ClusterRole
   name: clymene-agent

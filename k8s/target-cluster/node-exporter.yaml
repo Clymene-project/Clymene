@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-exporter
-  namespace: clymene
+  namespace: target
   labels:
     k8s-app: node-exporter
 spec:
@@ -28,7 +28,7 @@ metadata:
   labels:
     k8s-app: node-exporter
   name: node-exporter
-  namespace: clymene
+  namespace: target
 spec:
   ports:
     - name: http

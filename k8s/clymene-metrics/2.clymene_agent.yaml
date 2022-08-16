@@ -192,3 +192,8 @@ data:
           - action: replace
             target_label: cluster
             replacement: clymene-cluster
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: [ 'node-exporter:9100' ]
+            labels:
+              cluster: 'clymene-cluster'
