@@ -104,12 +104,12 @@ communication.
 ## How to work it on k8s
 
 For example, see
-the [clymene_using_gateway.yaml](https://github.com/Clymene-project/Clymene/blob/main/k8s/Clymene_using_gateway.yaml)
+the [k8s example](https://clymene-project.github.io/docs/tutorials/k8s-example/)
 
 ## How to work it on docker-compose
 
 For example, see
-the [docker-compose-clymene_using_gateway.yml](https://github.com/Clymene-project/Clymene/blob/main/docker-compose/docker-compose-clymene_using_gateway.yml)
+the [docker-compose example](https://clymene-project.github.io/docs/tutorials/docker-compose/)
 
 ## Roadmap
 
