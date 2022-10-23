@@ -34,7 +34,8 @@ spec:
           args:
             - --config.file=/etc/promtail/promtail.yaml
             - --gateway.grpc.host-port=promtail-gateway:15610
-#            - --loki.client.url=http://loki.loki:3100/loki/api/v1/push
+           # - --loki.client.url=http://loki.loki:3100/loki/api/v1/push
+           # - --es.server-urls=http://elasticsearch.es:9200
 #            - --log-level=debug
           env:
             - name: 'HOSTNAME'

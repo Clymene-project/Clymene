@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: clymene-gateway
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -23,6 +23,7 @@ spec:
             - containerPort: 15694
           args:
             - --kafka.producer.brokers=kafka.kafka:9092
+           # - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
           env:
             - name: STORAGE_TYPE

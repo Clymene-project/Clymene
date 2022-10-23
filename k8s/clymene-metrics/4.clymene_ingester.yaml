@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: clymene-ingester
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -24,10 +24,12 @@ spec:
           args:
             - --prometheus.remote.url=http://prometheus-server-http.prometheus:9090/api/v1/write
             - --kafka.consumer.brokers=kafka.kafka:9092
-#            - --es.server-urls=http://elasticsearch.es:9200
+            - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
+            - --influxdb.url=http://influxdb.influxdb:8086
+            - --opentsdb.host=opentsdb.opentsdb
           env:
             - name: STORAGE_TYPE
-              value: prometheus #,elasticsearch
+              value: prometheus,elasticsearch,influxdb,opentsdb
       securityContext:
         runAsUser: 1000

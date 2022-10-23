@@ -207,6 +207,9 @@ func (o *Options) makeTags(StringTags string) {
 	tags := strings.ReplaceAll(StringTags, " ", "") // for blank safety
 	for _, tag := range strings.Split(tags, ",") {
 		splitTag := strings.Split(tag, "=")
+		if len(splitTag) != 2 {
+			continue
+		}
 		o.AddDefaultTag(splitTag[0], splitTag[1])
 	}
 }
