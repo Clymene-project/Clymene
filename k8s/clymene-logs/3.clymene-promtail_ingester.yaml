@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: promtail-ingester
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -24,10 +24,10 @@ spec:
           args:
             - --kafka.consumer.brokers=kafka.kafka:9092
             - --loki.client.url=http://loki.loki:3100/loki/api/v1/push
-#            - --es.server-urls=http://elasticsearch.es:9200
+            - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
           env:
             - name: STORAGE_TYPE
-              value: loki #,elasticsearch
+              value: loki,elasticsearch
       securityContext:
         runAsUser: 1000
