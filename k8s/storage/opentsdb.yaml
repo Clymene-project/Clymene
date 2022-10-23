@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opentsdb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opentsdb
+  namespace: opentsdb
+  labels:
+    app: opentsdb
+spec:
+  selector:
+    matchLabels:
+      app: opentsdb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opentsdb
+    spec:
+      volumes:
+        - name: opentsdb-config
+          configMap:
+            name: opentsdb-config
+      containers:
+        - name: opentsdb
+          image: petergrace/opentsdb-docker:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4242
+            - containerPort: 9091
+          volumeMounts:
+            - name: opentsdb-config
+              mountPath: /etc/opentsdb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opentsdb
+  namespace: opentsdb
+  labels:
+    app: opentsdb
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 4242
+      targetPort: 4242
+    - name: web
+      port: 9091
+      targetPort: 9091
+  selector:
+    app: opentsdb
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opentsdb-config
+  namespace: opentsdb
+data:
+  opentsdb.conf: |
+    tsd.network.port = 4242
+    tsd.http.staticroot = /usr/local/share/opentsdb/static/
+    tsd.http.cachedir = /tmp/opentsdb
+    tsd.core.plugin_path = /opentsdb-plugins
+    tsd.core.auto_create_metrics = true
+    tsd.http.request.enable_chunked = true
+    tsd.http.request.max_chunk = 10000

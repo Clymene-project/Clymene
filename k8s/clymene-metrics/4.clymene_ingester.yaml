@@ -27,8 +27,9 @@ spec:
             - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
             - --influxdb.url=http://influxdb.influxdb:8086
+            - --opentsdb.host=opentsdb.opentsdb
           env:
             - name: STORAGE_TYPE
-              value: prometheus,elasticsearch,influxdb
+              value: prometheus,elasticsearch,influxdb,opentsdb
       securityContext:
         runAsUser: 1000
