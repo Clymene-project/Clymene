@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: promtail-gateway
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
