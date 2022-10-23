@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: ^1.16
+          go-version: ^1.18
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2

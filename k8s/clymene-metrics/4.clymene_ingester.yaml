@@ -27,6 +27,9 @@ spec:
             - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
             - --influxdb.url=http://influxdb.influxdb:8086
+            - --influxdb.token=ESc9kxvvBFJ-fjZOq8_ikYDUK63WJl3_klFn_V3-sWlX_bgrbVPY7VT-ZZIMo0OLDwAjBxrAECZkdWD4oe1gyQ==
+            - --influxdb.org=clymene
+            - --influxdb.bucket=clymene
             - --opentsdb.host=opentsdb.opentsdb
           env:
             - name: STORAGE_TYPE
