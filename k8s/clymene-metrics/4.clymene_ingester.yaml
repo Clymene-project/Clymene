@@ -23,16 +23,16 @@ spec:
             - containerPort: 15694
           args:
             - --prometheus.remote.url=http://prometheus-server-http.prometheus:9090/api/v1/write
-            - --kafka.consumer.brokers=kafka.kafka:9092
             - --es.server-urls=http://elasticsearch.es:9200
             - --log-level=info
-            - --influxdb.url=http://influxdb.influxdb:8086
-            - --influxdb.token=ESc9kxvvBFJ-fjZOq8_ikYDUK63WJl3_klFn_V3-sWlX_bgrbVPY7VT-ZZIMo0OLDwAjBxrAECZkdWD4oe1gyQ==
-            - --influxdb.org=clymene
-            - --influxdb.bucket=clymene
-            - --opentsdb.host=opentsdb.opentsdb
+#            - --kafka.consumer.brokers=kafka.kafka:9092
+#            - --influxdb.url=http://influxdb.influxdb:8086
+#            - --influxdb.token=6nfP-k1yvSd6nxXWBna_1cW9Dgt-37Z3RfjhSMjWyuZEGYSMxd_5nHDxbg8pVjFEsoO2G2hpqr311XKVklqC9A==
+#            - --influxdb.org=clymene
+#            - --influxdb.bucket=clymene
+#            - --opentsdb.host=opentsdb.opentsdb
           env:
             - name: STORAGE_TYPE
-              value: prometheus,elasticsearch,influxdb,opentsdb
+              value: prometheus,elasticsearch # opentsdb # prometheus,elasticsearch,influxdb,opentsdb
       securityContext:
         runAsUser: 1000
