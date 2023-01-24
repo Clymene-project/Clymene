@@ -101,6 +101,7 @@ STORAGE_TYPE=elasticsearch,prometheus  # composite write
 - [Opentsdb option](https://clymene-project.github.io/docs/database-options/opentsdb/)
 - [influxdb option](https://clymene-project.github.io/docs/database-options/influxdb/)
 - [TDengine options](https://clymene-project.github.io/docs/database-options/tdengine/)
+- [Druid usage](http://clymene-project.github.io/docs/database-options/druid)
 
 ### Docker-compose Example
 ```yaml
