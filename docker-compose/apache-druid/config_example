@@ -1,0 +1,57 @@
+{
+  "type": "kafka",
+  "spec": {
+    "ioConfig": {
+      "type": "kafka",
+      "consumerProperties": {
+        "bootstrap.servers": "localhost:9092"
+      },
+      "topic": "clymene",
+      "inputFormat": {
+        "type": "json",
+        "featureSpec": {
+          "ALLOW_COMMENTS": true,
+          "ALLOW_YAML_COMMENTS": true,
+          "ALLOW_UNQUOTED_FIELD_NAMES": true,
+          "ALLOW_SINGLE_QUOTES": true,
+          "ALLOW_UNQUOTED_CONTROL_CHARS": true,
+          "ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER": true,
+          "ALLOW_NUMERIC_LEADING_ZEROS": true,
+          "ALLOW_NON_NUMERIC_NUMBERS": true,
+          "ALLOW_MISSING_VALUES": true,
+          "ALLOW_TRAILING_COMMA": true
+        }
+      },
+      "useEarliestOffset": true
+    },
+    "tuningConfig": {
+      "type": "kafka"
+    },
+    "dataSchema": {
+      "dataSource": "clymene",
+      "timestampSpec": {
+        "column": "timestamp",
+        "format": "iso"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          "__name__",
+          "cluster",
+          "instance",
+          "job",
+          "quantile",
+          {
+            "type": "double",
+            "name": "value"
+          },
+          "version"
+        ]
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "day"
+      }
+    }
+  }
+}
