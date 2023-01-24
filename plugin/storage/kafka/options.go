@@ -31,6 +31,7 @@ const (
 	suffixBatchSize        = ".batch-size"
 	suffixBatchMinMessages = ".batch-min-messages"
 	suffixBatchMaxMessages = ".batch-max-messages"
+	suffixFlattenForDruid  = ".flatten-for-druid"
 
 	defaultBroker           = "127.0.0.1:9092"
 	defaultTopic            = "clymene"
@@ -43,6 +44,7 @@ const (
 	defaultBatchSize        = 0
 	defaultBatchMinMessages = 0
 	defaultBatchMaxMessages = 0
+	defaultFlattenForDruid  = false
 )
 
 var (
@@ -99,6 +101,7 @@ type Options struct {
 	Topic         string                 `mapstructure:"topic"`
 	PromtailTopic string                 `mapstructure:"promtail_topic"`
 	Encoding      string                 `mapstructure:"encoding"`
+	Flatten       bool                   `mapstructure:"flatten"`
 }
 
 // AddFlags adds flags for Options
@@ -159,6 +162,11 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultEncoding,
 		fmt.Sprintf(`Encoding of metric ("%s" or "%s") sent to kafka.`, EncodingJSON, EncodingProto),
 	)
+	flagSet.Bool(
+		configPrefix+suffixFlattenForDruid,
+		defaultFlattenForDruid,
+		"flattening settings for using druid.",
+	)
 
 	auth.AddFlags(configPrefix, flagSet)
 }
@@ -199,6 +207,7 @@ func (opt *Options) InitFromViper(v *viper.Viper) {
 	opt.Topic = v.GetString(configPrefix + suffixTopic)
 	opt.PromtailTopic = v.GetString(configPrefix + suffixPromtailTopic)
 	opt.Encoding = v.GetString(configPrefix + suffixEncoding)
+	opt.Flatten = v.GetBool(configPrefix + suffixFlattenForDruid)
 }
 
 // stripWhiteSpace removes all whitespace characters from a string
@@ -224,7 +233,7 @@ func getCompressionLevel(mode string, compressionLevel int) (int, error) {
 	return compressionLevel, nil
 }
 
-//getCompressionMode maps input modes to sarama CompressionCodec
+// getCompressionMode maps input modes to sarama CompressionCodec
 func getCompressionMode(mode string) (sarama.CompressionCodec, error) {
 	compressionMode, ok := compressionModes[mode]
 	if !ok {
@@ -234,7 +243,7 @@ func getCompressionMode(mode string) (sarama.CompressionCodec, error) {
 	return compressionMode.compressor, nil
 }
 
-//getRequiredAcks maps input ack values to sarama requiredAcks
+// getRequiredAcks maps input ack values to sarama requiredAcks
 func getRequiredAcks(acks string) (sarama.RequiredAcks, error) {
 	requiredAcks, ok := requiredAcks[strings.ToLower(acks)]
 	if !ok {

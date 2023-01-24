@@ -1,3 +1,5 @@
+# sudo docker-compose -f kafka-druid-superset-docker-compose.yml up -d
+# sudo docker-compose -f kafka-druid-superset-docker-compose.yml kill
 version: "3"
 
 volumes:

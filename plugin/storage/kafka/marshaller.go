@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/Clymene-project/Clymene/cmd/promtail/app/client"
+	"github.com/Clymene-project/Clymene/plugin/storage/es/metricstore/dbmodel"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
@@ -30,7 +31,7 @@ func (h *protobufMarshaller) MarshalMetric(ts []prompb.TimeSeries) ([]byte, erro
 	return compressed, nil
 }
 
-func (h *protobufMarshaller) MarshalLog(batch *client.ProducerBatch) ([]byte, error) {
+func (h *protobufMarshaller) MarshalLog(_ *client.ProducerBatch) ([]byte, error) {
 	panic("not supported")
 }
 
@@ -61,4 +62,31 @@ func (h *jsonMarshaller) MarshalLog(batch *client.ProducerBatch) ([]byte, error)
 
 func NewJSONMarshaller() *jsonMarshaller {
 	return &jsonMarshaller{&jsonpb.Marshaler{}}
+}
+
+type jsonFlattenMarshaller struct {
+	converter dbmodel.Converter
+}
+
+func (j *jsonFlattenMarshaller) MarshalMetric(metrics []prompb.TimeSeries) ([]byte, error) {
+	var metricsMap []byte
+	for _, metric := range metrics {
+		jsonMetric := j.converter.ConvertTsToJSON(metric)
+		marshaledMetric, err := json.Marshal(jsonMetric)
+		if err != nil {
+			return nil, err
+		}
+		metricsMap = append(metricsMap, marshaledMetric...)
+	}
+	return metricsMap, nil
+}
+
+func (j *jsonFlattenMarshaller) MarshalLog(_ *client.ProducerBatch) ([]byte, error) {
+	panic("not supported")
+}
+
+func NewJsonFlattenMarshaller() *jsonFlattenMarshaller {
+	return &jsonFlattenMarshaller{
+		converter: dbmodel.Converter{},
+	}
 }
