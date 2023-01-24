@@ -82,6 +82,15 @@ tdengine
 ```
 STORAGE_TYPE=tdengine
 ```
+druid
+```
+# env setting
+STORAGE_TYPE=kafka
+# arg
+--kafka.producer.encoding=json
+--kafka.producer.flatten-for-druid
+```
+
 Several
 
 ```
@@ -90,14 +99,15 @@ STORAGE_TYPE=elasticsearch,prometheus  # composite write
 
 #### 2. Option description by storage type
 
-- [Kafka option](./kafka/kafka-option.md)
-- [ElasticSearch option](./elasticsearch/es-option.md)
-- [Prometheus option](prometheus/prometheus-option.md)
-- [cortex option](./cortex/cortex-option.md)
-- [gateway option](./gateway/gataway-option.md)
-- [Opentsdb option](./opentsdb/opentsdb-option.md)
-- [influxdb option](./influxdb/influxdb-options.md)
-- [TDengine options](./tdengine/tdengine-options.md)
+- [Kafka option](https://clymene-project.github.io/docs/database-options/kafka/)
+- [ElasticSearch option](https://clymene-project.github.io/docs/database-options/elasticsearch/)
+- [Prometheus option](https://clymene-project.github.io/docs/database-options/prometheus/)
+- [cortex option](https://clymene-project.github.io/docs/database-options/cortex/)
+- [gateway option](https://clymene-project.github.io/docs/database-options/gateway/)
+- [Opentsdb option](https://clymene-project.github.io/docs/database-options/opentsdb/)
+- [influxdb option](https://clymene-project.github.io/docs/database-options/influxdb/)
+- [TDengine options](https://clymene-project.github.io/docs/database-options/tdengine/)
+- [Druid usage](http://clymene-project.github.io/docs/database-options/druid)
 
 ### Docker-compose Example
 

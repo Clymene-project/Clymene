@@ -48,11 +48,9 @@ STORAGE_TYPE=kafka
 
 #### 2. Option description by storage type
 
-- [ElasticSearch option](../clymene-promtail/elasticsearch/es-option.md)
-- [Loki option](../clymene-promtail/loki/loki-option.md)
-- [Kafka option](../clymene-promtail/kafka/kafka-option.md)
-- [Promtail-gateway](../clymene-promtail/gateway/gateway-option.md)
-
+- [ElasticSearch option](https://clymene-project.github.io/docs/database-options/elasticsearch/)
+- [Loki option](https://clymene-project.github.io/docs/database-options/loki/)
+- [Kafka option](https://clymene-project.github.io/docs/database-options/kafka/)
 
 ### Docker-compose Example
 ```yaml
