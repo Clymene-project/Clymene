@@ -53,3 +53,10 @@ mv ../out/promtail-gateway-linux-arm64 ../out/clymene-${1}-linux-arm64/
 mv ../out/promtail-gateway-linux-ppc64le ../out/clymene-${1}-linux-ppc64le/
 mv ../out/promtail-gateway-linux-s390x ../out/clymene-${1}-linux-s390x/
 mv ../out/promtail-gateway-windows-amd64 ../out/clymene-${1}-windows-amd64/promtail-gateway-windows-amd64.exe
+
+tar Jcvf ../out/clymene-${1}-linux-amd64.tar.xz ../out/clymene-${1}-linux-amd64/
+tar Jcvf ../out/clymene-${1}-darwin-amd64.tar.xz ../out/clymene-${1}-darwin-amd64/
+tar Jcvf ../out/clymene-${1}-linux-arm64.tar.xz ../out/clymene-${1}-linux-arm64/
+tar Jcvf ../out/clymene-${1}-linux-ppc64le.tar.xz ../out/clymene-${1}-linux-ppc64le/
+tar Jcvf ../out/clymene-${1}-linux-s390x.tar.xz ../out/clymene-${1}-linux-s390x/
+tar Jcvf ../out/clymene-${1}-windows-amd64.tar.xz ../out/clymene-${1}-windows-amd64/
