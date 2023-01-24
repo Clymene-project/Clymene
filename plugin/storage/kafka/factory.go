@@ -71,7 +71,11 @@ func (f *Factory) Initialize(metricsFactory metrics.Factory, logger *zap.Logger)
 		f.marshaller = NewProtobufMarshaller()
 		logger.Info("promtail can only use json Marshaller.")
 	case EncodingJSON:
-		f.marshaller = NewJSONMarshaller()
+		if f.options.Flatten {
+			f.marshaller = NewJsonFlattenMarshaller()
+		} else {
+			f.marshaller = NewJSONMarshaller()
+		}
 	default:
 		return errors.New("kafka encoding is not one of '" + EncodingJSON + "' or '" + EncodingProto + "'")
 	}

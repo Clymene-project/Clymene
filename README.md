@@ -21,7 +21,7 @@ The Clymene project is a platform for collecting time series data and log data. 
 Or, depending on the situation, you can use the Clymene components to configure a variety of architectures. It can be configured with an architecture that can be used with a lot of traffic. 
 The Clymene Project provides various storage types, so choose a storage type you are familiar with. And build great monitoring systems using familiar dashboards.  
   
-<img src="https://user-images.githubusercontent.com/25188468/165649203-7382735f-0c1f-4388-93f3-65b57b06d7f4.png" width="90%" height="90%" alt="architecture_v2.1.0">
+<img src="https://user-images.githubusercontent.com/25188468/214236117-0f195984-5c17-4a88-a661-2186ae10830d.png" width="90%" height="90%" alt="architecture_v2.1.0">
 
 # Components
 
