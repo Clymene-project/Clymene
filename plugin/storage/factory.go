@@ -25,7 +25,6 @@ import (
 	"github.com/Clymene-project/Clymene/plugin/storage/gateway"
 	"github.com/Clymene-project/Clymene/plugin/storage/influxdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/kafka"
-	"github.com/Clymene-project/Clymene/plugin/storage/kdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/loki"
 	"github.com/Clymene-project/Clymene/plugin/storage/opentsdb"
 	"github.com/Clymene-project/Clymene/plugin/storage/prometheus"
@@ -103,8 +102,6 @@ func (f *Factory) getFactoryOfType(factoryType string) (storage.Factory, error) 
 		return gateway.NewFactory(), nil
 	case opentsdbStorageType:
 		return opentsdb.NewFactory(), nil
-	case kdbStorageType:
-		return kdb.NewFactory(), nil
 	case tdengineStorageType:
 		return tdengine.NewFactory(), nil
 	case lokiStorageType:

@@ -93,7 +93,10 @@ func NewMetricWriter(p WriterParams) *Writer {
 
 func (s *Writer) WriteMetric(metrics []prompb.TimeSeries) error {
 	for _, metric := range metrics {
-		jsonTimeSeries := s.converter.ConvertTsToJSON(metric)
+		jsonTimeSeries, err := s.converter.ConvertTsToJSON(metric)
+		if err != nil {
+			continue
+		}
 		s.writeMetric(&jsonTimeSeries)
 	}
 	return nil
