@@ -71,7 +71,10 @@ type jsonFlattenMarshaller struct {
 func (j *jsonFlattenMarshaller) MarshalMetric(metrics []prompb.TimeSeries) ([]byte, error) {
 	var metricsMap []byte
 	for _, metric := range metrics {
-		jsonMetric := j.converter.ConvertTsToJSON(metric)
+		jsonMetric, err := j.converter.ConvertTsToJSON(metric)
+		if err != nil {
+			continue
+		}
 		marshaledMetric, err := json.Marshal(jsonMetric)
 		if err != nil {
 			return nil, err

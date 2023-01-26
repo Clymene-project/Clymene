@@ -17,27 +17,32 @@
 package dbmodel
 
 import (
+	"fmt"
 	"github.com/Clymene-project/Clymene/model/timestamp"
 	"github.com/Clymene-project/Clymene/pkg/logproto"
 	"github.com/Clymene-project/Clymene/prompb"
 	"github.com/prometheus/prometheus/pkg/labels"
 	"github.com/prometheus/prometheus/promql/parser"
+	"math"
 	"strconv"
 )
 
 type Converter struct{}
 
 // ConvertTsToJSON Change TimeSeries data to json
-func (c *Converter) ConvertTsToJSON(metric prompb.TimeSeries) map[string]interface{} {
+func (c *Converter) ConvertTsToJSON(metric prompb.TimeSeries) (map[string]interface{}, error) {
 	jsonTs := make(map[string]interface{})
+	for _, sample := range metric.Samples {
+		if math.IsNaN(sample.Value) || math.IsInf(sample.Value, 1) {
+			return nil, fmt.Errorf("sample value is NaN or Inf")
+		}
+		jsonTs["value"] = sample.Value
+		jsonTs["timestamp"] = timestamp.Time(sample.Timestamp)
+	}
 	for _, label := range metric.Labels {
 		jsonTs[label.Name] = label.Value
 	}
-	for _, sample := range metric.Samples {
-		jsonTs["timestamp"] = timestamp.Time(sample.Timestamp)
-		jsonTs["value"] = sample.Value
-	}
-	return jsonTs
+	return jsonTs, nil
 }
 
 func (c *Converter) ConvertLogsToJSON(tenantId string, labels labels.Labels, entry logproto.Entry, hash uint64) (*map[string]interface{}, error) {
