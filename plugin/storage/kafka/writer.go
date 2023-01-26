@@ -82,6 +82,7 @@ func NewMetricWriter(
 		producer:   producer,
 		marshaller: marshaller,
 		topic:      topic,
+		metrics:    writeMetrics,
 	}
 }
 
@@ -132,5 +133,6 @@ func NewLogWriter(
 		producer:   producer,
 		marshaller: marshaller,
 		topic:      topic,
+		metrics:    writeLogs,
 	}
 }
