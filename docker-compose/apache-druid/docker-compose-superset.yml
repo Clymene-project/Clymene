@@ -1,0 +1,12 @@
+# sudo docker-compose -f docker-compose-superset.yml up -d
+# sudo docker-compose -f docker-compose-superset.yml kill
+version: "3"
+
+#networks:
+services:
+  # Superset container
+  superset:
+    image: apache/superset:1.4.0
+    container_name: superset
+    ports:
+      - "8088:8088"

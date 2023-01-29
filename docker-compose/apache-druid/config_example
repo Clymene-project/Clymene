@@ -31,8 +31,9 @@
       "dataSource": "clymene",
       "timestampSpec": {
         "column": "timestamp",
-        "format": "iso"
+        "format": "auto"
       },
+      "transformSpec": {},
       "dimensionsSpec": {
         "dimensions": [
           "__name__",
@@ -44,7 +45,26 @@
             "type": "double",
             "name": "value"
           },
-          "version"
+          "version",
+          "device",
+          "block_group_type",
+          "mode",
+          "uuid",
+          "label",
+          "name",
+          "cpu",
+          "mountpoint",
+          "fstype",
+          "operstate",
+          "namespace",
+          "pod",
+          "metrics_path",
+          "nodename",
+          "resource",
+          "verb",
+          "unit",
+          "reason",
+          "container"
         ]
       },
       "granularitySpec": {
