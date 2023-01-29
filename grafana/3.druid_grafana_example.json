@@ -1,0 +1,552 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafadruid-druid-datasource",
+        "uid": "qwowHeoVz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.3.6",
+      "targets": [
+        {
+          "builder": {
+            "intervals": {
+              "intervals": [
+                "${__from:date:iso}/${__to:date:iso}"
+              ],
+              "type": "intervals"
+            },
+            "query": "select cpu1.\"cluster\",\n    cpu1.\"job\",\n    cpu1.\"instance\",\n    cpu1.\"namespace\",\n    cpu1.\"pod\",\n    cpu1.\"cpu_time\" - cpu2.\"cpu_time\" as cpuTime,\n    cpu1.__timestamp\nfrom (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n             \"__name__\"                                       AS \"__name__\",\n             \"cluster\"                                        AS \"cluster\",\n             \"job\"                                            AS \"job\",\n             \"instance\"                                       AS \"instance\",\n             \"namespace\"                                      AS \"namespace\",\n             \"pod\"                                            AS \"pod\",\n             sum(\"value\")                                     AS \"cpu_time\"\n      from \"druid\".\"clymene\"\n      WHERE \"__name__\" = 'container_cpu_usage_seconds_total'\n        AND \"pod\" !=''\n      GROUP BY \"__name__\",\n          \"cluster\",\n          \"job\",\n          \"instance\",\n          \"namespace\",\n          \"pod\",\n          TIME_FLOOR(CAST (\"__time\" AS TIMESTAMP), 'PT30S')) cpu1\n         left join (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                           \"__name__\"                                       AS \"__name__\",\n                           \"cluster\"                                        AS \"cluster\",\n                           \"job\"                                            AS \"job\",\n                           \"instance\"                                       AS \"instance\",\n                           \"namespace\"                                      AS \"namespace\",\n                           \"pod\"                                            AS \"pod\",\n                           sum(\"value\")                                     AS \"cpu_time\"\n                    from \"druid\".\"clymene\"\n                    WHERE \"__name__\" = 'container_cpu_usage_seconds_total'\n                      AND \"pod\" !=''\n                    GROUP BY \"__name__\",\n                        \"cluster\",\n                        \"job\",\n                        \"instance\",\n                        \"namespace\",\n                        \"pod\",\n                        TIME_FLOOR(CAST (\"__time\" AS TIMESTAMP), 'PT30S')) cpu2\n                   on cpu1.\"__timestamp\" = cpu2.\"__timestamp\" + INTERVAL '30' SECOND\n    AND cpu1.\"namespace\"=cpu2.\"namespace\"\n    AND cpu1.\"pod\"=cpu2.\"pod\"\nwhere cpu1.\"__timestamp\" >= MILLIS_TO_TIMESTAMP(${__from})\n    AND cpu1.\"__timestamp\" < MILLIS_TO_TIMESTAMP(${__to})",
+            "queryType": "sql"
+          },
+          "datasource": {
+            "type": "grafadruid-druid-datasource",
+            "uid": "qwowHeoVz"
+          },
+          "expr": "{\"builder\":{\"queryType\":\"sql\",\"query\":\"select cpu1.\\\"cluster\\\",\\n    cpu1.\\\"job\\\",\\n    cpu1.\\\"instance\\\",\\n    cpu1.\\\"namespace\\\",\\n    cpu1.\\\"pod\\\",\\n    cpu1.\\\"cpu_time\\\" - cpu2.\\\"cpu_time\\\" as cpuTime,\\n    cpu1.__timestamp\\nfrom (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n             \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n             \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n             \\\"job\\\"                                            AS \\\"job\\\",\\n             \\\"instance\\\"                                       AS \\\"instance\\\",\\n             \\\"namespace\\\"                                      AS \\\"namespace\\\",\\n             \\\"pod\\\"                                            AS \\\"pod\\\",\\n             sum(\\\"value\\\")                                     AS \\\"cpu_time\\\"\\n      from \\\"druid\\\".\\\"clymene\\\"\\n      WHERE \\\"__name__\\\" = 'container_cpu_usage_seconds_total'\\n        AND \\\"pod\\\" !=''\\n      GROUP BY \\\"__name__\\\",\\n          \\\"cluster\\\",\\n          \\\"job\\\",\\n          \\\"instance\\\",\\n          \\\"namespace\\\",\\n          \\\"pod\\\",\\n          TIME_FLOOR(CAST (\\\"__time\\\" AS TIMESTAMP), 'PT30S')) cpu1\\n         left join (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                           \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n                           \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n                           \\\"job\\\"                                            AS \\\"job\\\",\\n                           \\\"instance\\\"                                       AS \\\"instance\\\",\\n                           \\\"namespace\\\"                                      AS \\\"namespace\\\",\\n                           \\\"pod\\\"                                            AS \\\"pod\\\",\\n                           sum(\\\"value\\\")                                     AS \\\"cpu_time\\\"\\n                    from \\\"druid\\\".\\\"clymene\\\"\\n                    WHERE \\\"__name__\\\" = 'container_cpu_usage_seconds_total'\\n                      AND \\\"pod\\\" !=''\\n                    GROUP BY \\\"__name__\\\",\\n                        \\\"cluster\\\",\\n                        \\\"job\\\",\\n                        \\\"instance\\\",\\n                        \\\"namespace\\\",\\n                        \\\"pod\\\",\\n                        TIME_FLOOR(CAST (\\\"__time\\\" AS TIMESTAMP), 'PT30S')) cpu2\\n                   on cpu1.\\\"__timestamp\\\" = cpu2.\\\"__timestamp\\\" + INTERVAL '30' SECOND\\n    AND cpu1.\\\"namespace\\\"=cpu2.\\\"namespace\\\"\\n    AND cpu1.\\\"pod\\\"=cpu2.\\\"pod\\\"\\nwhere cpu1.\\\"__timestamp\\\" >= MILLIS_TO_TIMESTAMP(${__from})\\n    AND cpu1.\\\"__timestamp\\\" < MILLIS_TO_TIMESTAMP(${__to})\",\"intervals\":{\"type\":\"intervals\",\"intervals\":[\"${__from:date:iso}/${__to:date:iso}\"]}},\"settings\":{}}",
+          "key": "Q-2a2c04d7-3a45-4b41-ab6b-ebd5cd513796-0",
+          "refId": "A",
+          "settings": {}
+        }
+      ],
+      "title": "container cpu time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafadruid-druid-datasource",
+        "uid": "aKcEneoVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "cpu_time"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.3.6",
+      "targets": [
+        {
+          "builder": {
+            "intervals": {
+              "intervals": [
+                "${__from:date:iso}/${__to:date:iso}"
+              ],
+              "type": "intervals"
+            },
+            "query": "select cpu1.\"cpu_time\" - cpu2.\"cpu_time\" AS cpu_time,\ncpu1.__timestamp\nfrom (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n             \"__name__\"                                       AS \"__name__\",\n             \"cluster\"                                        AS \"cluster\",\n             \"job\"                                            AS \"job\",\n             \"instance\"                                       AS \"instance\",\n             sum(\"value\")                                     AS \"cpu_time\"\n      from \"druid\".\"clymene\"\n      WHERE \"__name__\" = 'node_cpu_seconds_total'\n        AND \"mode\" != 'idle'\n      GROUP BY \"__name__\",\n          \"cluster\",\n          \"job\",\n          \"instance\",\n          TIME_FLOOR(CAST (\"__time\" AS TIMESTAMP), 'PT30S')) cpu1\n         left join (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                           \"__name__\"                                       AS \"__name__\",\n                           \"cluster\"                                        AS \"cluster\",\n                           \"job\"                                            AS \"job\",\n                           \"instance\"                                       AS \"instance\",\n                           sum(\"value\")                                     AS \"cpu_time\"\n                    from \"druid\".\"clymene\"\n                    WHERE \"__name__\" = 'node_cpu_seconds_total'\n                      AND \"mode\" != 'idle'\n                    GROUP BY \"__name__\",\n                        \"cluster\",\n                        \"job\",\n                        \"instance\",\n                        TIME_FLOOR(CAST (\"__time\" AS TIMESTAMP), 'PT30S')) cpu2\n        on cpu1.__timestamp = cpu2.__timestamp + INTERVAL '30' SECOND\nwhere cpu1.\"__timestamp\" >= MILLIS_TO_TIMESTAMP(${__from})\n  AND cpu1.\"__timestamp\" < MILLIS_TO_TIMESTAMP(${__to})",
+            "queryType": "sql"
+          },
+          "datasource": {
+            "type": "grafadruid-druid-datasource",
+            "uid": "aKcEneoVk"
+          },
+          "expr": "{\"builder\":{\"queryType\":\"sql\",\"query\":\"select cpu1.\\\"cpu_time\\\" - cpu2.\\\"cpu_time\\\" AS cpu_time,\\ncpu1.__timestamp\\nfrom (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n             \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n             \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n             \\\"job\\\"                                            AS \\\"job\\\",\\n             \\\"instance\\\"                                       AS \\\"instance\\\",\\n             sum(\\\"value\\\")                                     AS \\\"cpu_time\\\"\\n      from \\\"druid\\\".\\\"clymene\\\"\\n      WHERE \\\"__name__\\\" = 'node_cpu_seconds_total'\\n        AND \\\"mode\\\" != 'idle'\\n      GROUP BY \\\"__name__\\\",\\n          \\\"cluster\\\",\\n          \\\"job\\\",\\n          \\\"instance\\\",\\n          TIME_FLOOR(CAST (\\\"__time\\\" AS TIMESTAMP), 'PT30S')) cpu1\\n         left join (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                           \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n                           \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n                           \\\"job\\\"                                            AS \\\"job\\\",\\n                           \\\"instance\\\"                                       AS \\\"instance\\\",\\n                           sum(\\\"value\\\")                                     AS \\\"cpu_time\\\"\\n                    from \\\"druid\\\".\\\"clymene\\\"\\n                    WHERE \\\"__name__\\\" = 'node_cpu_seconds_total'\\n                      AND \\\"mode\\\" != 'idle'\\n                    GROUP BY \\\"__name__\\\",\\n                        \\\"cluster\\\",\\n                        \\\"job\\\",\\n                        \\\"instance\\\",\\n                        TIME_FLOOR(CAST (\\\"__time\\\" AS TIMESTAMP), 'PT30S')) cpu2\\n        on cpu1.__timestamp = cpu2.__timestamp + INTERVAL '30' SECOND\\nwhere cpu1.\\\"__timestamp\\\" >= MILLIS_TO_TIMESTAMP(${__from})\\n  AND cpu1.\\\"__timestamp\\\" < MILLIS_TO_TIMESTAMP(${__to})\",\"intervals\":{\"type\":\"intervals\",\"intervals\":[\"${__from:date:iso}/${__to:date:iso}\"]}},\"settings\":{}}",
+          "hide": false,
+          "refId": "A",
+          "settings": {}
+        }
+      ],
+      "title": "CPU time",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "title": "Panel Title",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafadruid-druid-datasource",
+        "uid": "aKcEneoVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.3.6",
+      "targets": [
+        {
+          "builder": {
+            "intervals": {
+              "intervals": [
+                "${__from:date:iso}/${__to:date:iso}"
+              ],
+              "type": "intervals"
+            },
+            "query": "select\n    total.__timestamp,\n    total.__name__,\n    total.cluster,\n    total.job,\n    total.instance,\n    (total.mem_total - mem_free.memFree - (mem_cached.memCached + mem_buffer.memBuffer + mem_sr.memSr))/1024/1024/1024 as memoryUsed\nfrom (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n             \"__name__\"                                       AS \"__name__\",\n             \"cluster\"                                        AS \"cluster\",\n             \"job\"                                            AS \"job\",\n             \"instance\"                                       AS \"instance\",\n             \"mode\"                                           AS \"mode\",\n             avg(\"value\")                                     AS \"mem_total\"\n      from \"druid\".\"clymene\"\n      WHERE \"__name__\" = 'node_memory_MemTotal_bytes'\n      GROUP BY \"__name__\",\n               \"cluster\",\n               \"job\",\n               \"instance\",\n               \"mode\",\n               TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) total\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memFree\"\n                    FROM \"druid\".\"clymene\"\n                    WHERE \"__name__\" = 'node_memory_MemFree_bytes'\n                    GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_free\n             on total.__timestamp = mem_free.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memCached\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_Cached_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_cached\n             on total.__timestamp = mem_cached.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memBuffer\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_Buffers_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_buffer\n             on total.__timestamp = mem_buffer.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memSr\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_SReclaimable_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_sr\n             on total.__timestamp = mem_sr.__timestamp\nwhere total.__timestamp >= MILLIS_TO_TIMESTAMP(${__from})\n  AND total.__timestamp < MILLIS_TO_TIMESTAMP(${__to})",
+            "queryType": "sql"
+          },
+          "datasource": {
+            "type": "grafadruid-druid-datasource",
+            "uid": "aKcEneoVk"
+          },
+          "expr": "{\"builder\":{\"queryType\":\"sql\",\"query\":\"select\\n    total.__timestamp,\\n    total.__name__,\\n    total.cluster,\\n    total.job,\\n    total.instance,\\n    (total.mem_total - mem_free.memFree - (mem_cached.memCached + mem_buffer.memBuffer + mem_sr.memSr))/1024/1024/1024 as memoryUsed\\nfrom (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n             \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n             \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n             \\\"job\\\"                                            AS \\\"job\\\",\\n             \\\"instance\\\"                                       AS \\\"instance\\\",\\n             \\\"mode\\\"                                           AS \\\"mode\\\",\\n             avg(\\\"value\\\")                                     AS \\\"mem_total\\\"\\n      from \\\"druid\\\".\\\"clymene\\\"\\n      WHERE \\\"__name__\\\" = 'node_memory_MemTotal_bytes'\\n      GROUP BY \\\"__name__\\\",\\n               \\\"cluster\\\",\\n               \\\"job\\\",\\n               \\\"instance\\\",\\n               \\\"mode\\\",\\n               TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) total\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memFree\\\"\\n                    FROM \\\"druid\\\".\\\"clymene\\\"\\n                    WHERE \\\"__name__\\\" = 'node_memory_MemFree_bytes'\\n                    GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_free\\n             on total.__timestamp = mem_free.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memCached\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_Cached_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_cached\\n             on total.__timestamp = mem_cached.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memBuffer\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_Buffers_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_buffer\\n             on total.__timestamp = mem_buffer.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memSr\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_SReclaimable_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_sr\\n             on total.__timestamp = mem_sr.__timestamp\\nwhere total.__timestamp >= MILLIS_TO_TIMESTAMP(${__from})\\n  AND total.__timestamp < MILLIS_TO_TIMESTAMP(${__to})\",\"intervals\":{\"type\":\"intervals\",\"intervals\":[\"${__from:date:iso}/${__to:date:iso}\"]}},\"settings\":{}}",
+          "key": "Q-90c6fb0b-b3ac-4ea7-bcd3-23cd8b080791-0",
+          "refId": "A",
+          "settings": {}
+        }
+      ],
+      "title": "Memory Used",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafadruid-druid-datasource",
+        "uid": "aKcEneoVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.3.6",
+      "targets": [
+        {
+          "builder": {
+            "intervals": {
+              "intervals": [
+                "${__from:date:iso}/${__to:date:iso}"
+              ],
+              "type": "intervals"
+            },
+            "query": "select\n    total.__timestamp,\n    total.__name__,\n    total.cluster,\n    total.job,\n    total.instance,\n    ROUND((total.mem_total - mem_free.memFree - (mem_cached.memCached + mem_buffer.memBuffer + mem_sr.memSr)) / total.mem_total * 100, 2) as memUtilization\nfrom (select TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n             \"__name__\"                                       AS \"__name__\",\n             \"cluster\"                                        AS \"cluster\",\n             \"job\"                                            AS \"job\",\n             \"instance\"                                       AS \"instance\",\n             \"mode\"                                           AS \"mode\",\n             avg(\"value\")                                     AS \"mem_total\"\n      from \"druid\".\"clymene\"\n      WHERE \"__name__\" = 'node_memory_MemTotal_bytes'\n      GROUP BY \"__name__\",\n               \"cluster\",\n               \"job\",\n               \"instance\",\n               \"mode\",\n               TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) total\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memFree\"\n                    FROM \"druid\".\"clymene\"\n                    WHERE \"__name__\" = 'node_memory_MemFree_bytes'\n                    GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_free\n             on total.__timestamp = mem_free.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memCached\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_Cached_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_cached\n             on total.__timestamp = mem_cached.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memBuffer\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_Buffers_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_buffer\n             on total.__timestamp = mem_buffer.__timestamp\n        left join (SELECT TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S') AS \"__timestamp\",\n                          avg(\"value\")                                     AS \"memSr\"\n                   FROM \"druid\".\"clymene\"\n                   WHERE \"__name__\" = 'node_memory_SReclaimable_bytes'\n                   GROUP BY TIME_FLOOR(CAST(\"__time\" AS TIMESTAMP), 'PT30S')) mem_sr\n             on total.__timestamp = mem_sr.__timestamp\nwhere total.__timestamp >= MILLIS_TO_TIMESTAMP(${__from})\n  AND total.__timestamp < MILLIS_TO_TIMESTAMP(${__to})",
+            "queryType": "sql"
+          },
+          "datasource": {
+            "type": "grafadruid-druid-datasource",
+            "uid": "aKcEneoVk"
+          },
+          "expr": "{\"builder\":{\"queryType\":\"sql\",\"query\":\"select\\n    total.__timestamp,\\n    total.__name__,\\n    total.cluster,\\n    total.job,\\n    total.instance,\\n    ROUND((total.mem_total - mem_free.memFree - (mem_cached.memCached + mem_buffer.memBuffer + mem_sr.memSr)) / total.mem_total * 100, 2) as memUtilization\\nfrom (select TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n             \\\"__name__\\\"                                       AS \\\"__name__\\\",\\n             \\\"cluster\\\"                                        AS \\\"cluster\\\",\\n             \\\"job\\\"                                            AS \\\"job\\\",\\n             \\\"instance\\\"                                       AS \\\"instance\\\",\\n             \\\"mode\\\"                                           AS \\\"mode\\\",\\n             avg(\\\"value\\\")                                     AS \\\"mem_total\\\"\\n      from \\\"druid\\\".\\\"clymene\\\"\\n      WHERE \\\"__name__\\\" = 'node_memory_MemTotal_bytes'\\n      GROUP BY \\\"__name__\\\",\\n               \\\"cluster\\\",\\n               \\\"job\\\",\\n               \\\"instance\\\",\\n               \\\"mode\\\",\\n               TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) total\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memFree\\\"\\n                    FROM \\\"druid\\\".\\\"clymene\\\"\\n                    WHERE \\\"__name__\\\" = 'node_memory_MemFree_bytes'\\n                    GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_free\\n             on total.__timestamp = mem_free.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memCached\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_Cached_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_cached\\n             on total.__timestamp = mem_cached.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memBuffer\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_Buffers_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_buffer\\n             on total.__timestamp = mem_buffer.__timestamp\\n        left join (SELECT TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S') AS \\\"__timestamp\\\",\\n                          avg(\\\"value\\\")                                     AS \\\"memSr\\\"\\n                   FROM \\\"druid\\\".\\\"clymene\\\"\\n                   WHERE \\\"__name__\\\" = 'node_memory_SReclaimable_bytes'\\n                   GROUP BY TIME_FLOOR(CAST(\\\"__time\\\" AS TIMESTAMP), 'PT30S')) mem_sr\\n             on total.__timestamp = mem_sr.__timestamp\\nwhere total.__timestamp >= MILLIS_TO_TIMESTAMP(${__from})\\n  AND total.__timestamp < MILLIS_TO_TIMESTAMP(${__to})\",\"intervals\":{\"type\":\"intervals\",\"intervals\":[\"${__from:date:iso}/${__to:date:iso}\"]}},\"settings\":{}}",
+          "key": "Q-90c6fb0b-b3ac-4ea7-bcd3-23cd8b080791-0",
+          "refId": "A",
+          "settings": {}
+        }
+      ],
+      "title": "Memory Utilization",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "k8s monitoring using druid",
+  "uid": "BVgm4eo4k",
+  "version": 3,
+  "weekStart": ""
+}
