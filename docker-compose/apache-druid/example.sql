@@ -115,7 +115,7 @@ from (select TIME_FLOOR(CAST("__time" AS TIMESTAMP), 'PT30S') AS "__timestamp",
              sum("value")                                     AS "cpu_time"
       from "druid"."clymene"
       WHERE "__name__" = 'container_cpu_usage_seconds_total'
-        AND "pod" !=''
+        AND "pod" !='' AND "pod"='etcd-minikube'
       GROUP BY "__name__",
           "cluster",
           "job",
@@ -133,7 +133,7 @@ from (select TIME_FLOOR(CAST("__time" AS TIMESTAMP), 'PT30S') AS "__timestamp",
                            sum("value")                                     AS "cpu_time"
                     from "druid"."clymene"
                     WHERE "__name__" = 'container_cpu_usage_seconds_total'
-                      AND "pod" !=''
+                      AND "pod" !='' AND "pod"='etcd-minikube'
                     GROUP BY "__name__",
                         "cluster",
                         "job",
@@ -145,4 +145,4 @@ from (select TIME_FLOOR(CAST("__time" AS TIMESTAMP), 'PT30S') AS "__timestamp",
     AND cpu1."namespace"=cpu2."namespace"
     AND cpu1."pod"=cpu2."pod"
 where cpu1."__timestamp" >= MILLIS_TO_TIMESTAMP(${__from})
-    AND cpu1."__timestamp" < MILLIS_TO_TIMESTAMP(${__to});
+    AND cpu1."__timestamp" < MILLIS_TO_TIMESTAMP(${__to})
