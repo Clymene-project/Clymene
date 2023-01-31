@@ -134,6 +134,7 @@ To learn more about Clymene, consult the following talks and articles.
 - Aug 2022 blog post "[Best Practices, Monitoring System for Multi-K8s Cluster Environments Using Open Source](https://medium.com/@clymeneallen/best-practices-monitoring-system-for-multi-k8s-cluster-environments-using-open-source-d85544052f37)"
 - Aug 2022 blog post "[Best practice, k8s Node/POD resource usage and log monitoring system for multi-k8s cluster environment using Open source](https://medium.com/@clymeneallen/best-practice-k8s-node-pod-resource-usage-and-log-monitoring-system-for-multi-k8s-cluster-3f2e5c2c401a)"
 - Sep 2022 YouTube "[[CLYMENE-PROJECT] DEMO VIDEO](https://www.youtube.com/watch?v=TqFXVlbBOGQ)"
+- Jan 2023 blog post "[Best Practices, K8s Monitoring System Using Open Source Clymene and Druid](https://medium.com/@clymeneallen/best-practices-k8s-monitoring-system-using-open-source-clymene-and-druid-e47b2d09955e)"
 
 ## License
 
