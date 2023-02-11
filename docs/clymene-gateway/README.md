@@ -17,7 +17,6 @@ The Clymene Gateway is an optional service that can receive metric data from the
 --gateway.http-server.tls.client-ca string      Path to a TLS CA (Certification Authority) file used to verify certificates presented by clients (if unset, all clients are permitted)
 --gateway.http-server.tls.enabled               Enable TLS on the server
 --gateway.http-server.tls.key string            Path to a TLS Private Key file, used to identify this server to clients
---gateway.service-type string                   gateway service type(grpc or http) (default "grpc")
 --log-level string                              Minimal allowed log Level. For more levels see https://github.com/uber-go/zap (default "info")
 --metrics-backend string                        Defines which metrics backend to use for metrics reporting: expvar, prometheus, none (default "prometheus")
 --metrics-http-route string                     Defines the route of HTTP endpoint for metrics backends that support scraping (default "/metrics")
