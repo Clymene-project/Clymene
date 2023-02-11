@@ -27,7 +27,7 @@ spec:
           imagePullPolicy: Always
           args:
             - --config.file=/etc/promtail/promtail.yaml
-            - --gateway.grpc.host-port=[CLYMENE_GATEWAY_NODE_PORT]:30611
+            - --gateway.grpc-client.host-port=[CLYMENE_GATEWAY_NODE_PORT]:30611
           env:
             - name: 'HOSTNAME'
               valueFrom:
