@@ -35,7 +35,7 @@ type Options struct {
 }
 
 const (
-	hTTPPrefix         = "gateway.http"
+	hTTPPrefix         = "gateway.http-client"
 	suffixUrl          = ".url"
 	suffixLogsUrl      = ".logs.url"
 	suffixUserAgent    = ".user.agent"

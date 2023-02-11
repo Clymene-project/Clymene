@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	gRPCPrefix        = "gateway.grpc"
+	gRPCPrefix        = "gateway.grpc-client"
 	gatewayHostPort   = gRPCPrefix + ".host-port"
 	retry             = gRPCPrefix + ".retry.max"
 	defaultMaxRetry   = 3
