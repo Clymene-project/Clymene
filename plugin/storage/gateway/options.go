@@ -33,14 +33,14 @@ const (
 	configPrefix      = "gateway"
 	suffixServiceType = ".service-type"
 
-	defsultServiceType = "grpc"
+	defaultServiceType = "grpc"
 )
 
 func (o *Options) AddFlags(flagSet *flag.FlagSet) {
 	flagSet.String(
 		configPrefix+suffixServiceType,
-		defsultServiceType,
-		"gateway service type(grpc or http)",
+		defaultServiceType,
+		"Setting the type of gateway server (grpc or http)",
 	)
 	grpc.AddFlags(flagSet)
 	http.AddFlags(flagSet)
