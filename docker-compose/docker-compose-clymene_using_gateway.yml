@@ -10,7 +10,7 @@ services:
     volumes:
       - ./config/clymene_scrape_config.yml:/etc/clymene/clymene.yml
     command:
-      - --gateway.grpc.host-port=[CLYMENE-GATEWAY]:15610
+      - --gateway.grpc-client.host-port=[CLYMENE-GATEWAY]:15610
 
   clymene-ingester:
     image: bourbonkk/clymene-ingester:v1.2.0

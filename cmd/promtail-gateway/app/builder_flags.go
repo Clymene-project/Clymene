@@ -29,13 +29,13 @@ const (
 )
 
 var tlsGRPCFlagsConfig = tlscfg.ServerFlagsConfig{
-	Prefix:       "gateway.grpc",
+	Prefix:       "gateway.grpc-server",
 	ShowEnabled:  true,
 	ShowClientCA: true,
 }
 
 var tlsHTTPFlagsConfig = tlscfg.ServerFlagsConfig{
-	Prefix:       "gateway.http",
+	Prefix:       "gateway.http-server",
 	ShowEnabled:  true,
 	ShowClientCA: true,
 }
