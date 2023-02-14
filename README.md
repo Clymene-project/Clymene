@@ -22,7 +22,8 @@ Or, depending on the situation, you can use the Clymene components to configure 
 The Clymene Project provides various storage types, so choose a storage type you are familiar with. And build great monitoring systems using familiar dashboards.  
   
 <img src="https://user-images.githubusercontent.com/25188468/214236117-0f195984-5c17-4a88-a661-2186ae10830d.png" width="90%" height="90%" alt="architecture_v2.1.0">
-<img src="https://user-images.githubusercontent.com/25188468/218608485-78ce6dca-f3bb-41d2-a708-dfee4ced57e8.png" width="90%" height="90%" alt="architecture_v2.2.2">
+<img src="https://user-images.githubusercontent.com/25188468/218608485-78ce6dca-f3bb-41d2-a708-dfee4ced57e8.png" width="90%" height="90%" alt="architecture_v2.2.2">  
+
 # Components
 
 ## Pipeline 1. TimeSeries data collection   
