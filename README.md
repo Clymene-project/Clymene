@@ -1,7 +1,8 @@
-# Clymene  
+# [DEPRECATED] Clymene  
 
-
-
+> [!WARNING]
+> **This project is officially deprecated and is no longer actively maintained.**
+> We recommend checking out our other active projects. Thank you for your support!
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5491/badge)](https://bestpractices.coreinfrastructure.org/projects/5491) ![CodeQL](https://github.com/clymene-project/clymene/workflows/CodeQL/badge.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/clymene-project/clymene) [![Go Reference](https://pkg.go.dev/badge/github.com/Clymene-project/Clymene.svg)](https://pkg.go.dev/github.com/Clymene-project/Clymene)  
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![ElasticSearch](https://img.shields.io/badge/-ElasticSearch-005571?style=for-the-badge&logo=elasticsearch) <img src="https://img.shields.io/badge/influxdb-%2322ADF6.svg?&style=for-the-badge&logo=influxdb&logoColor=white"/>  <img src="https://img.shields.io/badge/prometheus-%23E6522C.svg?&style=for-the-badge&logo=prometheus&logoColor=white" />   <img src="https://img.shields.io/badge/OpenTSDB-green?style=for-the-badge"> <img src="https://img.shields.io/badge/cortex-blue?style=for-the-badge">  <img src="https://img.shields.io/badge/tdengine-gray?style=for-the-badge"> <img src="https://img.shields.io/badge/Loki-yellow?style=for-the-badge"> <img src="https://img.shields.io/badge/druid-darkgray?style=for-the-badge">
 
